@@ -1,0 +1,7 @@
+<configuration>
+    <input>
+        <net-file value="square.net.xml"/>
+        <route-files value="square.rou.xml"/>
+        <additional-files value="square.poly.xml"/>
+    </input>
+</configuration>
