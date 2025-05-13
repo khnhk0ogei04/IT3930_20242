@@ -139,14 +139,11 @@ vector<Edge> Graph::getRoadsFromXml(string filePath) {
             // Create the edge with its lanes
             Edge edge(edgeId, fromNode, toNode, lanes);
             
-            // Debug check after edge creation
             if (edge.getLanes().size() != edgeLaneCount) {
                 std::cout << "WARNING: Edge " << edgeId << " has " << edgeLaneCount 
                           << " lanes in XML but " << edge.getLanes().size() 
                           << " lanes after Edge construction" << std::endl;
             }
-            
-            // Add the edge to our collection
             roads.push_back(edge);
             edgeCount++;
         }
@@ -195,7 +192,9 @@ unordered_map<string, Node> Graph::getJunctionsFromXml(string filePath) {
 bool parseNetXml(string filePath, Graph& graph) {
 
     unordered_map<string, Node> junctions = Graph::getJunctionsFromXml(filePath);
-    for (const auto& [id, node] : junctions) {
+    for (const auto &junctionInfo : junctions) {
+        string id = junctionInfo.first;
+        Node node = junctionInfo.second;
         graph.addNode(id, node.getX(), node.getY());
     }
 

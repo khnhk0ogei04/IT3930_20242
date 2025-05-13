@@ -50,162 +50,351 @@ std::vector<std::vector<std::string>> GraphProcessor::findKShortestPaths(
     if (k <= 1) {
         return result;
     }
-    
-    // Improved approach to find alternative paths by modifying one edge at a time
-    
-    // Extract all edges from the shortest path
-    std::set<std::string> shortestPathEdges(shortestPath.begin(), shortestPath.end());
-    
-    // For storing path info with length for sorting
-    struct PathInfo {
-        std::vector<std::string> path;
-        double length;
+
+    // Implement Yen's algorithm for k-shortest paths
+    // Data structures for storing potential paths and their lengths
+    std::vector<std::pair<std::vector<std::string>, double>> potentialPaths;
+    std::set<std::vector<std::string>> addedPaths;  // To track paths we've already found
+    addedPaths.insert(shortestPath);
+
+    // Track path lengths for efficient sorting
+    auto calculatePathLength = [this](const std::vector<std::string>& path) {
+        double length = 0.0;
+        for (const auto& edgeId : path) {
+            for (const auto& nodePair : roadNetwork.getAdjList()) {
+                for (const auto& edge : nodePair.second) {
+                    if (edge.getId() == edgeId) {
+                        length += edge.getLength();
+                        break;
+                    }
+                }
+            }
+        }
+        return length;
     };
-    std::vector<PathInfo> alternativePaths;
     
-    // For each edge in the shortest path, try to find an alternative path that doesn't use it
-    for (const auto& edgeToAvoid : shortestPathEdges) {
-        // Run a modified Dijkstra's algorithm that avoids this edge
-        std::map<std::string, double> distances;
-        std::map<std::string, std::string> previous;
-        std::set<std::string> visited;
+    // For each path already found, find potential next-best paths
+    for (int i = 0; result.size() < k && i < result.size(); ++i) {
+        const auto& path = result[i];
         
-        // Initialize distances
-        for (const auto& nodePair : roadNetwork.getNodes()) {
-            distances[nodePair.first] = std::numeric_limits<double>::infinity();
-        }
-        distances[sourceId] = 0.0;
+        // For each node in the path (except the last), try alternative routes
+        string lastNodeId = sourceId;
+        std::vector<string> rootPath;
         
-        // Priority queue for Dijkstra's algorithm
-        std::set<std::pair<double, std::string>> pq;
-        pq.insert(std::make_pair(0.0, sourceId));
-        
-        // Dijkstra's algorithm
-        while (!pq.empty()) {
-            // Extract min
-            auto it = pq.begin();
-            double dist = it->first;
-            std::string current = it->second;
-            pq.erase(it);
+        for (size_t j = 0; j < path.size(); ++j) {
+            // Get the current edge and its destination node
+            string currentEdgeId = path[j];
+            string currentNodeId = "";
             
-            // Check if we reached the target
-            if (current == targetId) {
-                break;
-            }
-            
-            // Skip if already visited
-            if (visited.find(current) != visited.end()) {
-                continue;
-            }
-            visited.insert(current);
-            
-            // Process neighbors
-            auto adjIt = roadNetwork.getAdjList().find(current);
-            if (adjIt != roadNetwork.getAdjList().end()) {
-                for (const auto& edge : adjIt->second) {
-                    // Skip the edge we want to avoid
-                    if (edge.getId() == edgeToAvoid) {
-                        continue;
+            // Find where this edge goes to
+            for (const auto& nodePair : roadNetwork.getAdjList()) {
+                for (const auto& edge : nodePair.second) {
+                    if (edge.getId() == currentEdgeId) {
+                        currentNodeId = edge.getTo();
+                        break;
                     }
+                }
+                if (!currentNodeId.empty()) break;
+            }
+            
+            if (currentNodeId.empty()) continue;
+            
+            // The root path up to current deviation point
+            std::vector<string> spurRootPath = rootPath;
+            
+            // Remove the links that were in previous k-shortest paths
+            std::map<std::pair<string, string>, double> removedEdges;
+            
+            for (const auto& prevPath : result) {
+                if (j < prevPath.size() && spurRootPath.size() <= prevPath.size() &&
+                    std::equal(spurRootPath.begin(), spurRootPath.end(), prevPath.begin())) {
                     
-                    std::string neighbor = edge.getTo();
-                    double newDist = dist + edge.getLength();
-                    
-                    if (newDist < distances[neighbor]) {
-                        distances[neighbor] = newDist;
-                        previous[neighbor] = edge.getId();
-                        pq.insert(std::make_pair(newDist, neighbor));
-                    }
-                }
-            }
-        }
-        
-        // Reconstruct the path if we found one
-        if (distances[targetId] != std::numeric_limits<double>::infinity()) {
-            std::vector<std::string> path;
-            std::string current = targetId;
-            
-            while (current != sourceId) {
-                auto prevIt = previous.find(current);
-                if (prevIt == previous.end()) {
-                    // No way to reach from source to here
-                    path.clear();
-                    break;
-                }
-                
-                std::string edgeId = prevIt->second;
-                path.push_back(edgeId);
-                
-                // Find where this edge comes from
-                bool found = false;
-                for (const auto& nodePair : roadNetwork.getAdjList()) {
-                    for (const auto& edge : nodePair.second) {
-                        if (edge.getId() == edgeId) {
-                            current = nodePair.first;  // This is the edge's source node
-                            found = true;
-                            break;
-                        }
-                    }
-                    if (found) break;
-                }
-                
-                if (!found) {
-                    // Something went wrong
-                    path.clear();
-                    break;
-                }
-            }
-            
-            // Reverse the path (we built it backwards)
-            std::reverse(path.begin(), path.end());
-            
-            // Check if this is a valid path and differs from the shortest path
-            if (!path.empty() && path != shortestPath) {
-                // Calculate the path length
-                double pathLength = 0.0;
-                for (const auto& edgeId : path) {
-                    for (const auto& nodePair : roadNetwork.getAdjList()) {
-                        for (const auto& edge : nodePair.second) {
-                            if (edge.getId() == edgeId) {
-                                pathLength += edge.getLength();
-                                break;
+                    // Find the next edge in the previous path
+                    if (j < prevPath.size()) {
+                        string edgeToRemove = prevPath[j];
+                        
+                        // Find the source node of this edge
+                        for (const auto& nodePair : roadNetwork.getAdjList()) {
+                            for (const auto& edge : nodePair.second) {
+                                if (edge.getId() == edgeToRemove) {
+                                    removedEdges[{nodePair.first, edge.getTo()}] = edge.getLength();
+                                    break;
+                                }
                             }
                         }
                     }
                 }
+            }
+            
+            // Create a temporary modified graph excluding removed edges
+            Graph tempGraph = roadNetwork;  // Make a copy (this is a deep copy in the original code)
+            for (const auto& edgePair : removedEdges) {
+                // We need to modify the real graph - but since we're in a const method, 
+                // we can't modify the original graph
+                // For simplicity, we'll implement this by using Dijkstra with avoided edges
+                // ...
+            }
+            
+            // Find shortest path from deviation node to target with modified graph
+            // Since we can't easily modify the graph in a const method, we'll use a modified
+            // version of dijkstra that avoids certain edges
+            
+            // Run a modified Dijkstra's algorithm
+            std::map<std::string, double> distances;
+            std::map<std::string, std::string> previous;
+            std::set<std::string> visited;
+            
+            // Initialize distances
+            for (const auto& nodePair : roadNetwork.getNodes()) {
+                distances[nodePair.first] = std::numeric_limits<double>::infinity();
+            }
+            distances[lastNodeId] = 0.0;
+            
+            // Priority queue for Dijkstra's algorithm
+            std::set<std::pair<double, std::string>> pq;
+            pq.insert(std::make_pair(0.0, lastNodeId));
+            
+            // Dijkstra's algorithm that avoids specific edges
+            while (!pq.empty()) {
+                auto it = pq.begin();
+                double dist = it->first;
+                std::string current = it->second;
+                pq.erase(it);
                 
-                PathInfo info;
-                info.path = path;
-                info.length = pathLength;
-                alternativePaths.push_back(info);
+                if (current == targetId) {
+                    break;
+                }
+                
+                if (visited.find(current) != visited.end()) {
+                    continue;
+                }
+                visited.insert(current);
+                
+                auto adjIt = roadNetwork.getAdjList().find(current);
+                if (adjIt != roadNetwork.getAdjList().end()) {
+                    for (const auto& edge : adjIt->second) {
+                        std::string neighbor = edge.getTo();
+                        
+                        // Skip edges that were removed
+                        if (removedEdges.find({current, neighbor}) != removedEdges.end()) {
+                            continue;
+                        }
+                        
+                        // Also check if this node is in the root path to avoid loops
+                        bool inRootPath = false;
+                        for (const auto& rootEdgeId : spurRootPath) {
+                            for (const auto& nodePair : roadNetwork.getAdjList()) {
+                                for (const auto& pathEdge : nodePair.second) {
+                                    if (pathEdge.getId() == rootEdgeId && 
+                                        (pathEdge.getTo() == neighbor || nodePair.first == neighbor)) {
+                                        inRootPath = true;
+                                        break;
+                                    }
+                                }
+                                if (inRootPath) break;
+                            }
+                            if (inRootPath) break;
+                        }
+                        
+                        if (inRootPath) continue;
+                        
+                        double newDist = dist + edge.getLength();
+                        if (newDist < distances[neighbor]) {
+                            distances[neighbor] = newDist;
+                            previous[neighbor] = edge.getId();
+                            pq.insert(std::make_pair(newDist, neighbor));
+                        }
+                    }
+                }
+            }
+            
+            // If we found a path from deviation to target
+            if (distances[targetId] != std::numeric_limits<double>::infinity()) {
+                // Reconstruct the path
+                std::vector<std::string> spurPath;
+                std::string current = targetId;
+                
+                while (current != lastNodeId) {
+                    auto prevIt = previous.find(current);
+                    if (prevIt == previous.end()) {
+                        spurPath.clear();
+                        break;
+                    }
+                    
+                    std::string edgeId = prevIt->second;
+                    spurPath.push_back(edgeId);
+                    
+                    // Find where this edge comes from
+                    bool found = false;
+                    for (const auto& nodePair : roadNetwork.getAdjList()) {
+                        for (const auto& edge : nodePair.second) {
+                            if (edge.getId() == edgeId) {
+                                current = nodePair.first;
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (found) break;
+                    }
+                    
+                    if (!found) {
+                        spurPath.clear();
+                        break;
+                    }
+                }
+                
+                // Reverse the spur path (we built it backwards)
+                std::reverse(spurPath.begin(), spurPath.end());
+                
+                // Combine root path and spur path
+                std::vector<std::string> totalPath = spurRootPath;
+                totalPath.insert(totalPath.end(), spurPath.begin(), spurPath.end());
+                
+                // If this path is new, add it to potential paths
+                if (addedPaths.find(totalPath) == addedPaths.end()) {
+                    double pathLength = calculatePathLength(totalPath);
+                    potentialPaths.push_back({totalPath, pathLength});
+                }
+            }
+            
+            // Update the root path to include the current edge
+            rootPath.push_back(currentEdgeId);
+            lastNodeId = currentNodeId;
+        }
+        
+        // Sort potential paths by length
+        std::sort(potentialPaths.begin(), potentialPaths.end(),
+            [](const std::pair<std::vector<std::string>, double>& a, 
+               const std::pair<std::vector<std::string>, double>& b) {
+                return a.second < b.second;
+            });
+        
+        // Add the next best path to the result
+        while (!potentialPaths.empty() && result.size() < k) {
+            auto bestPath = potentialPaths.front();
+            potentialPaths.erase(potentialPaths.begin());
+            
+            if (addedPaths.find(bestPath.first) == addedPaths.end()) {
+                addedPaths.insert(bestPath.first);
+                result.push_back(bestPath.first);
+                break;
             }
         }
     }
     
-    // Sort the alternative paths by length
-    std::sort(alternativePaths.begin(), alternativePaths.end(), 
-        [](const PathInfo& a, const PathInfo& b) {
-            return a.length < b.length;
-        }
-    );
-    
-    // Add the best alternative paths to the result
-    for (const auto& pathInfo : alternativePaths) {
-        // Check if this path is different from all existing paths
-        bool isDifferent = true;
-        for (const auto& existingPath : result) {
-            if (pathInfo.path == existingPath) {
-                isDifferent = false;
-                break;
-            }
-        }
+    // If we didn't find enough paths, try the alternative approach from the original implementation
+    if (result.size() < k) {
+        // Extract all edges from the shortest path
+        std::set<std::string> shortestPathEdges(shortestPath.begin(), shortestPath.end());
         
-        if (isDifferent) {
-            result.push_back(pathInfo.path);
-            if (result.size() >= k) {
-                break;
+        // For each edge in the shortest path, try to find an alternative path that doesn't use it
+        for (const auto& edgeToAvoid : shortestPathEdges) {
+            // Run a modified Dijkstra's algorithm that avoids this edge
+            std::map<std::string, double> distances;
+            std::map<std::string, std::string> previous;
+            std::set<std::string> visited;
+            
+            // Initialize distances
+            for (const auto& nodePair : roadNetwork.getNodes()) {
+                distances[nodePair.first] = std::numeric_limits<double>::infinity();
+            }
+            distances[sourceId] = 0.0;
+            
+            // Priority queue for Dijkstra's algorithm
+            std::set<std::pair<double, std::string>> pq;
+            pq.insert(std::make_pair(0.0, sourceId));
+            
+            // Dijkstra's algorithm
+            while (!pq.empty()) {
+                auto it = pq.begin();
+                double dist = it->first;
+                std::string current = it->second;
+                pq.erase(it);
+                
+                if (current == targetId) {
+                    break;
+                }
+                
+                if (visited.find(current) != visited.end()) {
+                    continue;
+                }
+                visited.insert(current);
+                
+                auto adjIt = roadNetwork.getAdjList().find(current);
+                if (adjIt != roadNetwork.getAdjList().end()) {
+                    for (const auto& edge : adjIt->second) {
+                        // Skip the edge we want to avoid
+                        if (edge.getId() == edgeToAvoid) {
+                            continue;
+                        }
+                        
+                        std::string neighbor = edge.getTo();
+                        double newDist = dist + edge.getLength();
+                        
+                        if (newDist < distances[neighbor]) {
+                            distances[neighbor] = newDist;
+                            previous[neighbor] = edge.getId();
+                            pq.insert(std::make_pair(newDist, neighbor));
+                        }
+                    }
+                }
+            }
+            
+            // Reconstruct the path if we found one
+            if (distances[targetId] != std::numeric_limits<double>::infinity()) {
+                std::vector<std::string> path;
+                std::string current = targetId;
+                
+                while (current != sourceId) {
+                    auto prevIt = previous.find(current);
+                    if (prevIt == previous.end()) {
+                        path.clear();
+                        break;
+                    }
+                    
+                    std::string edgeId = prevIt->second;
+                    path.push_back(edgeId);
+                    
+                    // Find where this edge comes from
+                    bool found = false;
+                    for (const auto& nodePair : roadNetwork.getAdjList()) {
+                        for (const auto& edge : nodePair.second) {
+                            if (edge.getId() == edgeId) {
+                                current = nodePair.first;
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (found) break;
+                    }
+                    
+                    if (!found) {
+                        path.clear();
+                        break;
+                    }
+                }
+                
+                // Reverse the path (we built it backwards)
+                std::reverse(path.begin(), path.end());
+                
+                // Check if this is a valid path and differs from paths we already have
+                if (!path.empty()) {
+                    if (addedPaths.find(path) == addedPaths.end()) {
+                        addedPaths.insert(path);
+                        result.push_back(path);
+                        
+                        if (result.size() >= k) {
+                            break;
+                        }
+                    }
+                }
             }
         }
+    }
+    
+    // Final safety check to ensure we don't return more than k paths
+    if (result.size() > k) {
+        result.resize(k);
     }
     
     return result;

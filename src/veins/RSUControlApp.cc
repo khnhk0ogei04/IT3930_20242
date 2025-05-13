@@ -785,13 +785,13 @@ void RSUControlApp::testTaskGenerator() {
     // Test 2: Find k shortest paths
     if (graphProcessor) {
         const auto& roads = getAllRoads();
-        if (roads.size() >= 4) {
-            std::string sourceId = "1153";  // Using specific node ID
-            std::string targetId = "473";  // Using specific node ID
+        if (roads.size() >= 6) {
+            std::string sourceId = "830";  // Using specific node ID
+            std::string targetId = "1914";  // Using specific node ID
             
-            EV << "\n[RSU] Test 2: Finding 2 shortest paths from " << sourceId << " to " << targetId << std::endl;
+            EV << "\n[RSU] Test 2: Finding 6 shortest paths from " << sourceId << " to " << targetId << std::endl;
             
-            auto paths = taskGenerator->findKPaths(sourceId, targetId, 4);
+            auto paths = taskGenerator->findKPaths(sourceId, targetId, 6);
             
             EV << "[RSU] Found " << paths.size() << " paths:" << std::endl;
             for (size_t i = 0; i < paths.size(); i++) {
@@ -826,16 +826,16 @@ void RSUControlApp::testTaskGenerator() {
     }
     
     // Test 3: Check valid assignment
-    EV << "\n[RSU] Test 3: Testing valid assignment" << std::endl;
+    //    EV << "\n[RSU] Test 3: Testing valid assignment" << std::endl;
+    //
+    //    std::vector<std::string> sources = {"1024", "213", "337"};
+    //    std::vector<std::string> targets = {"1985", "853", "205"};
+    //
+    //    bool validAssignment = taskGenerator->existsValidAssignment(sources, targets);
     
-    std::vector<std::string> sources = {"1024", "213", "337"};
-    std::vector<std::string> targets = {"1985", "853", "205"};
+    //    EV << "[RSU] Valid assignment exists: " << (validAssignment ? "YES" : "NO") << std::endl;
     
-    bool validAssignment = taskGenerator->existsValidAssignment(sources, targets);
-    
-    EV << "[RSU] Valid assignment exists: " << (validAssignment ? "YES" : "NO") << std::endl;
-    
-    EV << "\n[RSU] Test 4: Tìm đường đi giữa các edge" << std::endl;
+    EV << "\n[RSU] Test 3: Tìm đường đi giữa các edge" << std::endl;
     findEdgePathAndPrint("-184", "1939");
 
     EV << "\n[RSU] =========================================\n" << std::endl;
@@ -843,7 +843,6 @@ void RSUControlApp::testTaskGenerator() {
 
 void RSUControlApp::findLanePathAndPrint(std::string sourceLaneId, std::string targetLaneId) const {
     if (!graphProcessor) {
-        EV << "[RSU] GraphProcessor chưa được khởi tạo" << std::endl;
         return;
     }
     
