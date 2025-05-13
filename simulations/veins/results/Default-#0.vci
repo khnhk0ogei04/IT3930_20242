@@ -1,0 +1,120 @@
+file 5162 1747160173                                            
+version 2
+run Default-0-20250514-01:15:04-34848
+attr configname Default
+attr datetime 20250514-01:15:04
+attr experiment Default
+attr inifile omnetpp.ini
+attr iterationvars ""
+attr iterationvarsf ""
+attr measurement ""
+attr network RSUExampleScenario
+attr processid 34848
+attr repetition 0
+attr replication #0
+attr resultdir results
+attr runnumber 0
+attr seedset 0
+param *.playgroundSizeX 2500m
+param *.playgroundSizeY 2500m
+param *.playgroundSizeZ 50m
+param *.annotations.draw true
+param *.obstacles.obstacles "xmldoc(\"config.xml\", \"//AnalogueModel[@type='SimpleObstacleShadowing']/obstacles\")"
+param *.manager.updateInterval 1s
+param *.manager.host "\"localhost\""
+param *.manager.port 9999
+param *.manager.autoShutdown true
+param *.manager.launchConfig "xmldoc(\"erlangen.launchd.xml\")"
+param *.manager.trafficLightModuleType "\"org.car2x.veins.nodes.TrafficLight\""
+param *.tls[*].mobility.x 0
+param *.tls[*].mobility.y 0
+param *.tls[*].mobility.z 3
+param *.tls[*].applType "\"org.car2x.veins.modules.application.traci.TraCIDemoTrafficLightApp\""
+param *.tls[*].logicType "\"org.car2x.veins.modules.world.traci.trafficLight.logics.TraCITrafficLightSimpleLogic\""
+param *.rsu[0].mobility.x 1000
+param *.rsu[0].mobility.y 1000
+param *.rsu[0].mobility.z 3
+param *.rsu[*].applType "\"RSUControlApp\""
+param *.rsu[*].appl.headerLength "80 bit"
+param *.rsu[*].appl.sendBeacons false
+param *.rsu[*].appl.dataOnSch false
+param *.rsu[*].appl.beaconInterval 1s
+param *.rsu[*].appl.beaconUserPriority 7
+param *.rsu[*].appl.dataUserPriority 5
+param *.rsu[*].appl.netFile "\"./erlangen.net.xml\""
+param *.rsu[*].nic.phy80211p.antennaOffsetZ "0 m"
+param *.connectionManager.sendDirect true
+param *.connectionManager.maxInterfDist 2600m
+param *.connectionManager.drawMaxIntfDist false
+param *.**.nic.mac1609_4.useServiceChannel false
+param *.**.nic.mac1609_4.txPower 50mW
+param *.**.nic.mac1609_4.bitrate 6Mbps
+param *.**.nic.phy80211p.minPowerLevel -110dBm
+param *.**.nic.phy80211p.useNoiseFloor true
+param *.**.nic.phy80211p.noiseFloor -98dBm
+param *.**.nic.phy80211p.decider "xmldoc(\"config.xml\")"
+param *.**.nic.phy80211p.analogueModels "xmldoc(\"config.xml\")"
+param *.**.nic.phy80211p.usePropagationDelay true
+param *.**.nic.phy80211p.antenna "xmldoc(\"antenna.xml\", \"/root/Antenna[@id='monopole']\")"
+param *.node[*].nic.phy80211p.antennaOffsetY "0 m"
+param *.node[*].nic.phy80211p.antennaOffsetZ "1.895 m"
+param *.node[*].applType "\"VehicleControlApp\""
+param *.node[*].appl.headerLength "80 bit"
+param *.node[*].appl.sendBeacons true
+param *.node[*].appl.dataOnSch false
+param *.node[*].appl.beaconInterval 1s
+param *.node[*].veinsmobility.x 0
+param *.node[*].veinsmobility.y 0
+param *.node[*].veinsmobility.z 0
+param *.node[*].veinsmobility.setHostSpeed false
+param *.node[*0].veinsmobility.accidentCount 1
+param *.node[*0].veinsmobility.accidentStart 73s
+param *.node[*0].veinsmobility.accidentDuration 50s
+
+vector 0 RSUExampleScenario.node[0].veinsmobility posx ETV
+vector 1 RSUExampleScenario.node[0].veinsmobility posy ETV
+vector 2 RSUExampleScenario.node[1].veinsmobility posx ETV
+vector 3 RSUExampleScenario.node[1].veinsmobility posy ETV
+vector 4 RSUExampleScenario.node[2].veinsmobility posx ETV
+vector 5 RSUExampleScenario.node[2].veinsmobility posy ETV
+vector 6 RSUExampleScenario.node[3].veinsmobility posx ETV
+vector 7 RSUExampleScenario.node[3].veinsmobility posy ETV
+vector 8 RSUExampleScenario.node[4].veinsmobility posx ETV
+vector 9 RSUExampleScenario.node[4].veinsmobility posy ETV
+vector 10 RSUExampleScenario.node[5].veinsmobility posx ETV
+vector 11 RSUExampleScenario.node[5].veinsmobility posy ETV
+vector 12 RSUExampleScenario.node[6].veinsmobility posx ETV
+vector 13 RSUExampleScenario.node[6].veinsmobility posy ETV
+vector 14 RSUExampleScenario.node[7].veinsmobility posx ETV
+vector 15 RSUExampleScenario.node[7].veinsmobility posy ETV
+vector 16 RSUExampleScenario.node[0].veinsmobility speed ETV
+vector 17 RSUExampleScenario.node[1].veinsmobility speed ETV
+vector 18 RSUExampleScenario.node[2].veinsmobility speed ETV
+vector 19 RSUExampleScenario.node[3].veinsmobility speed ETV
+vector 20 RSUExampleScenario.node[4].veinsmobility speed ETV
+vector 21 RSUExampleScenario.node[5].veinsmobility speed ETV
+vector 22 RSUExampleScenario.node[6].veinsmobility speed ETV
+0	4389 48 3 986 1 2 2 638.14160740962 640.42788403821 1278.5694914478 817372.58576099
+1	4437 47 3 986 1 2 2 822.6560579809 823.79919629519 1646.4552542761 1355408.1055493
+2	4484 28 3 986 1 2 2 829.8 829.8 1659.6 1377136.08
+3	4512 40 3 986 1 2 2 1095.7845700337 1097.62 2193.4045700337 2405513.488324
+4	4552 28 3 986 1 2 2 223.4 223.4 446.8 99815.12
+5	4580 38 3 986 1 2 2 930.1 936.54986981645 1866.6498698164 1742211.6686532
+6	4618 30 3 986 1 2 2 1626.6 1626.6 3253.2 5291655.12
+7	4648 40 3 986 1 2 2 2005.0530645063 2012.17 4017.2230645063 8069065.900386
+8	4688 39 3 986 1 2 2 452.38 454.25987667182 906.63987667182 410999.6999539
+9	4727 28 3 986 1 2 2 829.8 829.8 1659.6 1377136.08
+10	4755 40 3 986 1 2 2 812.89125379105 819.9 1632.7912537911 1333028.20049
+11	4795 32 3 986 1 2 2 1323.4 1323.4 2646.8 3502775.12
+12	4827 50 3 986 1 2 2 1905.7350533853 1909.0336961955 3814.7687495808 7276235.7469113
+13	4877 50 3 986 1 2 2 1302.2436961955 1303.4656614422 2605.7093576377 3394861.3748398
+14	4927 26 986 986 2 2 1 1909.0336961955 1909.0336961955 1909.0336961955 3644409.6532099
+15	4953 26 986 986 2 2 1 1302.2436961955 1302.2436961955 1302.2436961955 1695838.6442809
+16	4979 26 986 986 2 2 1 2.5561188762542 2.5561188762542 2.5561188762542 6.533743709543
+17	5005 26 986 986 2 2 1 1.8354299662868 1.8354299662868 1.8354299662868 3.3688031611434
+18	5031 26 986 986 2 2 1 6.4498698164476 6.4498698164476 6.4498698164476 41.600820649122
+19	5057 26 986 986 2 2 1 7.1169354937272 7.1169354937272 7.1169354937272 50.650770821874
+20	5083 26 986 986 2 2 1 1.8798766718246 1.8798766718246 1.8798766718246 3.5339363012704
+21	5109 25 986 986 2 2 1 7.008746208949 7.008746208949 7.008746208949 49.122523421457
+22	5134 26 986 986 2 2 1 1.4688386279158 1.4688386279158 1.4688386279158 2.1574869148577
+

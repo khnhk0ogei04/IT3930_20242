@@ -2,6 +2,8 @@
 #include <algorithm>
 #include <iostream>
 
+using namespace std;
+
 namespace veins {
 
 NetworkSourceManager::NetworkSourceManager() : networkLoaded(false) {
@@ -12,29 +14,28 @@ bool NetworkSourceManager::loadNetwork(string filename) {
     bool success = parseNetXml(filename, roadNetwork);
     if (success) {
         networkLoaded = true;
-        std::cout << "Loaded network from " << filename << std::endl;
-        std::cout << "Network contains " << roadNetwork.getNodeCount() << " nodes and " 
-                  << roadNetwork.getEdgeCount() << " edges" << std::endl;
+        cout << "Loaded network from " << filename << endl;
+        cout << "Network contains " << roadNetwork.getNodeCount() << " nodes and " 
+                  << roadNetwork.getEdgeCount() << " edges" << endl;
     } else {
-        std::cout << "Failed to load network from " << filename << std::endl;
+        cout << "Failed to load network from " << filename << endl;
     }
     return networkLoaded;
 }
 
-std::vector<std::string> NetworkSourceManager::getAllNodes() const {
-    std::vector<std::string> result;
+vector<string> NetworkSourceManager::getAllNodes() const {
+    vector<string> result;
     if (!networkLoaded) return result;
     
     const auto& nodes = roadNetwork.getNodes();
     for (const auto& pair : nodes) {
         result.push_back(pair.first);
     }
-    
     return result;
 }
 
-std::vector<std::string> NetworkSourceManager::getAllEdges() const {
-    std::vector<std::string> result;
+vector<string> NetworkSourceManager::getAllEdges() const {
+    vector<string> result;
     if (!networkLoaded) return result;
     
     const auto& adjList = roadNetwork.getAdjList();
@@ -46,15 +47,15 @@ std::vector<std::string> NetworkSourceManager::getAllEdges() const {
     }
     
     // Remove duplicates
-    std::sort(result.begin(), result.end());
-    auto last = std::unique(result.begin(), result.end());
+    sort(result.begin(), result.end());
+    auto last = unique(result.begin(), result.end());
     result.erase(last, result.end());
     
     return result;
 }
 
-std::vector<std::string> NetworkSourceManager::getEdgesFromNode(string nodeId) const {
-    std::vector<std::string> result;
+vector<string> NetworkSourceManager::getEdgesFromNode(string nodeId) const {
+    vector<string> result;
     if (!networkLoaded) return result;
     
     const auto& adjList = roadNetwork.getAdjList();
@@ -69,14 +70,14 @@ std::vector<std::string> NetworkSourceManager::getEdgesFromNode(string nodeId) c
     return result;
 }
 
-std::vector<std::string> NetworkSourceManager::getConnectedEdges(string edgeId) const {
-    std::vector<std::string> result;
+vector<string> NetworkSourceManager::getConnectedEdges(string edgeId) const {
+    vector<string> result;
     if (!networkLoaded) return result;
     
     const Edge* edge = findEdge(edgeId);
     if (!edge) return result;
     
-    const std::string& targetNode = edge->getTo();
+    const string& targetNode = edge->getTo();
     
     // Get all edges starting from the target node
     const auto& adjList = roadNetwork.getAdjList();
@@ -93,7 +94,7 @@ std::vector<std::string> NetworkSourceManager::getConnectedEdges(string edgeId) 
     return result;
 }
 
-std::string NetworkSourceManager::getEdgeSource(string edgeId) const {
+string NetworkSourceManager::getEdgeSource(string edgeId) const {
     if (!networkLoaded) return "";
     
     const Edge* edge = findEdge(edgeId);
@@ -103,7 +104,7 @@ std::string NetworkSourceManager::getEdgeSource(string edgeId) const {
     return "";
 }
 
-std::string NetworkSourceManager::getEdgeTarget(string edgeId) const {
+string NetworkSourceManager::getEdgeTarget(string edgeId) const {
     if (!networkLoaded) return "";
     
     const Edge* edge = findEdge(edgeId);

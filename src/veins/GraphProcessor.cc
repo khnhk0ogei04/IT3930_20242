@@ -5,17 +5,15 @@
 #include <set>
 #include <limits>
 
-namespace veins {
+using namespace std;
 
+namespace veins {
 GraphProcessor::GraphProcessor(const Graph& graph) : roadNetwork(graph) {
-    // Constructor
+
 }
 
-std::vector<std::string> GraphProcessor::findShortestPath(string sourceId, string targetId) const {
-    // Run Dijkstra's algorithm from the source node
+vector<string> GraphProcessor::findShortestPath(string sourceId, string targetId) const {
     auto dijkstraResult = dijkstra(sourceId);
-    
-    // Reconstruct the path from the dijkstra results
     return reconstructPath(dijkstraResult, sourceId, targetId);
 }
 
@@ -45,19 +43,12 @@ std::vector<std::vector<std::string>> GraphProcessor::findKShortestPaths(
     }
     
     result.push_back(shortestPath);
-    
-    // If only one path is requested, return it
     if (k <= 1) {
         return result;
     }
-
-    // Implement Yen's algorithm for k-shortest paths
-    // Data structures for storing potential paths and their lengths
     std::vector<std::pair<std::vector<std::string>, double>> potentialPaths;
-    std::set<std::vector<std::string>> addedPaths;  // To track paths we've already found
+    std::set<std::vector<std::string>> addedPaths;
     addedPaths.insert(shortestPath);
-
-    // Track path lengths for efficient sorting
     auto calculatePathLength = [this](const std::vector<std::string>& path) {
         double length = 0.0;
         for (const auto& edgeId : path) {
