@@ -11,7 +11,7 @@ struct Lane{
     double speed;
     double length;
     string shape;
-    Lane(const string& id="", int index=0, double speed=0.0, double length=0.0, const string& shape="")
+    Lane(string id="", int index=0, double speed=0.0, double length=0.0, string shape="")
         : id(id), index(index), speed(speed), length(length), shape(shape) {}
 };
 
@@ -25,38 +25,48 @@ private:
     vector<Lane> lanes;
 public:
     Edge();
-    Edge(const string& id, const string& from, const string& to, double length, const string& function);
-    
-    // Add constructor that accepts a vector of lanes
-    Edge(const string& id, const string& from, const string& to, const vector<Lane>& lanes, double length = 0.0, const string& function = "");
+    Edge(string id, string from, string to, double length, string function);
+    Edge(string id, string from, string to, vector<Lane> lanes, double length = 0.0, string function = "");
 
     // Getter:
-    const string& getId() const {return id;}
-    const string& getFrom() const{
+    string getId() const {
+        return id;
+    }
+    string getFrom() const{
         return from;
     }
-    const string& getTo() const{
+    string getTo() const{
         return to;
     }
     double getLength() const{
         return length;
     }
-    const string& getFunction() const {return function;}
-    const vector<Lane>& getLanes() const {return lanes;}
+    string getFunction() const {
+        return function;
+    }
+    vector<Lane> getLanes() const {
+        return lanes;
+    }
 
     // Setter:
-    void setId(const string &newId){ id = newId; }
-    void setFrom(const string &newFrom){
+    void setId(string newId){
+        id = newId;
+    }
+    void setFrom(string newFrom){
         from = newFrom;
     }
-    void setTo(const string &newTo){
+    void setTo(string newTo){
         to =  newTo;
     }
     void setLength(double newLength){
         length = newLength;
     }
-    void setFunction(const string &newFunction) {function = newFunction;}
-    void addLane(const Lane& lane) {lanes.push_back(lane);}
+    void setFunction(string newFunction) {
+        function = newFunction;
+    }
+    void addLane(Lane lane) {
+        lanes.push_back(lane);
+    }
 };
 
 #endif // EDGE_H

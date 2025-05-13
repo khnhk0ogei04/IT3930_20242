@@ -6,23 +6,18 @@
 using namespace tinyxml2;
 using namespace std;
 
-void Graph::addNode(const string& id, double x, double y) {
+void Graph::addNode(string id, double x, double y) {
     if (nodes.find(id) == nodes.end()) {
         nodes.emplace(id, Node(id, x, y));
         adjList.emplace(id, vector<Edge>());
     }
 }
 
-void Graph::addEdge(const string& from, const string& to, double length, const string& id) {
-    // Skip edges without valid from/to nodes
+void Graph::addEdge(string from, string to, double length, string id) {
     if (from.empty() || to.empty()) {
         return;
     }
-    
-    // Create the Edge object
     Edge edge(id, from, to, length, "");
-    
-    // Use the new method to add the edge
     addEdge(edge);
 }
 
@@ -30,28 +25,21 @@ void Graph::addEdge(const Edge& edge) {
     string from = edge.getFrom();
     string to = edge.getTo();
     string id = edge.getId();
-    
-    // Skip edges without valid from/to nodes
     if (from.empty() || to.empty()) {
         return;
     }
-
-    // Ensure nodes exist in the graph
     if (nodes.find(from) == nodes.end()) {
         nodes[from] = Node(from);
     }
     if (nodes.find(to) == nodes.end()) {
         nodes[to] = Node(to);
     }
-    
-    // Add edge to adjacency list
     adjList[from].push_back(edge);
     edges[id] = edge;
-    
-    // Debug output
-    std::cout << "Graph Edge: " << id << " has " << edge.getLanes().size() << " lanes in Graph" << std::endl;
-    
-    // Update edge count
+
+    // debug
+    cout << "Graph Edge: " << id << " has " << edge.getLanes().size() << " lanes in Graph" << std::endl;
+    // count number of edges in graph
     edgeCount++;
 }
 
@@ -68,7 +56,9 @@ size_t Graph::getEdgeCount() const {
 }
 
 void Graph::printNeighbors() const {
-    for (const auto& [fromId, edges] : adjList) {
+    for (const auto& nodePair : adjList) {
+        string fromId = nodePair.first;
+        const vector<Edge> edges = nodePair.second;
         cout << "Node " << fromId << " adjacent to:\n";
         for (const auto& edge : edges) {
             cout << "  - Node " << edge.getTo() << " (Distance: " << edge.getLength() << ")\n";
@@ -76,16 +66,16 @@ void Graph::printNeighbors() const {
     }
 }
 
-vector<Edge> Graph::getRoadsFromXml(const string& filePath) {
-    vector<Edge> roads;
 
+// Extracts all road from .net.xml file:
+vector<Edge> Graph::getRoadsFromXml(string filePath) {
+    vector<Edge> roads;
     XMLDocument doc;
     XMLError result = doc.LoadFile(filePath.c_str());
     if (result != XML_SUCCESS) {
         cerr << "Error: Could not open XML file \"" << filePath << "\".\n";
         return roads;
     }
-
     XMLElement* netElement = doc.FirstChildElement("net");
     if (!netElement) {
         cerr << "Error: XML file missing root element <net>.\n";
@@ -168,7 +158,7 @@ vector<Edge> Graph::getRoadsFromXml(const string& filePath) {
     return roads;
 }
 
-unordered_map<string, Node> Graph::getJunctionsFromXml(const string& filePath) {
+unordered_map<string, Node> Graph::getJunctionsFromXml(string filePath) {
     unordered_map<string, Node> junctions;
 
     XMLDocument doc;
@@ -202,7 +192,7 @@ unordered_map<string, Node> Graph::getJunctionsFromXml(const string& filePath) {
 }
 
 
-bool parseNetXml(const string& filePath, Graph& graph) {
+bool parseNetXml(string filePath, Graph& graph) {
 
     unordered_map<string, Node> junctions = Graph::getJunctionsFromXml(filePath);
     for (const auto& [id, node] : junctions) {
@@ -220,7 +210,7 @@ bool parseNetXml(const string& filePath, Graph& graph) {
     return (!junctions.empty() || !roads.empty());
 }
 
-Edge Graph::getEdge(const string& edgeId) const {
+Edge Graph::getEdge(string edgeId) const {
     auto it = edges.find(edgeId);
     if (it != edges.end()) {
         return it->second;

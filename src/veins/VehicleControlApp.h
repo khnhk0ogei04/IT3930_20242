@@ -56,7 +56,7 @@ struct VehicleDestination {
     std::string nodeId;
     VehicleTimeWindow timeWindow;
     
-    VehicleDestination(const std::string& id, const VehicleTimeWindow& tw) 
+    VehicleDestination(const std::string& id, const VehicleTimeWindow& tw)
         : nodeId(id), timeWindow(tw) {}
 };
 

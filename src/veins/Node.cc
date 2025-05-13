@@ -1,10 +1,15 @@
-#include "Node.h";
+#include "Node.h"
 
 using namespace std;
 
-Node::Node() : id(""), x(0.0), y(0.0){
+Node::Node(){
+    this->id = "";
+    this->x = 0.0;
+    this->y = 0.0;
 }
 
-Node::Node(const string& id, double x, double y)
-    : id(id), x(x), y(y) {
+Node::Node(string id, double x, double y){
+    this->id = id;
+    this->x = x;
+    this->y = y;
 }

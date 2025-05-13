@@ -8,7 +8,7 @@ NetworkSourceManager::NetworkSourceManager() : networkLoaded(false) {
     // Constructor
 }
 
-bool NetworkSourceManager::loadNetwork(const std::string& filename) {
+bool NetworkSourceManager::loadNetwork(string filename) {
     bool success = parseNetXml(filename, roadNetwork);
     if (success) {
         networkLoaded = true;
@@ -53,7 +53,7 @@ std::vector<std::string> NetworkSourceManager::getAllEdges() const {
     return result;
 }
 
-std::vector<std::string> NetworkSourceManager::getEdgesFromNode(const std::string& nodeId) const {
+std::vector<std::string> NetworkSourceManager::getEdgesFromNode(string nodeId) const {
     std::vector<std::string> result;
     if (!networkLoaded) return result;
     
@@ -69,7 +69,7 @@ std::vector<std::string> NetworkSourceManager::getEdgesFromNode(const std::strin
     return result;
 }
 
-std::vector<std::string> NetworkSourceManager::getConnectedEdges(const std::string& edgeId) const {
+std::vector<std::string> NetworkSourceManager::getConnectedEdges(string edgeId) const {
     std::vector<std::string> result;
     if (!networkLoaded) return result;
     
@@ -93,7 +93,7 @@ std::vector<std::string> NetworkSourceManager::getConnectedEdges(const std::stri
     return result;
 }
 
-std::string NetworkSourceManager::getEdgeSource(const std::string& edgeId) const {
+std::string NetworkSourceManager::getEdgeSource(string edgeId) const {
     if (!networkLoaded) return "";
     
     const Edge* edge = findEdge(edgeId);
@@ -103,7 +103,7 @@ std::string NetworkSourceManager::getEdgeSource(const std::string& edgeId) const
     return "";
 }
 
-std::string NetworkSourceManager::getEdgeTarget(const std::string& edgeId) const {
+std::string NetworkSourceManager::getEdgeTarget(string edgeId) const {
     if (!networkLoaded) return "";
     
     const Edge* edge = findEdge(edgeId);
@@ -113,7 +113,7 @@ std::string NetworkSourceManager::getEdgeTarget(const std::string& edgeId) const
     return "";
 }
 
-double NetworkSourceManager::getEdgeLength(const std::string& edgeId) const {
+double NetworkSourceManager::getEdgeLength(string edgeId) const {
     if (!networkLoaded) return 0.0;
     
     const Edge* edge = findEdge(edgeId);
@@ -123,7 +123,7 @@ double NetworkSourceManager::getEdgeLength(const std::string& edgeId) const {
     return 0.0;
 }
 
-const Edge* NetworkSourceManager::findEdge(const std::string& edgeId) const {
+const Edge* NetworkSourceManager::findEdge(string edgeId) const {
     if (!networkLoaded) return nullptr;
     
     const auto& adjList = roadNetwork.getAdjList();

@@ -156,7 +156,7 @@ void VehicleControlApp::sendStatusUpdate() {
         << "lane=" << lane << ";"
         << "pos=" << pos.x << "," << pos.y << "," << pos.z << ";"
         << "speed=" << speed;
-    
+
     // Send message
     auto* status = new TraCIDemo11pMessage();
     status->setDemoData(oss.str().c_str());
@@ -414,7 +414,7 @@ void VehicleControlApp::processAllRoadsResponse(const std::string& data) {
     
     // Now also test k shortest paths using specific nodes instead of random roads
     // Choose nodes that we know exist in the network
-    std::string source = "1024";  // Use specific node IDs that exist in the network 
+    std::string source = "1024";  // Use specific node IDs that exist in the network
     std::string target = "1985";  // Use specific node IDs that exist in the network
     EV << "[VEHICLE] Requesting 2 shortest paths from " << source << " to " << target << std::endl;
     requestKPaths(source, target, 2);

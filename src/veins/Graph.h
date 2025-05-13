@@ -11,8 +11,8 @@ using namespace std;
 
 class Graph {
 public:
-    void addNode(const string& id, double x = 0.0, double y = 0.0);
-    void addEdge(const string& from, const string& to, double length, const string& id = "");
+    void addNode(string id, double x = 0.0, double y = 0.0);
+    void addEdge(string from, string to, double length, string id = "");
     void addEdge(const Edge& edge);
     size_t getNodeCount() const;
     size_t getEdgeCount() const;
@@ -20,9 +20,9 @@ public:
     const unordered_map<string, vector<Edge>>& getAdjList() const {
         return adjList;
     }
-    Edge getEdge(const string& edgeId) const;
-    static vector<Edge> getRoadsFromXml(const string& filePath);
-    static unordered_map<string, Node> getJunctionsFromXml(const string& filePath);
+    Edge getEdge(string edgeId) const;
+    static vector<Edge> getRoadsFromXml(string filePath);
+    static unordered_map<string, Node> getJunctionsFromXml(string filePath);
     void printNeighbors() const;
 
 private:
@@ -32,6 +32,6 @@ private:
     size_t edgeCount = 0;
 };
 
-bool parseNetXml(const string& filePath, Graph& graph);
+bool parseNetXml(string filePath, Graph& graph);
 
 #endif // GRAPH_H

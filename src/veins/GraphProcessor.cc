@@ -11,7 +11,7 @@ GraphProcessor::GraphProcessor(const Graph& graph) : roadNetwork(graph) {
     // Constructor
 }
 
-std::vector<std::string> GraphProcessor::findShortestPath(const std::string& sourceId, const std::string& targetId) const {
+std::vector<std::string> GraphProcessor::findShortestPath(string sourceId, string targetId) const {
     // Run Dijkstra's algorithm from the source node
     auto dijkstraResult = dijkstra(sourceId);
     
@@ -19,7 +19,7 @@ std::vector<std::string> GraphProcessor::findShortestPath(const std::string& sou
     return reconstructPath(dijkstraResult, sourceId, targetId);
 }
 
-double GraphProcessor::getShortestPathLength(const std::string& sourceId, const std::string& targetId) const {
+double GraphProcessor::getShortestPathLength(string sourceId, string targetId) const {
     // Run Dijkstra's algorithm from the source node
     auto dijkstraResult = dijkstra(sourceId);
     
@@ -34,7 +34,7 @@ double GraphProcessor::getShortestPathLength(const std::string& sourceId, const 
 }
 
 std::vector<std::vector<std::string>> GraphProcessor::findKShortestPaths(
-    const std::string& sourceId, const std::string& targetId, int k) const {
+    string sourceId, string targetId, int k) const {
     
     std::vector<std::vector<std::string>> result;
     
@@ -241,7 +241,7 @@ bool GraphProcessor::existsValidAssignment(
     return hungarianAlgorithm(costMatrix);
 }
 
-std::map<std::string, std::pair<double, std::string>> GraphProcessor::dijkstra(const std::string& sourceId) const {
+std::map<std::string, std::pair<double, std::string>> GraphProcessor::dijkstra(string sourceId) const {
     // Map to store the distance and previous node for each node (node_id -> {distance, previous_node})
     std::map<std::string, std::pair<double, std::string>> result;
     
@@ -304,8 +304,8 @@ std::map<std::string, std::pair<double, std::string>> GraphProcessor::dijkstra(c
 
 std::vector<std::string> GraphProcessor::reconstructPath(
     const std::map<std::string, std::pair<double, std::string>>& dijkstraResult,
-    const std::string& sourceId, 
-    const std::string& targetId) const {
+    string sourceId,
+    string targetId) const {
     
     std::vector<std::string> path;
     
@@ -384,6 +384,297 @@ bool GraphProcessor::hungarianAlgorithm(const std::vector<std::vector<double>>& 
     }
     
     return true;
+}
+
+// Implementation for findLaneShortestPath
+vector<GraphProcessor::LanePath> GraphProcessor::findLaneShortestPath(string sourceLaneId, string targetLaneId) const {
+    vector<LanePath> result;
+    
+    // Extract edge IDs and lane indices from the lane IDs
+    string sourceEdgeId = extractEdgeIdFromLane(sourceLaneId);
+    string targetEdgeId = extractEdgeIdFromLane(targetLaneId);
+    int sourceLaneIndex = extractLaneIndexFromLane(sourceLaneId);
+    int targetLaneIndex = extractLaneIndexFromLane(targetLaneId);
+    
+    if (sourceEdgeId.empty() || targetEdgeId.empty() || sourceLaneIndex < 0 || targetLaneIndex < 0) {
+        // Invalid lane IDs
+        return result;
+    }
+    
+    // Find the shortest path between the edges using the existing method
+    vector<string> edgePath = findShortestPath(sourceEdgeId, targetEdgeId);
+    
+    if (edgePath.empty() && sourceEdgeId != targetEdgeId) {
+        // No path exists between the edges
+        return result;
+    }
+    
+    // Special case: source and target are on the same edge
+    if (sourceEdgeId == targetEdgeId) {
+        // Create a single LanePath segment
+        LanePath segment;
+        segment.edgeId = sourceEdgeId;
+        segment.laneIndex = sourceLaneIndex; // Start with source lane
+        
+        // Find the edge in the graph to calculate cost
+        bool found = false;
+        for (const auto& nodePair : roadNetwork.getAdjList()) {
+            for (const auto& edge : nodePair.second) {
+                if (edge.getId() == sourceEdgeId) {
+                    // Cost is the length of the edge
+                    segment.cost = edge.getLength();
+                    found = true;
+                    break;
+                }
+            }
+            if (found) break;
+        }
+        
+        result.push_back(segment);
+        return result;
+    }
+    
+    // Add source edge (with source lane)
+    if (!edgePath.empty()) {
+        LanePath sourceSegment;
+        sourceSegment.edgeId = sourceEdgeId;
+        sourceSegment.laneIndex = sourceLaneIndex;
+        
+        // Find the source edge in the graph to calculate cost
+        bool found = false;
+        for (const auto& nodePair : roadNetwork.getAdjList()) {
+            for (const auto& edge : nodePair.second) {
+                if (edge.getId() == sourceEdgeId) {
+                    // Cost is the length of the edge
+                    sourceSegment.cost = edge.getLength();
+                    found = true;
+                    break;
+                }
+            }
+            if (found) break;
+        }
+        
+        result.push_back(sourceSegment);
+    }
+    
+    // Add intermediate edges (with best lanes)
+    for (size_t i = 0; i < edgePath.size(); i++) {
+        const string& edgeId = edgePath[i];
+        
+        // Skip if this is the source or target edge (we handle those separately)
+        if (edgeId == sourceEdgeId || edgeId == targetEdgeId) {
+            continue;
+        }
+        
+        LanePath segment;
+        segment.edgeId = edgeId;
+        segment.laneIndex = findBestLaneForEdge(edgeId);
+        
+        // Find the edge in the graph to calculate cost
+        bool found = false;
+        for (const auto& nodePair : roadNetwork.getAdjList()) {
+            for (const auto& edge : nodePair.second) {
+                if (edge.getId() == edgeId) {
+                    // Cost is the length of the edge
+                    segment.cost = edge.getLength();
+                    found = true;
+                    break;
+                }
+            }
+            if (found) break;
+        }
+        
+        result.push_back(segment);
+    }
+    
+    // Add target edge (with target lane)
+    if (!edgePath.empty() || sourceEdgeId == targetEdgeId) {
+        LanePath targetSegment;
+        targetSegment.edgeId = targetEdgeId;
+        targetSegment.laneIndex = targetLaneIndex;
+        
+        // Find the target edge in the graph to calculate cost
+        bool found = false;
+        for (const auto& nodePair : roadNetwork.getAdjList()) {
+            for (const auto& edge : nodePair.second) {
+                if (edge.getId() == targetEdgeId) {
+                    // Cost is the length of the edge
+                    targetSegment.cost = edge.getLength();
+                    found = true;
+                    break;
+                }
+            }
+            if (found) break;
+        }
+        
+        result.push_back(targetSegment);
+    }
+    
+    return result;
+}
+
+string GraphProcessor::extractEdgeIdFromLane(string laneId) const {
+    // In SUMO, lane IDs typically have the format "edgeId_laneIndex"
+    size_t pos = laneId.find_last_of('_');
+    if (pos != string::npos) {
+        return laneId.substr(0, pos);
+    }
+    
+    // If the lane ID doesn't contain an underscore, it might just be the edge ID
+    // with a minus sign for direction (common in some SUMO networks)
+    return laneId;
+}
+
+int GraphProcessor::extractLaneIndexFromLane(string laneId) const {
+    // In SUMO, lane IDs typically have the format "edgeId_laneIndex"
+    size_t pos = laneId.find_last_of('_');
+    if (pos != string::npos && pos < laneId.length() - 1) {
+        try {
+            return stoi(laneId.substr(pos + 1));
+        } catch (const std::invalid_argument&) {
+            return 0; // Default to lane 0 if conversion fails
+        }
+    }
+    
+    // If no lane index is specified, default to 0
+    return 0;
+}
+
+int GraphProcessor::findBestLaneForEdge(string edgeId) const {
+    // Find the edge in the graph
+    for (const auto& nodePair : roadNetwork.getAdjList()) {
+        for (const auto& edge : nodePair.second) {
+            if (edge.getId() == edgeId) {
+                const auto& lanes = edge.getLanes();
+                
+                if (lanes.empty()) {
+                    return 0; // Default to lane 0 if no lanes are defined
+                }
+                
+                // Find the lane with the highest speed
+                int bestLaneIndex = 0;
+                double highestSpeed = 0.0;
+                
+                for (const auto& lane : lanes) {
+                    if (lane.speed > highestSpeed) {
+                        highestSpeed = lane.speed;
+                        bestLaneIndex = lane.index;
+                    }
+                }
+                
+                return bestLaneIndex;
+            }
+        }
+    }
+    
+    // If edge not found, default to lane 0
+    return 0;
+}
+
+// Implementation for findEdgeShortestPath
+vector<string> GraphProcessor::findEdgeShortestPath(string sourceEdgeId, string targetEdgeId) const {
+    vector<string> result;
+    
+    // Special case: source and target are the same edge
+    if (sourceEdgeId == targetEdgeId) {
+        result.push_back(sourceEdgeId);
+        return result;
+    }
+    
+    // First, find the source and target edges to get their associated nodes
+    string sourceFromNode = "", sourceToNode = "";
+    string targetFromNode = "", targetToNode = "";
+    
+    // Find the nodes for source and target edges
+    for (const auto& nodePair : roadNetwork.getAdjList()) {
+        const string& fromNode = nodePair.first;
+        for (const auto& edge : nodePair.second) {
+            if (edge.getId() == sourceEdgeId) {
+                sourceFromNode = fromNode;
+                sourceToNode = edge.getTo();
+            }
+            if (edge.getId() == targetEdgeId) {
+                targetFromNode = fromNode;
+                targetToNode = edge.getTo();
+            }
+        }
+    }
+    
+    // If we couldn't find the edges, return empty path
+    if (sourceFromNode.empty() || targetFromNode.empty()) {
+        return result;
+    }
+    
+    // Try different combinations of source and target nodes
+    vector<vector<string>> possiblePaths;
+    
+    // 1. Path from source end node to target start node (most likely case)
+    vector<string> path1 = findShortestPath(sourceToNode, targetFromNode);
+    if (!path1.empty()) {
+        // Construct the complete path: sourceEdge -> connecting edges -> targetEdge
+        vector<string> completePath;
+        completePath.push_back(sourceEdgeId);
+        completePath.insert(completePath.end(), path1.begin(), path1.end());
+        completePath.push_back(targetEdgeId);
+        possiblePaths.push_back(completePath);
+    }
+    
+    // 2. Path from source start node to target start node
+    vector<string> path2 = findShortestPath(sourceFromNode, targetFromNode);
+    if (!path2.empty()) {
+        vector<string> completePath;
+        completePath.push_back(sourceEdgeId);
+        completePath.insert(completePath.end(), path2.begin(), path2.end());
+        completePath.push_back(targetEdgeId);
+        possiblePaths.push_back(completePath);
+    }
+    
+    // 3. Path from source end node to target end node
+    vector<string> path3 = findShortestPath(sourceToNode, targetToNode);
+    if (!path3.empty()) {
+        vector<string> completePath;
+        completePath.push_back(sourceEdgeId);
+        completePath.insert(completePath.end(), path3.begin(), path3.end());
+        completePath.push_back(targetEdgeId);
+        possiblePaths.push_back(completePath);
+    }
+    
+    // 4. Path from source start node to target end node
+    vector<string> path4 = findShortestPath(sourceFromNode, targetToNode);
+    if (!path4.empty()) {
+        vector<string> completePath;
+        completePath.push_back(sourceEdgeId);
+        completePath.insert(completePath.end(), path4.begin(), path4.end());
+        completePath.push_back(targetEdgeId);
+        possiblePaths.push_back(completePath);
+    }
+    
+    // If we found any possible paths, choose the shortest one
+    if (!possiblePaths.empty()) {
+        // Find shortest path (by edge count)
+        size_t shortestIndex = 0;
+        size_t shortestLength = possiblePaths[0].size();
+        
+        for (size_t i = 1; i < possiblePaths.size(); i++) {
+            if (possiblePaths[i].size() < shortestLength) {
+                shortestLength = possiblePaths[i].size();
+                shortestIndex = i;
+            }
+        }
+        
+        result = possiblePaths[shortestIndex];
+    }
+    
+    // If we still have no path, try to find a direct path between the edges
+    if (result.empty()) {
+        vector<string> directPath = findShortestPath(sourceEdgeId, targetEdgeId);
+        if (!directPath.empty()) {
+            // Just use the direct path
+            result = directPath;
+        }
+    }
+    
+    return result;
 }
 
 } // namespace veins 

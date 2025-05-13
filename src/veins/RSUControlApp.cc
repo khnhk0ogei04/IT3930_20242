@@ -668,10 +668,10 @@ void RSUControlApp::printRoadNetworkInfo() const {
     // Chọn một số đường để kiểm tra đường đi
     if (allRoads.size() >= 2) {
         // Kiểm tra đường đi đầu tiên: từ đường đầu tiên đến đường cuối cùng
-        std::string sourceRoad = "1024";
-        std::string targetRoad = "1959";
+        std::string sourceRoad = "42";
+        std::string targetRoad = "1945";
         
-        EV << "[RSU] Path Test 1: Finding path from " << sourceRoad << " to " << targetRoad << std::endl;
+        EV << "[RSU] Path Test: Finding path from " << sourceRoad << " to " << targetRoad << std::endl;
         std::vector<std::string> path = findShortestPath(sourceRoad, targetRoad);
         double pathLength = getShortestPathLength(sourceRoad, targetRoad);
         
@@ -716,30 +716,6 @@ void RSUControlApp::printRoadNetworkInfo() const {
                 } else {
                     EV << "[RSU] NO PATH found between nodes " << sourceNode << " and " << targetNode << std::endl;
                 }
-            }
-        }
-        
-        // Kiểm tra đường đi thứ hai: từ đường đầu tiên đến đường ở giữa
-        if (allRoads.size() >= 3) {
-            std::string middleRoad = allRoads[allRoads.size() / 2];
-            
-            EV << "\n[RSU] Path Test 2: Finding path from " << sourceRoad << " to " << middleRoad << std::endl;
-            path = findShortestPath(sourceRoad, middleRoad);
-            pathLength = getShortestPathLength(sourceRoad, middleRoad);
-            
-            if (!path.empty() && pathLength > 0) {
-                EV << "[RSU] SUCCESS: Path found with length " << pathLength << " units" << std::endl;
-                // In danh sách đường đi trên cùng một dòng
-                EV << "[RSU] Path segments (" << path.size() << "): ";
-                for (size_t i = 0; i < path.size(); i++) {
-                    EV << path[i];
-                    if (i < path.size() - 1) {
-                        EV << " -> "; // Sử dụng mũi tên để phân tách
-                    }
-                }
-                EV << std::endl;
-            } else {
-                EV << "[RSU] NO PATH found between " << sourceRoad << " and " << middleRoad << std::endl;
             }
         }
     } else {
@@ -859,5 +835,167 @@ void RSUControlApp::testTaskGenerator() {
     
     EV << "[RSU] Valid assignment exists: " << (validAssignment ? "YES" : "NO") << std::endl;
     
+    EV << "\n[RSU] Test 4: Tìm đường đi giữa các edge" << std::endl;
+    findEdgePathAndPrint("-184", "1939");
+
     EV << "\n[RSU] =========================================\n" << std::endl;
+}
+
+void RSUControlApp::findLanePathAndPrint(std::string sourceLaneId, std::string targetLaneId) const {
+    if (!graphProcessor) {
+        EV << "[RSU] GraphProcessor chưa được khởi tạo" << std::endl;
+        return;
+    }
+    
+    EV << "[RSU] Tìm đường đi ngắn nhất từ làn " << sourceLaneId << " đến làn " << targetLaneId << std::endl;
+    
+    auto lanePath = graphProcessor->findLaneShortestPath(sourceLaneId, targetLaneId);
+    
+    if (lanePath.empty()) {
+        EV << "[RSU] Không tìm thấy đường đi giữa hai làn đường" << std::endl;
+        return;
+    }
+    
+    double totalCost = 0.0;
+    for (const auto& segment : lanePath) {
+        totalCost += segment.cost;
+    }
+    
+    EV << "[RSU] Đã tìm thấy đường đi với " << lanePath.size() << " phân đoạn, tổng chi phí: " << totalCost << std::endl;
+    
+    for (size_t i = 0; i < lanePath.size(); i++) {
+        const auto& segment = lanePath[i];
+        EV << "  - Edge: " << segment.edgeId << ", Lane: " << segment.laneIndex 
+           << ", Chi phí: " << segment.cost << std::endl;
+    }
+}
+
+void RSUControlApp::findEdgePathAndPrint(std::string sourceEdgeId, std::string targetEdgeId) const {
+    if (!graphProcessor) {
+        EV << "[RSU] GraphProcessor chưa được khởi tạo" << std::endl;
+        return;
+    }
+    
+    EV << "[RSU] Tìm đường đi ngắn nhất từ edge " << sourceEdgeId << " đến edge " << targetEdgeId << std::endl;
+    
+    // Debug: Check if edges exist in the graph
+    const Graph& graph = graphProcessor->getGraph();
+    bool sourceEdgeFound = false;
+    bool targetEdgeFound = false;
+    std::string sourceNodeId, targetNodeId;
+    
+    // First check if edges exist in the graph
+    for (const auto& nodePair : graph.getAdjList()) {
+        for (const auto& edge : nodePair.second) {
+            if (edge.getId() == sourceEdgeId) {
+                sourceEdgeFound = true;
+                sourceNodeId = nodePair.first; // Source node of this edge
+                EV << "[RSU] Source edge " << sourceEdgeId << " found: connects from node " 
+                   << edge.getFrom() << " to node " << edge.getTo() << std::endl;
+            }
+            if (edge.getId() == targetEdgeId) {
+                targetEdgeFound = true;
+                targetNodeId = nodePair.first; // Source node of this edge
+                EV << "[RSU] Target edge " << targetEdgeId << " found: connects from node " 
+                   << edge.getFrom() << " to node " << edge.getTo() << std::endl;
+            }
+        }
+    }
+    
+    if (!sourceEdgeFound) {
+        EV << "[RSU] ERROR: Source edge " << sourceEdgeId << " not found in graph!" << std::endl;
+        return;
+    }
+    if (!targetEdgeFound) {
+        EV << "[RSU] ERROR: Target edge " << targetEdgeId << " not found in graph!" << std::endl;
+        return;
+    }
+    
+    // Try finding path between nodes that these edges connect
+    if (!sourceNodeId.empty() && !targetNodeId.empty()) {
+        EV << "[RSU] DEBUG: Checking if there's a node path from " << sourceNodeId << " to " << targetNodeId << std::endl;
+        std::vector<std::string> nodePath = graphProcessor->findShortestPath(sourceNodeId, targetNodeId);
+        if (!nodePath.empty()) {
+            EV << "[RSU] DEBUG: Node path exists with " << nodePath.size() << " segments" << std::endl;
+        } else {
+            EV << "[RSU] DEBUG: No node path exists between the nodes" << std::endl;
+        }
+    }
+    
+    // Get the edge path
+    auto edgePath = graphProcessor->findEdgeShortestPath(sourceEdgeId, targetEdgeId);
+    
+    if (edgePath.empty()) {
+        EV << "[RSU] Không tìm thấy đường đi giữa hai edge" << std::endl;
+        
+        // Try to find a path between these edges manually
+        EV << "[RSU] Attempting to manually find a path..." << std::endl;
+        
+        // Get edge details
+        std::string fromNodeSrc, toNodeSrc, fromNodeTgt, toNodeTgt;
+        for (const auto& nodePair : graph.getAdjList()) {
+            for (const auto& edge : nodePair.second) {
+                if (edge.getId() == sourceEdgeId) {
+                    fromNodeSrc = nodePair.first;
+                    toNodeSrc = edge.getTo();
+                }
+                if (edge.getId() == targetEdgeId) {
+                    fromNodeTgt = nodePair.first;
+                    toNodeTgt = edge.getTo();
+                }
+            }
+        }
+        
+        // Try various node combinations for path finding
+        std::vector<std::string> alternativePath;
+        alternativePath = graphProcessor->findShortestPath(toNodeSrc, fromNodeTgt);
+        if (!alternativePath.empty()) {
+            EV << "[RSU] Found path from source edge end node to target edge start node" << std::endl;
+            
+            // Construct a complete path
+            std::vector<std::string> completePath;
+            completePath.push_back(sourceEdgeId);
+            completePath.insert(completePath.end(), alternativePath.begin(), alternativePath.end());
+            completePath.push_back(targetEdgeId);
+            
+            // Print the path
+            EV << "[RSU] Manually constructed path: ";
+            for (size_t i = 0; i < completePath.size(); i++) {
+                EV << completePath[i];
+                if (i < completePath.size() - 1) {
+                    EV << " -> ";
+                }
+            }
+            EV << std::endl;
+        } else {
+            EV << "[RSU] Still could not find a path" << std::endl;
+        }
+        
+        return;
+    }
+    
+    // Calculate total path length
+    double totalLength = 0.0;
+    for (const auto& edgeId : edgePath) {
+        for (const auto& nodePair : graph.getAdjList()) {
+            for (const auto& edge : nodePair.second) {
+                if (edge.getId() == edgeId) {
+                    totalLength += edge.getLength();
+                    break;
+                }
+            }
+        }
+    }
+    
+    EV << "[RSU] Đã tìm thấy đường đi với " << edgePath.size() << " phân đoạn, tổng độ dài: " << totalLength << std::endl;
+    
+    // Print the path
+    EV << "[RSU] Đường đi: ";
+    for (size_t i = 0; i < edgePath.size(); i++) {
+        EV << edgePath[i];
+        if (i < edgePath.size() - 1) {
+            EV << " -> ";
+        }
+    }
+    EV << std::endl;
 }

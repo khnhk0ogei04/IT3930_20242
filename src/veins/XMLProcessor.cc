@@ -206,9 +206,6 @@ void XMLProcessor::buildIncomingRoadsMap() {
     if (!networkLoaded) return;
     
     incomingRoadsMap.clear();
-    
-    // Optimized algorithm: For each edge, add it as an incoming edge to all
-    // edges that start from its target node
     for (const auto& nodePair : roadNetwork.getAdjList()) {
         for (const auto& edge : nodePair.second) {
             const std::string& targetNodeId = edge.getTo();

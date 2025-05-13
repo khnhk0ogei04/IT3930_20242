@@ -3,7 +3,10 @@
 
 #include <string>
 using namespace std;
-
+/*
+ * Use for week 6 + 7 - IT3930
+ *
+ */
 namespace RSUConstants {
     static constexpr const char* RSU_IDENTIFIER = "RSU";
 

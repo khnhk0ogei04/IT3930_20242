@@ -1,21 +1,27 @@
 #include "Edge.h"
 using namespace std;
 
-Edge::Edge() : id(""), from(""), to(""), length(0.0) {
+Edge::Edge(){
+    this->id = "";
+    this->from = "";
+    this->to = "";
+    this->length = 0.0;
+    this->function = "";
 }
 
-Edge::Edge(const string& id, const string& from, const string& to, double length, const string& function)
-    : id(id), from(from), to(to), length(length), function(function) {
+Edge::Edge(string id, string from, string to, double length, string function){
+    this->id = id;
+    this->from = from;
+    this->to = to;
+    this->length = length;
+    this->function = function;
 }
 
-// New constructor that accepts lanes
-Edge::Edge(const string& id, const string& from, const string& to, const vector<Lane>& lanes, double length, const string& function)
+Edge::Edge(string id, string from, string to, vector<Lane> lanes, double length, string function)
     : id(id), from(from), to(to), length(length), function(function), lanes(lanes) {
-    
-    // If length is 0, calculate max length from lanes
     if (length == 0.0 && !lanes.empty()) {
         double maxLength = 0.0;
-        for (const auto& lane : lanes) {
+        for (Lane lane : lanes) {
             if (lane.length > maxLength) {
                 maxLength = lane.length;
             }

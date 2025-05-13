@@ -12,13 +12,12 @@ private:
 
 public:
     Node();
-    Node(const string& id, double x = 0.0, double y = 0.0);
-
-    const string& getId() const {return id;}
+    Node(string id, double x = 0.0, double y = 0.0);
+    string getId() const {return id;}
     double getX() const {return x;}
     double getY() const {return y;}
 
-    void setId(const string& newId) {id = newId;}
+    void setId(string newId) {id = newId;}
     void setX(double newX){
         x = newX;
     }

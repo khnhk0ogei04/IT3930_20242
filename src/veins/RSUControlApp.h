@@ -62,6 +62,12 @@ private:
     void printRoadNetworkInfo() const;
     void printNodeInfo() const;
     
+    // Lane path finding method
+    void findLanePathAndPrint(std::string sourceLaneId, std::string targetLaneId) const;
+    
+    // Edge path finding method
+    void findEdgePathAndPrint(std::string sourceEdgeId, std::string targetEdgeId) const;
+    
     // Test methods
     void testTaskGenerator();
 };
