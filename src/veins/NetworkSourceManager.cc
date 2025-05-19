@@ -78,7 +78,7 @@ vector<string> NetworkSourceManager::getConnectedEdges(string edgeId) const {
     if (!edge) return result;
     
     const string& targetNode = edge->getTo();
-    
+
     // Get all edges starting from the target node
     const auto& adjList = roadNetwork.getAdjList();
     auto it = adjList.find(targetNode);
@@ -140,4 +140,4 @@ const Edge* NetworkSourceManager::findEdge(string edgeId) const {
     return nullptr;
 }
 
-} // namespace veins 
+} // namespace veins

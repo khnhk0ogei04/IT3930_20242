@@ -11,7 +11,7 @@ bool XMLProcessor::parseNetXml(const std::string& filePath, Graph& graph) {
 }
 
 XMLProcessor::XMLProcessor() : networkLoaded(false) {
-    // Constructor initialization
+    vehicleData.clear();
 }
 
 bool XMLProcessor::loadNetworkFile(const std::string& filename) {
@@ -19,59 +19,59 @@ bool XMLProcessor::loadNetworkFile(const std::string& filename) {
     incomingRoadsMap.clear();
     roadAttributes.clear();
     networkLoaded = false;
-    
+    vehicleData.clear();
     std::cout << "XMLProcessor: Attempting to load network file from: " << filename << std::endl;
-    
+
     // Use the existing parseNetXml to load the graph
     bool success = parseNetXml(filename, roadNetwork);
     if (!success) {
         std::cout << "Failed to load network from " << filename << std::endl;
         return false;
     }
-    
+
     // Process the XML file to extract road attributes
     tinyxml2::XMLDocument doc;
     tinyxml2::XMLError result = doc.LoadFile(filename.c_str());
     if (result != tinyxml2::XML_SUCCESS) {
-        std::cout << "Error: Could not open XML file \"" << filename << "\" (Error code: " 
+        std::cout << "Error: Could not open XML file \"" << filename << "\" (Error code: "
                   << static_cast<int>(result) << ")." << std::endl;
         return false;
     }
-    
+
     tinyxml2::XMLElement* netElement = doc.FirstChildElement("net");
     if (!netElement) {
         std::cout << "Error: XML file missing root element <net>." << std::endl;
         return false;
     }
-    
+
     // Count edges and lanes for debugging
     int edgeCount = 0;
     int laneCount = 0;
-    
+
     // Process all edge elements to extract attributes
     for (tinyxml2::XMLElement* edgeElem = netElement->FirstChildElement("edge");
          edgeElem != nullptr;
          edgeElem = edgeElem->NextSiblingElement("edge")) {
-        
+
         const char* idAttr = edgeElem->Attribute("id");
         if (!idAttr) continue;
-        
+
         edgeCount++;
         std::string edgeId(idAttr);
         roadAttributes[edgeId] = extractAttributes(edgeElem);
-        
+
         // Process lanes for this edge
         int laneCount = 0;
-        
+
         for (tinyxml2::XMLElement* laneElem = edgeElem->FirstChildElement("lane");
              laneElem != nullptr;
              laneElem = laneElem->NextSiblingElement("lane")) {
-             
+
             const char* laneId = laneElem->Attribute("id");
             const char* laneIndex = laneElem->Attribute("index");
             const char* laneSpeed = laneElem->Attribute("speed");
             const char* laneLength = laneElem->Attribute("length");
-            
+
             if (laneId && laneIndex && laneSpeed && laneLength) {
                 std::string prefix = "lane" + std::string(laneIndex) + "_";
                 roadAttributes[edgeId][prefix + "id"] = laneId;
@@ -88,12 +88,12 @@ bool XMLProcessor::loadNetworkFile(const std::string& filename) {
         
         std::cout << "XML Edge: " << edgeId << " has " << laneCount << " lanes in XML" << std::endl;
     }
-    
+
     std::cout << "XML Processing found " << edgeCount << " edges and " << laneCount << " lanes" << std::endl;
-    
+
     // Build the map of incoming roads
     buildIncomingRoadsMap();
-    
+
     // Verify lanes in the graph
     int graphLaneCount = 0;
     const auto& adjList = roadNetwork.getAdjList();
@@ -106,12 +106,12 @@ bool XMLProcessor::loadNetworkFile(const std::string& filename) {
     }
     
     std::cout << "Graph has " << graphLaneCount << " total lanes" << std::endl;
-    
+
     networkLoaded = true;
     std::cout << "Loaded network from " << filename << std::endl;
-    std::cout << "Network contains " << roadNetwork.getNodeCount() << " nodes and " 
+    std::cout << "Network contains " << roadNetwork.getNodeCount() << " nodes and "
               << roadNetwork.getEdgeCount() << " edges" << std::endl;
-    
+
     return true;
 }
 
@@ -222,5 +222,60 @@ void XMLProcessor::buildIncomingRoadsMap() {
         }
     }
 }
+
+bool XMLProcessor::loadRouteFile(const std::string& filePath) {
+    vehicleData.clear();
+
+    std::cout << "XMLProcessor: Attempting to load route file from: " << filePath << std::endl;
+
+    tinyxml2::XMLDocument doc;
+    tinyxml2::XMLError result = doc.LoadFile(filePath.c_str());
+    if (result != tinyxml2::XML_SUCCESS) {
+        std::cout << "Error: Could not open XML file \"" << filePath << "\" (Error code: "
+                  << static_cast<int>(result) << ")." << std::endl;
+        return false;
+    }
+
+    tinyxml2::XMLElement* routesElement = doc.FirstChildElement("routes");
+    if (!routesElement) {
+        std::cout << "Error: XML file missing root element <routes>." << std::endl;
+        return false;
+    }
+
+    // Process all trip elements to extract vehicle information
+    for (tinyxml2::XMLElement* tripElem = routesElement->FirstChildElement("trip");
+         tripElem != nullptr;
+         tripElem = tripElem->NextSiblingElement("trip")) {
+
+        VehicleInfo vehicle;
+        vehicle.id = tripElem->Attribute("id");
+
+        const char* departAttr = tripElem->Attribute("depart");
+        if (departAttr) {
+            vehicle.depart = std::stod(departAttr);
+        } else {
+            vehicle.depart = 0.0; // Default if not specified
+        }
+
+        vehicle.from = tripElem->Attribute("from");
+        vehicle.to = tripElem->Attribute("to");
+
+        const char* viaAttr = tripElem->Attribute("via");
+        if (viaAttr) {
+            vehicle.via = viaAttr;
+        } else {
+            vehicle.via = ""; // Empty if not specified
+        }
+
+        vehicleData.push_back(vehicle);
+    }
+
+    std::cout << "XMLProcessor: Loaded " << vehicleData.size() << " vehicles from " << filePath << std::endl;
+    return true;
+}
+
+std::vector<VehicleInfo> XMLProcessor::getVehicles() const { return vehicleData; }
+
+
 
 } // namespace veins

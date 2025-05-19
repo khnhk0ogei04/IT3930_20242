@@ -24,19 +24,37 @@ struct Destination {
     
     Destination(const string& id = "", const TimeWindow& tw = TimeWindow())
         : nodeId(id), timeWindow(tw) {}
+        
+    bool operator<(const Destination& other) const {
+        if (nodeId != other.nodeId)
+            return nodeId < other.nodeId;
+        if (timeWindow.earliness != other.timeWindow.earliness)
+            return timeWindow.earliness < other.timeWindow.earliness;
+        return timeWindow.tardiness < other.timeWindow.tardiness;
+    }
 };
 
 class TaskGenerator {
 public:
     TaskGenerator(const GraphProcessor& processor);
     vector<Destination> generateDestinations(int n, unsigned seedValue = 0);
+    
+    // New method to generate destinations using Hungarian algorithm for optimal assignment
+    vector<Destination> generateOptimalDestinations(
+        const vector<string>& sourceNodes,
+        int n,
+        unsigned seedValue = 0);
+    
     vector<vector<string>> findKPaths(const string& sourceId, const string& destinationId, int k);
     bool existsValidAssignment(const vector<string>& sources, const vector<string>& destinations);
 private:
     const GraphProcessor& graphProcessor;
     mt19937 rng;
+    
+    // Helper method to generate time windows with travel time considerations
+    TimeWindow generateTimeWindowForDistance(double distance);
 };
 
 } // namespace veins
 
-#endif // TASK_GENERATOR_H 
+#endif // TASK_GENERATOR_H

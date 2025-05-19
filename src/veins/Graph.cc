@@ -43,16 +43,12 @@ void Graph::addEdge(const Edge& edge) {
     edgeCount++;
 }
 
-int Graph::getNodeCount() const {
+size_t Graph::getNodeCount() const {
     return nodes.size();
 }
 
-int Graph::getEdgeCount() const {
-    size_t count = 0;
-    for (const auto& kv : adjList) {
-        count += kv.second.size();
-    }
-    return count;
+size_t Graph::getEdgeCount() const {
+    return edgeCount;
 }
 
 void Graph::printNeighbors() const {
@@ -135,7 +131,7 @@ vector<Edge> Graph::getRoadsFromXml(string filePath) {
             if (edgeLaneCount == 0) {
                 edgesWithNoLanes++;
             }
-            
+
             // Create the edge with its lanes
             Edge edge(edgeId, fromNode, toNode, lanes);
             
@@ -201,7 +197,6 @@ bool parseNetXml(string filePath, Graph& graph) {
     // get roads from xml
     vector<Edge> roads = Graph::getRoadsFromXml(filePath);
 
-    // add new edge to roads
     for (Edge edge: roads){
         graph.addEdge(edge);
     }
@@ -214,7 +209,6 @@ Edge Graph::getEdge(string edgeId) const {
     if (it != edges.end()) {
         return it->second;
     }
-    
-    // Return default/empty edge if not found
     return Edge();
 }
+

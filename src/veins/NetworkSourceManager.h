@@ -34,4 +34,4 @@ private:
 
 } // namespace veins
 
-#endif // NETWORK_SOURCE_MANAGER_H 
+#endif // NETWORK_SOURCE_MANAGER_H

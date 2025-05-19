@@ -42,10 +42,11 @@ private:
     // Process vehicle messages and send responses
     void handleVehicleMessage(const std::string& message, LAddress::L2Type vehicleId);
     void sendRoadListMessage(LAddress::L2Type vehicleId, const std::vector<std::string>& roadList);
-    
+
     // Vehicle tracking data
     struct VehicleData {
         simtime_t lastMessageTime = 0;
+        Destination assignedDestination; // Store the assigned destination
     };
     std::map<LAddress::L2Type, VehicleData> vehicleDataMap;
     void cleanupVehicleData();
@@ -53,7 +54,7 @@ private:
     // Road network data access methods
     std::vector<std::string> getAllRoads() const;
     std::vector<std::string> getAllNodes() const;
-    
+
     // Path finding methods
     std::vector<std::string> findShortestPath(const std::string& sourceId, const std::string& targetId) const;
     double getShortestPathLength(const std::string& sourceId, const std::string& targetId) const;
@@ -61,6 +62,8 @@ private:
     // Information display methods
     void printRoadNetworkInfo() const;
     void printNodeInfo() const;
+    void printVehicleRouteInfo(const std::vector<VehicleInfo>& vehicles);
+    void generateAndAssignDestinations(const std::vector<VehicleInfo>& vehicles);
     
     // Lane path finding method
     void findLanePathAndPrint(std::string sourceLaneId, std::string targetLaneId) const;
@@ -70,6 +73,9 @@ private:
     
     // Test methods
     void testTaskGenerator();
+
+    // Helper method to get edge length
+    double getEdgeLength(const std::string& edgeId) const;
 };
 
 } // namespace veins

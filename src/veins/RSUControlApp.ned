@@ -24,4 +24,6 @@ simple RSUControlApp extends TraCIDemoRSU11p
     @display("i=block/app2");
     
     string netFile = default("");
+    int numVehiclesToWaitFor = default(1); // Number of vehicles to register before generating tasks
+    string routeFile = default(""); // Path to SUMO .rou.xml file
 }

@@ -4,6 +4,13 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <queue>
+#include <limits>
+#include <functional>
+#include <unordered_map>
+#include <unordered_set>
+#include <algorithm>
+#include <iostream>
 #include "Graph.h"
 
 using namespace std;
@@ -20,7 +27,12 @@ public:
      * Constructor
      */
     GraphProcessor(const Graph& graph);
-    
+
+    /**
+     * Destructor
+     */
+    virtual ~GraphProcessor();
+
     /**
      * Find the shortest path between source and target nodes
      * @param sourceId The ID of the source node
@@ -28,7 +40,7 @@ public:
      * @return A vector of road IDs forming the shortest path, empty if no path exists
      */
     vector<string> findShortestPath(string sourceId, string targetId) const;
-    
+
     /**
      * Calculate the length of the shortest path between source and target nodes
      * @param sourceId The ID of the source node
@@ -36,7 +48,7 @@ public:
      * @return The length of the shortest path, -1 if no path exists
      */
     double getShortestPathLength(string sourceId, string targetId) const;
-    
+
     /**
      * Find k shortest paths between source and target nodes
      * @param sourceId The ID of the source node
@@ -46,7 +58,7 @@ public:
      */
     vector<vector<string>> findKShortestPaths(
         string sourceId, string targetId, int k) const;
-    
+
     /**
      * Check if there exists a valid assignment between sources and targets
      * @param sources Vector of source node IDs
@@ -56,13 +68,13 @@ public:
     bool existsValidAssignment(
         const vector<string>& sources,
         const vector<string>& targets) const;
-    
+
     /**
      * Get the underlying graph
      * @return The road network graph
      */
     const Graph& getGraph() const { return roadNetwork; }
-    
+
     /**
      * Find shortest path between two edges
      * @param sourceEdgeId ID of the source edge
@@ -88,6 +100,11 @@ public:
      */
     vector<LanePath> findLaneShortestPath(string sourceLaneId, string targetLaneId) const;
     
+    // New method to get optimal vehicle-to-destination assignment using Hungarian algorithm
+    vector<int> getOptimalVehicleAssignment(
+        const vector<string>& sourceNodes,
+        const vector<string>& destNodes) const;
+
 private:
     // Reference to the road network graph
     const Graph& roadNetwork;
@@ -122,4 +139,4 @@ private:
 
 } // namespace veins
 
-#endif // GRAPH_PROCESSOR_H 
+#endif // GRAPH_PROCESSOR_H

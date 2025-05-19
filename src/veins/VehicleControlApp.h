@@ -103,6 +103,7 @@ private:
     void requestShortestPath(const std::string& sourceId, const std::string& targetId);
     void requestKPaths(const std::string& sourceId, const std::string& targetId, int k);
     void requestDestinations(int count);
+    void requestOptimalDestinations(const std::vector<std::string>& sourceNodes, int count);
     void requestValidAssignment(const std::vector<std::string>& sources, const std::vector<std::string>& destinations);
     
     // Response processing methods

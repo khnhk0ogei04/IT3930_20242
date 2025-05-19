@@ -8,7 +8,16 @@
 #include "Graph.h"
 #include "tinyxml2.h"
 
+using namespace std;
 namespace veins {
+
+struct VehicleInfo {
+    std::string id;
+    double depart;
+    std::string from;
+    std::string to;
+    std::string via; // Can be empty
+};
 
 class XMLProcessor {
 public:
@@ -20,6 +29,10 @@ public:
     std::vector<std::string> getAccessibleRoads(const std::string& roadId) const;
     std::vector<std::string> getIncomingRoads(const std::string& roadId) const;
     std::map<std::string, std::string> getRoadAttributes(const std::string& roadId) const;
+
+    bool loadRouteFile(const std::string& filePath);
+    std::vector<VehicleInfo> getVehicles() const;
+
     bool isNetworkLoaded() const { return networkLoaded; }
     const Graph& getGraph() const { return roadNetwork; }
     
@@ -33,6 +46,7 @@ private:
     
     std::map<std::string, std::string> extractAttributes(const tinyxml2::XMLElement* element) const;
     void buildIncomingRoadsMap();
+    vector<VehicleInfo> vehicleData;
 };
 
 } // namespace veins

@@ -1,18 +1,42 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!-- generated on 2025-05-13 23:06:49 by Eclipse SUMO netedit Version 1.22.0
+<!-- generated on 2025-05-19 01:41:09 by Eclipse SUMO netedit Version 1.22.0
 -->
 
 <routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/routes_file.xsd">
     <!-- Vehicles, persons and containers (sorted by depart) -->
-    <trip id="t_0" depart="0.00" departSpeed="4.90" color="magenta" from="-2138" to="1259" via="-1962 -1257 1249 -340 334 588 -5 11 23 37 -592 -68 199 340 -1249"/>
-    <trip id="t_1" depart="0.00" from="-1154" to="1154" via="-1025 -991 -219 229 -229 219 991 1025"/>
-    <trip id="t_2" depart="0.00" departSpeed="4.80" color="cyan" from="-1034" to="1781" via="-1000 -854 852 -865 214 1777"/>
-    <trip id="t_3" depart="0.00" from="-2151" to="2126" via="-1766 -1614 -1186 1178 1257 1962"/>
-    <trip id="t_4" depart="0.00" color="85,0,255" from="-2151" to="2232" via="-1918 -1610 -1186 1606 1186 1610 1918 2284 -2283 -2230"/>
-    <flow id="f_0" begin="0.00" from="-991" to="-190" via="-219" end="3600.00" vehsPerHour="180"/>
-    <flow id="f_1" begin="0.00" color="green" from="92" to="1785" via="214 1777" end="3600.00" vehsPerHour="220"/>
-    <flow id="f_2" begin="0.00" departSpeed="3.90" color="255,27,0" from="-1725" to="1725" via="-1492 -1209 -1154 1168 1242 1597 1739 -1777 -214 865 873 1148 1154 1209 1492" end="3600.00" vehsPerHour="210"/>
+    <trip id="t_0" depart="0.00" from="873" to="164" via="865 -214 -219 -190"/>
+    <trip id="t_1" depart="0.00" from="60" to="-58" via="64 120 -109 31"/>
+    <trip id="t_10" depart="0.00" from="-831" to="-60"/>
+    <trip id="t_11" depart="0.00" from="-592" to="123"/>
+    <trip id="t_12" depart="0.00" from="-588" to="2230" via="206 474 2165"/>
+    <trip id="t_13" depart="0.00" from="-1755" to="-1766"/>
+    <trip id="t_14" depart="0.00" from="2151" to="-1775"/>
+    <trip id="t_16" depart="0.00" from="-5" to="-1775" via="206 474"/>
+    <trip id="t_17" depart="0.00" from="474" to="131" via="-206 -5 11 109"/>
+    <trip id="t_18" depart="0.00" from="109" to="587" via="123 -15 3"/>
+    <trip id="t_19" depart="0.00" from="58" to="172" via="123 -144 148"/>
+    <trip id="t_2" depart="0.00" from="-3" to="-120" via="15 -123"/>
+    <trip id="t_20" depart="0.00" from="583" to="2199" via="-1956 1960"/>
+    <trip id="t_21" depart="0.00" from="-2182" to="-2192"/>
+    <trip id="t_23" depart="0.00" from="-219" to="184" via="-190"/>
+    <trip id="t_24" depart="0.00" from="-172" to="-1972" via="2020"/>
+    <trip id="t_25" depart="0.00" from="1992" to="1925"/>
+    <trip id="t_26" depart="0.00" from="144" to="152" via="131"/>
+    <trip id="t_27" depart="0.00" from="162" to="60" via="-75"/>
+    <trip id="t_28" depart="0.00" from="31" to="-15" via="23 11"/>
+    <trip id="t_3" depart="0.00" from="-854" to="1737" via="852 879 1025 -1148 1150 1204 1474 1722"/>
+    <trip id="t_30" depart="0.00" from="45" to="-3" via="-55 -444 587"/>
+    <trip id="t_31" depart="0.00" from="-37" to="474" via="5 206"/>
+    <trip id="t_33" depart="0.00" from="92" to="-75" via="214 -219 -190 -172 164 -162"/>
+    <trip id="t_34" depart="0.00" from="-1774" to="1925"/>
+    <trip id="t_35" depart="0.00" from="1469" to="-879" via="-1209 -1154 -1025"/>
+    <trip id="t_4" depart="0.00" from="879" to="-162"/>
+    <trip id="t_5" depart="0.00" from="865" to="-214"/>
+    <trip id="t_6" depart="0.00" from="1148" to="1747" via="1242"/>
+    <trip id="t_7" depart="0.00" from="1597" to="-1777"/>
+    <trip id="t_8" depart="0.00" from="-1595" to="1211"/>
+    <trip id="t_9" depart="0.00" from="-1154" to="-991"/>
     <person id="p_0" depart="0.00">
         <personTrip from="-1194" to="-865"/>
     </person>
@@ -73,6 +97,12 @@
     <person id="p_30" depart="0.00">
         <personTrip from="1980" to="-2182"/>
     </person>
+    <person id="p_31" depart="0.00">
+        <walk from="1597" to="-196"/>
+    </person>
+    <person id="p_32" depart="0.00">
+        <personTrip from="-1150" to="1747"/>
+    </person>
     <person id="p_4" depart="0.00" color="magenta">
         <personTrip from="-1470" to="1492"/>
     </person>
@@ -91,7 +121,7 @@
     <personFlow id="pf_0" begin="0.00" end="3600.00" personsPerHour="250">
         <personTrip from="-1741" to="214"/>
     </personFlow>
-    <personFlow id="pf_1" begin="0.00" end="3600.00" personsPerHour="280">
+    <personFlow id="pf_1" begin="0.00" end="3600.00" personsPerHour="279.94">
         <personTrip from="-991" to="229"/>
     </personFlow>
     <personFlow id="pf_2" begin="0.00" end="7200.00" personsPerHour="180">
@@ -99,6 +129,9 @@
     </personFlow>
     <personFlow id="pf_3" begin="0.00" end="3600.00" personsPerHour="120">
         <personTrip from="592" to="-873"/>
+    </personFlow>
+    <personFlow id="pf_4" begin="0.00" end="3600.00" personsPerHour="94.99">
+        <personTrip from="1194" to="214"/>
     </personFlow>
     <person id="p_12" depart="1.00">
         <personTrip from="1722" to="-1211"/>

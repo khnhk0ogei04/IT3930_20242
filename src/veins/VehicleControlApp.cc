@@ -14,11 +14,11 @@ void VehicleControlApp::initialize(int stage) {
         // Initialize messages
         statusUpdateMsg = new cMessage("statusUpdate");
         requestRoadInfoMsg = new cMessage("requestRoadInfo");
-        
+
         // Get mobility info
         mobility = TraCIMobilityAccess().get(getParentModule());
         traciVehicle = mobility->getVehicleCommandInterface();
-        
+
         // Initialize data structures
         currentRoadId = "";
         allRoads.clear();
@@ -27,13 +27,13 @@ void VehicleControlApp::initialize(int stage) {
         currentRoadAttributes.clear();
         currentPath.clear();
         destinations.clear();
-        
+
         // Initialize the graph processor (will populate with data when we receive roads)
         graphProcessor.reset(new GraphProcessor(roadNetwork));
-        
+
         // Request all roads from the RSU immediately to get the road network data
         requestAllRoads();
-        
+
         // Print a message that we're waiting for road data
         EV << "\n[VEHICLE] Requesting road network data from RSU..." << std::endl;
         EV << "[VEHICLE] Road information will be printed once received." << std::endl;
@@ -45,11 +45,11 @@ void VehicleControlApp::initialize(int stage) {
         // Schedule a path finding test after 10 seconds (for demo purposes)
         cMessage* testPathFindingMsg = new cMessage("testPathFinding");
         scheduleAt(simTime() + 10.0, testPathFindingMsg);
-        
+
         // Schedule TaskGenerator test after 15 seconds
         cMessage* testTaskGeneratorMsg = new cMessage("testTaskGenerator");
         scheduleAt(simTime() + 15.0, testTaskGeneratorMsg);
-        
+
         EV << "[VEHICLE] Vehicle " << myId << " initialized" << std::endl;
     }
 }
@@ -65,7 +65,7 @@ void VehicleControlApp::onWSM(BaseFrame1609_4* wsm) {
     // Process different response types
     if (data.find("ALL_ROADS:") == 0) {
         processAllRoadsResponse(data.substr(10));  // Skip "ALL_ROADS:"
-    } 
+    }
     else if (data.find("ACCESSIBLE_ROADS:") == 0) {
         processAccessibleRoadsResponse(data.substr(17));  // Skip "ACCESSIBLE_ROADS:"
     } 
@@ -106,7 +106,7 @@ void VehicleControlApp::handleSelfMsg(cMessage* msg) {
     else if (msg == requestRoadInfoMsg) {
         // Update current road
         currentRoadId = traciVehicle->getRoadId();
-        
+
         // Only request road info if the vehicle is on a road
         if (!currentRoadId.empty() && currentRoadId != "") {
             // Request road information
@@ -114,7 +114,7 @@ void VehicleControlApp::handleSelfMsg(cMessage* msg) {
             requestIncomingRoads(currentRoadId);
             requestRoadAttributes(currentRoadId);
         }
-        
+
         // Schedule next request
         scheduleAt(simTime() + 5.0, requestRoadInfoMsg);
     }
@@ -127,10 +127,39 @@ void VehicleControlApp::handleSelfMsg(cMessage* msg) {
         // Simple test for TaskGenerator
         EV << "\n[VEHICLE] ==== TESTING TASK GENERATOR ====\n" << std::endl;
         EV << "[VEHICLE] Requesting 3 random destinations..." << std::endl;
-        
-        // Request 3 destinations
+
+        // Request 3 random destinations
         requestDestinations(3);
         
+        // Test optimal destinations with current vehicle position as source
+        if (!currentRoadId.empty()) {
+            EV << "\n[VEHICLE] ==== TESTING OPTIMAL DESTINATIONS ====\n" << std::endl;
+            EV << "[VEHICLE] Requesting 3 optimal destinations based on current position..." << std::endl;
+            
+            std::vector<std::string> sources = {currentRoadId};
+            requestOptimalDestinations(sources, 3);
+        }
+        
+        // Test optimal destinations with multiple vehicle positions
+        EV << "\n[VEHICLE] ==== TESTING MULTI-VEHICLE OPTIMAL DESTINATIONS ====\n" << std::endl;
+        EV << "[VEHICLE] Requesting 5 optimal destinations for multiple vehicles..." << std::endl;
+        
+        // Use some existing road IDs as sample vehicle positions
+        std::vector<std::string> multiSources;
+        int srcCount = 0;
+        for (const auto& road : allRoads) {
+            if (!road.empty() && srcCount < 3) {
+                multiSources.push_back(road);
+                srcCount++;
+            }
+        }
+        
+        if (multiSources.size() >= 2) {
+            requestOptimalDestinations(multiSources, 5);
+        } else {
+            EV << "[VEHICLE] Not enough road IDs available for multi-vehicle test" << std::endl;
+        }
+
         delete msg;
     }
     else {
@@ -144,10 +173,10 @@ void VehicleControlApp::sendStatusUpdate() {
     std::string lane = traciVehicle->getLaneId();
     std::string road = traciVehicle->getRoadId();
     double speed = mobility->getSpeed();
-    
+
     // Update current road
     currentRoadId = road;
-    
+
     // Create status message
     std::ostringstream oss;
     oss << "STATUS:"
@@ -173,7 +202,7 @@ void VehicleControlApp::sendStatusUpdate() {
 void VehicleControlApp::requestAllRoads() {
     // Create request message
     std::string request = "GET_ALL_ROADS";
-    
+
     // Send message
     auto* req = new TraCIDemo11pMessage();
     req->setDemoData(request.c_str());
@@ -190,7 +219,7 @@ void VehicleControlApp::requestAllRoads() {
 void VehicleControlApp::requestAccessibleRoads(const std::string& roadId) {
     // Create request message
     std::string request = "GET_ACCESSIBLE_ROADS:" + roadId;
-    
+
     // Send message
     auto* req = new TraCIDemo11pMessage();
     req->setDemoData(request.c_str());
@@ -224,7 +253,7 @@ void VehicleControlApp::requestIncomingRoads(const std::string& roadId) {
 void VehicleControlApp::requestRoadAttributes(const std::string& roadId) {
     // Create request message
     std::string request = "GET_ROAD_ATTRIBUTES:" + roadId;
-    
+
     // Send message
     auto* req = new TraCIDemo11pMessage();
     req->setDemoData(request.c_str());
@@ -241,7 +270,7 @@ void VehicleControlApp::requestRoadAttributes(const std::string& roadId) {
 void VehicleControlApp::requestShortestPath(const std::string& sourceId, const std::string& targetId) {
     // Create request message
     std::string request = "FIND_SHORTEST_PATH:" + sourceId + "," + targetId;
-    
+
     // Send message
     auto* req = new TraCIDemo11pMessage();
     req->setDemoData(request.c_str());
@@ -259,7 +288,7 @@ void VehicleControlApp::requestKPaths(const std::string& sourceId, const std::st
     // Create request message
     std::ostringstream oss;
     oss << "FIND_K_PATHS:" << sourceId << "," << targetId << "," << k;
-    
+
     // Send message
     auto* req = new TraCIDemo11pMessage();
     req->setDemoData(oss.str().c_str());
@@ -291,11 +320,41 @@ void VehicleControlApp::requestDestinations(int count) {
     EV << "[VEHICLE] Requested " << count << " random destinations - DEBUG: message=" << oss.str() << std::endl;
 }
 
+void VehicleControlApp::requestOptimalDestinations(const std::vector<std::string>& sourceNodes, int count) {
+    // Create request message with all source nodes and the count
+    std::ostringstream oss;
+    oss << "GENERATE_OPTIMAL_DESTINATIONS:";
+    
+    // Add source nodes separated by semicolons
+    for (size_t i = 0; i < sourceNodes.size(); ++i) {
+        oss << sourceNodes[i];
+        if (i < sourceNodes.size() - 1) {
+            oss << ";";
+        }
+    }
+    
+    // Add count at the end
+    oss << "," << count;
+    
+    // Send message
+    auto* req = new TraCIDemo11pMessage();
+    req->setDemoData(oss.str().c_str());
+    req->setSenderAddress(myId);
+    
+    auto* wsm = new BaseFrame1609_4();
+    wsm->encapsulate(req);
+    populateWSM(wsm);
+    sendDown(wsm);
+    
+    EV << "[VEHICLE] Requested " << count << " optimal destinations for " 
+       << sourceNodes.size() << " vehicles - DEBUG: message=" << oss.str() << std::endl;
+}
+
 void VehicleControlApp::requestValidAssignment(const std::vector<std::string>& sources, const std::vector<std::string>& destinations) {
     // Create request message
     std::ostringstream oss;
     oss << "EXISTS_VALID_ASSIGNMENT:";
-    
+
     // Add sources
     for (size_t i = 0; i < sources.size(); ++i) {
         oss << sources[i];
@@ -303,10 +362,10 @@ void VehicleControlApp::requestValidAssignment(const std::vector<std::string>& s
             oss << ",";
         }
     }
-    
+
     // Add separator between sources and destinations
     oss << "|";
-    
+
     // Add destinations
     for (size_t i = 0; i < destinations.size(); ++i) {
         oss << destinations[i];
@@ -314,7 +373,7 @@ void VehicleControlApp::requestValidAssignment(const std::vector<std::string>& s
             oss << ",";
         }
     }
-    
+
     // Send message
     auto* req = new TraCIDemo11pMessage();
     req->setDemoData(oss.str().c_str());
@@ -333,7 +392,7 @@ void VehicleControlApp::processAllRoadsResponse(const std::string& data) {
     allRoads = parseRoadList(data);
     
     EV << "[VEHICLE] Received list of all roads: " << allRoads.size() << " roads" << std::endl;
-    
+
     // Print the road list to standard output
     EV << "\n=============== ROAD NETWORK INFORMATION ===============" << std::endl;
     EV << "Received " << allRoads.size() << " roads from RSU:" << std::endl;
@@ -346,13 +405,13 @@ void VehicleControlApp::processAllRoadsResponse(const std::string& data) {
     if (allRoads.size() > maxRoadsToDisplay) {
         EV << "  ... and " << (allRoads.size() - maxRoadsToDisplay) << " more roads" << std::endl;
     }
-    
+
     // Build the local road network from the received data
     buildLocalRoadNetwork();
-    
+
     // Immediately run path finding tests to print shortest paths
     EV << "\n=============== IMMEDIATE PATH FINDING TEST ===============" << std::endl;
-    
+
     // Kiểm tra đường đi giữa các con đường
     if (allRoads.size() >= 2) {
         std::string source1 = allRoads.front();
@@ -375,7 +434,7 @@ void VehicleControlApp::processAllRoadsResponse(const std::string& data) {
         } else {
             EV << "NO PATH found between " << source1 << " and " << target1 << std::endl;
         }
-        
+
         // Kiểm tra đường đi giữa đoạn đầu và giữa
         if (allRoads.size() >= 3) {
             std::string target2 = allRoads[allRoads.size() / 2];
@@ -403,26 +462,43 @@ void VehicleControlApp::processAllRoadsResponse(const std::string& data) {
     }
     
     EV << "===========================================" << std::endl;
-    
+
     // Also run the pre-defined test function for consistency
     runPathFindingTests();
-    
+
     // Run TaskGenerator test immediately
     EV << "\n[VEHICLE] ==== TESTING TASK GENERATOR ====\n" << std::endl;
     EV << "[VEHICLE] Requesting 3 random destinations..." << std::endl;
     requestDestinations(3);
-    
+
+    // Test optimal destination generation
+    if (allRoads.size() >= 3) {
+        EV << "\n[VEHICLE] ==== TESTING OPTIMAL DESTINATIONS ====\n" << std::endl;
+        
+        // Select a few roads as source positions
+        std::vector<std::string> sourceRoads;
+        sourceRoads.push_back(allRoads[0]);
+        sourceRoads.push_back(allRoads[allRoads.size() / 2]);
+        sourceRoads.push_back(allRoads[allRoads.size() - 1]);
+        
+        EV << "[VEHICLE] Selected source roads: " << sourceRoads[0] << ", " 
+           << sourceRoads[1] << ", " << sourceRoads[2] << std::endl;
+        EV << "[VEHICLE] Requesting optimal destinations using the Hungarian algorithm..." << std::endl;
+        
+        requestOptimalDestinations(sourceRoads, 4);
+    }
+
     // Now also test k shortest paths using specific nodes instead of random roads
     // Choose nodes that we know exist in the network
     std::string source = "1024";  // Use specific node IDs that exist in the network
     std::string target = "1985";  // Use specific node IDs that exist in the network
     EV << "[VEHICLE] Requesting 2 shortest paths from " << source << " to " << target << std::endl;
     requestKPaths(source, target, 2);
-    
+
     // Test valid assignment with specific nodes
     std::vector<std::string> sources = {"1024", "213", "337"};
     std::vector<std::string> targets = {"1985", "853", "205"};
-    
+
     EV << "[VEHICLE] Testing valid assignment between specific sources and targets" << std::endl;
     requestValidAssignment(sources, targets);
 }
@@ -451,7 +527,7 @@ void VehicleControlApp::processRoadAttributesResponse(const std::string& data) {
         
         EV << "[VEHICLE] Received attributes for road " << roadId 
            << ": " << currentRoadAttributes.size() << " attributes" << std::endl;
-        
+
         // Also print in standard console for debugging
         EV << "[VEHICLE] Received attributes for road " << roadId 
                 << ": " << currentRoadAttributes.size() << " attributes" << std::endl;
@@ -485,11 +561,11 @@ void VehicleControlApp::processShortestPathResponse(const std::string& data) {
     
     // Store the path
     currentPath = responseElements;
-    
+
     // Display path information
-    EV << "[VEHICLE] Received shortest path with length " << pathLength 
+    EV << "[VEHICLE] Received shortest path with length " << pathLength
        << " units and " << currentPath.size() << " segments:" << std::endl;
-    
+
     // Print đường đi trên một dòng với mũi tên phân tách
     EV << "[VEHICLE] Path: ";
     for (size_t i = 0; i < currentPath.size(); i++) {
@@ -702,7 +778,7 @@ void VehicleControlApp::buildLocalRoadNetwork() {
                 }
             }
         }
-        
+
         // If we don't have connectivity info, try to infer it from the road ID
         if (fromNodeId.empty() || toNodeId.empty()) {
             // Some road IDs follow the pattern "edge_from_to"
@@ -756,14 +832,14 @@ void VehicleControlApp::buildLocalRoadNetwork() {
             // First add the nodes if they don't exist
             roadNetwork.addNode(fromNodeId);
             roadNetwork.addNode(toNodeId);
-            
+
             // Add edge between nodes
             roadNetwork.addEdge(fromNodeId, toNodeId, length);
-            
+
             // Also connect the road to its nodes
             roadNetwork.addEdge(roadId, toNodeId, 10.0); // Short connection
             roadNetwork.addEdge(fromNodeId, roadId, 10.0); // Short connection
-            
+
             // Print real connectivity info for a few roads
             static int infoCount = 0;
             if (infoCount < 5) {
@@ -774,7 +850,7 @@ void VehicleControlApp::buildLocalRoadNetwork() {
             }
         }
     }
-    
+
     // Create guaranteed connections between consecutive roads to ensure connectivity
     for (size_t i = 0; i < allRoads.size() - 1; i++) {
         roadNetwork.addEdge(allRoads[i], allRoads[i + 1], 50.0);
@@ -784,13 +860,13 @@ void VehicleControlApp::buildLocalRoadNetwork() {
             }
         }
     }
-    
+
     // Reinitialize the graph processor with the updated road network
     graphProcessor.reset(new GraphProcessor(roadNetwork));
     
     EV << "[VEHICLE] Local road network built with " << roadNetwork.getNodeCount() 
               << " nodes and " << roadNetwork.getEdgeCount() << " edges" << std::endl;
-              
+
     // Debug: Print some connectivity info
     EV << "[VEHICLE] Sample connectivity from the road network:" << std::endl;
     int debugCount = 0;
@@ -839,7 +915,7 @@ void VehicleControlApp::runPathFindingTests() {
 void VehicleControlApp::testPathBetween(const std::string& source, const std::string& target, const std::string& testName) {
     EV << "\n--- Test: " << testName << " ---" << std::endl;
     EV << "Finding path from " << source << " to " << target << std::endl;
-    
+
     // First try with our local GraphProcessor
     std::vector<std::string> path = findShortestPath(source, target);
     double pathLength = getShortestPathLength(source, target);
@@ -857,7 +933,7 @@ void VehicleControlApp::testPathBetween(const std::string& source, const std::st
         EV << std::endl;
     } else {
         EV << "FAILED: No path found between " << source << " and " << target << std::endl;
-        
+
         // Check if the nodes exist in our graph
         bool sourceExists = false;
         bool targetExists = false;
@@ -869,7 +945,7 @@ void VehicleControlApp::testPathBetween(const std::string& source, const std::st
         
         EV << "Source exists in graph: " << (sourceExists ? "Yes" : "No") << std::endl;
         EV << "Target exists in graph: " << (targetExists ? "Yes" : "No") << std::endl;
-        
+
         // Request from RSU as fallback
         EV << "Requesting path from RSU..." << std::endl;
         requestShortestPath(source, target);
@@ -878,26 +954,26 @@ void VehicleControlApp::testPathBetween(const std::string& source, const std::st
 
 void VehicleControlApp::testPathFinding() {
     EV << "\n[VEHICLE] Manual path finding test triggered" << std::endl;
-    
+
     // Run a more focused path finding test
     if (allRoads.size() < 2) {
         EV << "[VEHICLE] Not enough roads for path finding tests" << std::endl;
         return;
     }
-    
+
     // Select specific source and target roads from available roads
     std::string source = allRoads[0];
     std::string target = allRoads[allRoads.size() / 2];
     
     EV << "[VEHICLE] Finding path from " << source << " to " << target << std::endl;
-    
+
     // Use local graph processor to find path
     std::vector<std::string> path = findShortestPath(source, target);
     double pathLength = getShortestPathLength(source, target);
     
     if (!path.empty() && pathLength > 0) {
         EV << "[VEHICLE] SUCCESS: Path found with length " << pathLength << std::endl;
-        
+
         // Print path segments on a single line with arrow separators
         EV << "[VEHICLE] Path: ";
         for (size_t i = 0; i < path.size(); i++) {
@@ -912,7 +988,7 @@ void VehicleControlApp::testPathFinding() {
         EV << "[VEHICLE] Requesting path from RSU as fallback..." << std::endl;
         requestShortestPath(source, target);
     }
-    
+
     // Also test k-paths functionality
     int k = 2;
     EV << "\n[VEHICLE] Finding " << k << " alternative paths from " << source << " to " << target << std::endl;
@@ -924,10 +1000,10 @@ std::vector<std::string> VehicleControlApp::findShortestPath(const std::string& 
         EV << "[VEHICLE] GraphProcessor not initialized" << std::endl;
         return std::vector<std::string>();
     }
-    
+
     // Use the GraphProcessor to find the shortest path
     std::vector<std::string> path = graphProcessor->findShortestPath(sourceId, targetId);
-    
+
     // Store the path for later use if it's valid
     if (!path.empty()) {
         currentPath = path;
@@ -941,9 +1017,9 @@ double VehicleControlApp::getShortestPathLength(const std::string& sourceId, con
         EV << "[VEHICLE] GraphProcessor not initialized" << std::endl;
         return -1.0;
     }
-    
+
     // Use the GraphProcessor to get the shortest path length
     double length = graphProcessor->getShortestPathLength(sourceId, targetId);
-    
+
     return length;
 }
