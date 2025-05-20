@@ -38,21 +38,13 @@ class TaskGenerator {
 public:
     TaskGenerator(const GraphProcessor& processor);
     vector<Destination> generateDestinations(int n, unsigned seedValue = 0);
-    
-    // New method to generate destinations using Hungarian algorithm for optimal assignment
-    vector<Destination> generateOptimalDestinations(
-        const vector<string>& sourceNodes,
-        int n,
-        unsigned seedValue = 0);
-    
+    vector<string> getPotentialDestinationEdges(int n, const vector<string>& huidigeSourceEdges, unsigned seedValue = 0);
     vector<vector<string>> findKPaths(const string& sourceId, const string& destinationId, int k);
     bool existsValidAssignment(const vector<string>& sources, const vector<string>& destinations);
+    mt19937& getRNG() { return rng; }
 private:
     const GraphProcessor& graphProcessor;
     mt19937 rng;
-    
-    // Helper method to generate time windows with travel time considerations
-    TimeWindow generateTimeWindowForDistance(double distance);
 };
 
 } // namespace veins

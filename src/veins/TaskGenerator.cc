@@ -1,4 +1,7 @@
 #include "TaskGenerator.h"
+#include <algorithm>    // For std::shuffle
+#include <set>         // For std::set
+#include <iostream>    // For std::cout
 
 namespace veins {
 
@@ -58,118 +61,6 @@ std::vector<Destination> TaskGenerator::generateDestinations(int n, unsigned see
     return destinations;
 }
 
-std::vector<Destination> TaskGenerator::generateOptimalDestinations(
-    const std::vector<std::string>& sourceNodes,
-    int n, 
-    unsigned seedValue) {
-    
-    std::vector<Destination> destinations;
-    
-    // Seed the random number generator if a seed value is provided
-    if (seedValue > 0) {
-        rng.seed(seedValue);
-    }
-    
-    // Get all nodes from the graph
-    const auto& graph = graphProcessor.getGraph();
-    const auto& nodes = graph.getNodes();
-    
-    // Convert nodes map to vector for selection
-    std::vector<std::string> nodeIds;
-    for (const auto& nodePair : nodes) {
-        // Skip nodes that are sources (vehicles shouldn't be assigned to their own location)
-        bool isSource = false;
-        for (const auto& source : sourceNodes) {
-            if (nodePair.first == source) {
-                isSource = true;
-                break;
-            }
-        }
-        if (!isSource) {
-            nodeIds.push_back(nodePair.first);
-        }
-    }
-    
-    // Check if we have enough nodes
-    if (nodeIds.size() < n) {
-        return destinations;  // Not enough nodes
-    }
-    
-    // Shuffle the node IDs for random selection
-    if (seedValue > 0) {
-        std::shuffle(nodeIds.begin(), nodeIds.end(), rng);
-    } else {
-        std::shuffle(nodeIds.begin(), nodeIds.end(), std::default_random_engine(std::random_device()()));
-    }
-    
-    // Select n potential destinations
-    std::vector<std::string> potentialDests;
-    for (int i = 0; i < n && i < nodeIds.size(); ++i) {
-        potentialDests.push_back(nodeIds[i]);
-    }
-    
-    // Use the GraphProcessor's optimal assignment method
-    std::vector<int> assignments = graphProcessor.getOptimalVehicleAssignment(sourceNodes, potentialDests);
-    
-    // Generate destinations based on the optimal assignment
-    for (size_t i = 0; i < assignments.size() && i < sourceNodes.size(); ++i) {
-        int destIndex = assignments[i];
-        
-        // Skip invalid assignments
-        if (destIndex < 0 || destIndex >= potentialDests.size()) {
-            continue;
-        }
-        
-        std::string nodeId = potentialDests[destIndex];
-        
-        // Calculate estimated travel time for this assignment
-        double distance = graphProcessor.getShortestPathLength(sourceNodes[i], nodeId);
-        
-        // Generate appropriate time window based on the distance
-        TimeWindow timeWindow = generateTimeWindowForDistance(distance);
-        
-        // Create the destination
-        destinations.emplace_back(nodeId, timeWindow);
-    }
-    
-    return destinations;
-}
-
-TimeWindow TaskGenerator::generateTimeWindowForDistance(double distance) {
-    // Default values if no path exists or distance is invalid
-    if (distance <= 0) {
-        // Uniform distributions for time windows when we don't have distance
-        std::uniform_real_distribution<double> earlinessDistribution(0.0, 100.0);
-        std::uniform_real_distribution<double> durationDistribution(50.0, 200.0);
-        
-        double earliness = earlinessDistribution(rng);
-        double tardiness = earliness + durationDistribution(rng);
-        
-        return TimeWindow(earliness, tardiness);
-    }
-    
-    // Calculate estimated travel time based on distance
-    // Assuming average speed of 15 units per time unit
-    double averageSpeed = 15.0;
-    double estimatedTravelTime = distance / averageSpeed;
-    
-    // Add some randomness to the time window
-    std::uniform_real_distribution<double> earlyBufferDist(0.0, estimatedTravelTime * 0.2); // 0-20% buffer
-    std::uniform_real_distribution<double> lateBufferDist(0.1, 0.5); // 10-50% buffer for tardiness
-    
-    double earlyBuffer = earlyBufferDist(rng);
-    double lateBuffer = estimatedTravelTime * lateBufferDist(rng);
-    
-    // Create time window
-    double earliness = estimatedTravelTime - earlyBuffer;
-    double tardiness = estimatedTravelTime + lateBuffer;
-    
-    // Ensure earliness is not negative
-    earliness = std::max(0.0, earliness);
-    
-    return TimeWindow(earliness, tardiness);
-}
-
 std::vector<std::vector<std::string>> TaskGenerator::findKPaths(
     const std::string& sourceId, 
     const std::string& destinationId, 
@@ -183,6 +74,127 @@ bool TaskGenerator::existsValidAssignment(
     const std::vector<std::string>& destinations) {
     
     return graphProcessor.existsValidAssignment(sources, destinations);
+}
+
+std::vector<std::string> TaskGenerator::getPotentialDestinationEdges(int n, const std::vector<std::string>& currentSourceEdges, unsigned seedValue) {
+    std::vector<std::string> potentialDestEdges;
+    const auto& graph = graphProcessor.getGraph(); // Get the graph from GraphProcessor
+
+    if (seedValue > 0) {
+        rng.seed(seedValue);
+    }
+
+    // Get all actual edges from the graph
+    std::vector<std::string> allPossibleEdges;
+    std::cout << "DEBUG: Getting all possible destination edges from graph" << std::endl;
+    
+    int edgeCounter = 0;
+    for (const auto& pair : graph.getAdjList()) {
+        for (const auto& edge : pair.second) {
+            allPossibleEdges.push_back(edge.getId());
+            if (++edgeCounter <= 10) {
+                std::cout << "DEBUG: Found edge " << edge.getId() << " from " 
+                         << pair.first << " to " << edge.getTo() << std::endl;
+            }
+        }
+    }
+
+    if (allPossibleEdges.empty()) {
+        std::cout << "ERROR: No edges found in the graph by TaskGenerator!" << std::endl;
+        return potentialDestEdges; // Return empty if no edges
+    }
+
+    // Remove duplicates
+    std::sort(allPossibleEdges.begin(), allPossibleEdges.end());
+    allPossibleEdges.erase(std::unique(allPossibleEdges.begin(), allPossibleEdges.end()), allPossibleEdges.end());
+    
+    std::cout << "DEBUG: Found " << allPossibleEdges.size() << " unique edges in the graph" << std::endl;
+
+    // Filter out source edges and keep only edges that are likely reachable
+    std::vector<std::string> filteredEdges;
+    std::set<std::string> sourceEdgeSet(currentSourceEdges.begin(), currentSourceEdges.end());
+    
+    // For each edge in the graph
+    for (const auto& edgeId : allPossibleEdges) {
+        // Skip if this is a source edge
+        if (sourceEdgeSet.find(edgeId) != sourceEdgeSet.end()) {
+            continue;
+        }
+        
+        // Find edge information to check if it's likely reachable
+        bool edgeFound = false;
+        for (const auto& nodePair : graph.getAdjList()) {
+            for (const auto& edge : nodePair.second) {
+                if (edge.getId() == edgeId) {
+                    edgeFound = true;
+                    
+                    // Assume the edge is reachable if we found it
+                    filteredEdges.push_back(edgeId);
+                    
+                    // Try to verify if there might be a path from at least one source
+                    for (const auto& srcEdge : currentSourceEdges) {
+                        // Find source edge info
+                        std::string srcEdgeToNode;
+                        for (const auto& srcNodePair : graph.getAdjList()) {
+                            for (const auto& srcEdgeObj : srcNodePair.second) {
+                                if (srcEdgeObj.getId() == srcEdge) {
+                                    srcEdgeToNode = srcEdgeObj.getTo();
+                                    break;
+                                }
+                            }
+                            if (!srcEdgeToNode.empty()) break;
+                        }
+                        
+                        // Find target edge info
+                        std::string destEdgeFromNode = nodePair.first;
+                        
+                        // Check if there might be a path (same node means direct connection)
+                        if (srcEdgeToNode == destEdgeFromNode) {
+                            std::cout << "DEBUG: Found potentially direct path: " << srcEdge 
+                                     << " -> " << edgeId << std::endl;
+                            break;
+                        }
+                    }
+                    
+                    break;
+                }
+            }
+            if (edgeFound) break;
+        }
+    }
+    
+    if (filteredEdges.empty()) {
+        std::cout << "WARN: No destination edges available after filtering. Using all edges except sources." << std::endl;
+        for (const auto& edgeId : allPossibleEdges) {
+            if (sourceEdgeSet.find(edgeId) == sourceEdgeSet.end()) {
+                filteredEdges.push_back(edgeId);
+            }
+        }
+    }
+
+    if (filteredEdges.empty()) {
+        std::cout << "ERROR: TaskGenerator could not find any suitable destination edges." << std::endl;
+        return potentialDestEdges;
+    }
+
+    std::cout << "DEBUG: Have " << filteredEdges.size() << " filtered edges after removing sources" << std::endl;
+    
+    // Shuffle the filtered edges
+    std::shuffle(filteredEdges.begin(), filteredEdges.end(), rng);
+
+    // Select n destination edges
+    int selectedCount = 0;
+    for (int i = 0; i < filteredEdges.size() && selectedCount < n; ++i) {
+        potentialDestEdges.push_back(filteredEdges[i]);
+        selectedCount++;
+    }
+    
+    std::cout << "INFO: TaskGenerator selected " << potentialDestEdges.size() << " potential destination edges:" << std::endl;
+    for (const auto& edge : potentialDestEdges) {
+        std::cout << "  - " << edge << std::endl;
+    }
+    
+    return potentialDestEdges;
 }
 
 } // namespace veins

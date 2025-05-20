@@ -128,37 +128,8 @@ void VehicleControlApp::handleSelfMsg(cMessage* msg) {
         EV << "\n[VEHICLE] ==== TESTING TASK GENERATOR ====\n" << std::endl;
         EV << "[VEHICLE] Requesting 3 random destinations..." << std::endl;
 
-        // Request 3 random destinations
+        // Request 3 destinations
         requestDestinations(3);
-        
-        // Test optimal destinations with current vehicle position as source
-        if (!currentRoadId.empty()) {
-            EV << "\n[VEHICLE] ==== TESTING OPTIMAL DESTINATIONS ====\n" << std::endl;
-            EV << "[VEHICLE] Requesting 3 optimal destinations based on current position..." << std::endl;
-            
-            std::vector<std::string> sources = {currentRoadId};
-            requestOptimalDestinations(sources, 3);
-        }
-        
-        // Test optimal destinations with multiple vehicle positions
-        EV << "\n[VEHICLE] ==== TESTING MULTI-VEHICLE OPTIMAL DESTINATIONS ====\n" << std::endl;
-        EV << "[VEHICLE] Requesting 5 optimal destinations for multiple vehicles..." << std::endl;
-        
-        // Use some existing road IDs as sample vehicle positions
-        std::vector<std::string> multiSources;
-        int srcCount = 0;
-        for (const auto& road : allRoads) {
-            if (!road.empty() && srcCount < 3) {
-                multiSources.push_back(road);
-                srcCount++;
-            }
-        }
-        
-        if (multiSources.size() >= 2) {
-            requestOptimalDestinations(multiSources, 5);
-        } else {
-            EV << "[VEHICLE] Not enough road IDs available for multi-vehicle test" << std::endl;
-        }
 
         delete msg;
     }
@@ -320,36 +291,6 @@ void VehicleControlApp::requestDestinations(int count) {
     EV << "[VEHICLE] Requested " << count << " random destinations - DEBUG: message=" << oss.str() << std::endl;
 }
 
-void VehicleControlApp::requestOptimalDestinations(const std::vector<std::string>& sourceNodes, int count) {
-    // Create request message with all source nodes and the count
-    std::ostringstream oss;
-    oss << "GENERATE_OPTIMAL_DESTINATIONS:";
-    
-    // Add source nodes separated by semicolons
-    for (size_t i = 0; i < sourceNodes.size(); ++i) {
-        oss << sourceNodes[i];
-        if (i < sourceNodes.size() - 1) {
-            oss << ";";
-        }
-    }
-    
-    // Add count at the end
-    oss << "," << count;
-    
-    // Send message
-    auto* req = new TraCIDemo11pMessage();
-    req->setDemoData(oss.str().c_str());
-    req->setSenderAddress(myId);
-    
-    auto* wsm = new BaseFrame1609_4();
-    wsm->encapsulate(req);
-    populateWSM(wsm);
-    sendDown(wsm);
-    
-    EV << "[VEHICLE] Requested " << count << " optimal destinations for " 
-       << sourceNodes.size() << " vehicles - DEBUG: message=" << oss.str() << std::endl;
-}
-
 void VehicleControlApp::requestValidAssignment(const std::vector<std::string>& sources, const std::vector<std::string>& destinations) {
     // Create request message
     std::ostringstream oss;
@@ -470,23 +411,6 @@ void VehicleControlApp::processAllRoadsResponse(const std::string& data) {
     EV << "\n[VEHICLE] ==== TESTING TASK GENERATOR ====\n" << std::endl;
     EV << "[VEHICLE] Requesting 3 random destinations..." << std::endl;
     requestDestinations(3);
-
-    // Test optimal destination generation
-    if (allRoads.size() >= 3) {
-        EV << "\n[VEHICLE] ==== TESTING OPTIMAL DESTINATIONS ====\n" << std::endl;
-        
-        // Select a few roads as source positions
-        std::vector<std::string> sourceRoads;
-        sourceRoads.push_back(allRoads[0]);
-        sourceRoads.push_back(allRoads[allRoads.size() / 2]);
-        sourceRoads.push_back(allRoads[allRoads.size() - 1]);
-        
-        EV << "[VEHICLE] Selected source roads: " << sourceRoads[0] << ", " 
-           << sourceRoads[1] << ", " << sourceRoads[2] << std::endl;
-        EV << "[VEHICLE] Requesting optimal destinations using the Hungarian algorithm..." << std::endl;
-        
-        requestOptimalDestinations(sourceRoads, 4);
-    }
 
     // Now also test k shortest paths using specific nodes instead of random roads
     // Choose nodes that we know exist in the network

@@ -254,63 +254,6 @@ void RSUControlApp::handleVehicleMessage(const string& message, LAddress::L2Type
         EV << "[RSU] Sending " << destStrings.size() << " destinations to vehicle" << std::endl;
         sendRoadListMessage(vehicleId, destStrings);
     }
-    // Handle generate optimal destinations request
-    else if (message.find("GENERATE_OPTIMAL_DESTINATIONS:") == 0 && taskGenerator) {
-        EV << "[RSU] DEBUG: Received GENERATE_OPTIMAL_DESTINATIONS request: " << message << std::endl;
-        
-        std::string paramsStr = message.substr(29); // Skip "GENERATE_OPTIMAL_DESTINATIONS:"
-        size_t lastCommaPos = paramsStr.find_last_of(',');
-        
-        if (lastCommaPos != std::string::npos) {
-            std::string sourceNodesStr = paramsStr.substr(0, lastCommaPos);
-            int count = std::stoi(paramsStr.substr(lastCommaPos + 1));
-            
-            // Parse source nodes (vehicle positions)
-            std::vector<std::string> sourceNodes;
-            size_t pos = 0;
-            std::string token;
-            while ((pos = sourceNodesStr.find(';')) != std::string::npos) {
-                token = sourceNodesStr.substr(0, pos);
-                if (!token.empty()) {
-                    sourceNodes.push_back(token);
-                }
-                sourceNodesStr.erase(0, pos + 1);
-            }
-            if (!sourceNodesStr.empty()) {
-                sourceNodes.push_back(sourceNodesStr);
-            }
-            
-            EV << "[RSU] Generating " << count << " optimal destinations for " 
-               << sourceNodes.size() << " vehicles" << std::endl;
-            
-            // Get the current vehicle's source node
-            std::string currentVehicleNode = "";
-            if (!sourceNodes.empty()) {
-                currentVehicleNode = sourceNodes[0]; // Use the first source as the current vehicle
-            } else {
-                // If no source nodes provided, just skip this step
-                // We don't have road information stored in VehicleData
-            }
-            
-            // Generate optimal destinations
-            auto destinations = taskGenerator->generateOptimalDestinations(sourceNodes, count);
-            
-            // Convert destinations to a string format
-            std::vector<std::string> destStrings;
-            for (const auto& dest : destinations) {
-                std::string destStr = dest.nodeId + "," + 
-                                     std::to_string(dest.timeWindow.earliness) + "," + 
-                                     std::to_string(dest.timeWindow.tardiness);
-                destStrings.push_back(destStr);
-                EV << "[RSU] DEBUG: Generated optimal destination: " << destStr << std::endl;
-            }
-            
-            EV << "[RSU] Sending " << destStrings.size() << " optimal destinations to vehicle" << std::endl;
-            sendRoadListMessage(vehicleId, destStrings);
-        } else {
-            EV << "[RSU] ERROR: Malformed optimal destinations request" << std::endl;
-        }
-    }
     // Handle K paths request
     else if (message.find("FIND_K_PATHS:") == 0 && graphProcessor && taskGenerator) {
         EV << "[RSU] DEBUG: Received FIND_K_PATHS request: " << message << std::endl;
@@ -478,17 +421,10 @@ void RSUControlApp::onWSA(DemoServiceAdvertisment* wsa) {
 }
 
 vector<string> RSUControlApp::getAllRoads() const {
-    if (!xmlProcessor || !xmlProcessor->isNetworkLoaded()) {
-        return vector<string>();
-    }
     return xmlProcessor->getAllRoads();
 }
 
 vector<string> RSUControlApp::getAllNodes() const {
-    if (!xmlProcessor || !xmlProcessor->isNetworkLoaded()) {
-        return vector<string>();
-    }
-    
     vector<string> result;
     const Graph& graph = xmlProcessor->getGraph();
     const auto& nodes = graph.getNodes();
@@ -951,744 +887,211 @@ void RSUControlApp::generateAndAssignDestinations(const std::vector<VehicleInfo>
     
     EV << "\n=============== VEHICLE DESTINATION ASSIGNMENT ===============" << std::endl;
     
-    // Get all roads from the graph to use as potential destinations
-    std::vector<std::string> allRoads = getAllRoads();
-    
-    // Filter roads to use as destinations (remove negative road IDs)
-    std::vector<std::string> potentialDestRoads;
-    for (const auto& roadId : allRoads) {
-        // Only consider positive road IDs (not starting with '-')
-        if (!roadId.empty() && roadId[0] != '-') {
-            potentialDestRoads.push_back(roadId);
-        }
-    }
-    
-    // Print some debug info
-    EV << "[RSU] Found " << potentialDestRoads.size() << " potential destination roads" << std::endl;
-    
-    // Check if we have enough potential destinations
-    if (potentialDestRoads.size() < vehicles.size()) {
-        EV << "[RSU] WARNING: Not enough potential destinations in the network" << std::endl;
-        return;
-    }
-    
-    // Get the source roads for each vehicle
     std::vector<std::string> sourceRoads;
     for (const auto& vehicle : vehicles) {
         sourceRoads.push_back(vehicle.from);
+        EV << "[RSU] Vehicle " << vehicle.id << " starting at road " << vehicle.from << std::endl;
     }
     
-    // Get graph for reference
+    EV << "[RSU] Generating optimal destinations for " << sourceRoads.size() << " vehicles" << std::endl;
+    int destsToGenerate = sourceRoads.size(); 
+    auto destinations = taskGenerator->getPotentialDestinationEdges(destsToGenerate, sourceRoads);
+    
+    // Create Destination objects from the edge IDs
+    std::vector<Destination> destObjects;
+    
+    // First create destination objects without time windows
+    for (const auto& edgeId : destinations) {
+        destObjects.emplace_back(edgeId, TimeWindow(0, 0)); // Placeholder time windows
+    }
+    
+    // Calculate travel times and set time windows based on that
     const Graph& graph = graphProcessor->getGraph();
     
-    // Build a map from edge ID to "from" and "to" junctions
-    std::map<std::string, std::pair<std::string, std::string>> edgeToJunctions;
-    
-    for (const auto& nodePair : graph.getAdjList()) {
-        const std::string& fromJunction = nodePair.first;
-        for (const auto& edge : nodePair.second) {
-            const std::string& edgeId = edge.getId();
-            const std::string& toJunction = edge.getTo();
-            edgeToJunctions[edgeId] = std::make_pair(fromJunction, toJunction);
-        }
-    }
-    
-    // Debug: Print some edge-junction relationships
-    int debugCount = 0;
-    for (const auto& entry : edgeToJunctions) {
-        if (debugCount < 5) {
-            EV << "[RSU] Edge " << entry.first << ": from junction " << entry.second.first 
-               << " to junction " << entry.second.second << std::endl;
-            debugCount++;
-        }
-    }
-    
-    // Assign destinations and find paths
-    std::vector<std::string> targetRoads;
-    std::vector<Destination> destinations;
-    std::vector<bool> roadUsed(potentialDestRoads.size(), false);
-    
-    // Track found paths for each vehicle
-    std::vector<std::vector<std::string>> vehiclePaths;
-    
-    // For each vehicle, assign a destination road and find a path
-    for (size_t i = 0; i < sourceRoads.size(); i++) {
-        std::string sourceRoad = sourceRoads[i];
+    for (size_t i = 0; i < destObjects.size() && i < sourceRoads.size(); ++i) {
+        // Calculate path
+        auto path = graphProcessor->findEdgeShortestPath(sourceRoads[i], destObjects[i].nodeId);
         
-        // First try to find a valid path to some destination
-        bool pathFound = false;
-        std::vector<std::string> bestPath;
-        double bestPathLength = 0;
-        std::string bestDestRoad;
-        
-        // Try a limited number of potential destinations
-        int startIdx = rand() % potentialDestRoads.size();
-        
-        for (size_t attempt = 0; attempt < std::min(size_t(100), potentialDestRoads.size()); attempt++) {
-            size_t destIdx = (startIdx + attempt) % potentialDestRoads.size();
-            
-            // Skip if this road is already used or same as source
-            if (roadUsed[destIdx] || potentialDestRoads[destIdx] == sourceRoad) {
-                continue;
+        // Calculate total distance
+        double totalDistance = 0.0;
+        for (const auto& edgeId : path) {
+            bool edgeFound = false;
+            for (const auto& nodePair : graph.getAdjList()) {
+                for (const auto& edge : nodePair.second) {
+                    if (edge.getId() == edgeId) {
+                        totalDistance += edge.getLength();
+                        edgeFound = true;
+                        break;
+                    }
+                }
+                if (edgeFound) break;
             }
-            
-            std::string destRoad = potentialDestRoads[destIdx];
-            
-            // Get the junctions for source and destination roads
-            auto sourceIt = edgeToJunctions.find(sourceRoad);
-            auto destIt = edgeToJunctions.find(destRoad);
-            
-            if (sourceIt != edgeToJunctions.end() && destIt != edgeToJunctions.end()) {
-                const std::string& sourceFromJunction = sourceIt->second.first;
-                const std::string& sourceToJunction = sourceIt->second.second;
-                const std::string& destFromJunction = destIt->second.first;
-                const std::string& destToJunction = destIt->second.second;
-                
-                // Find a path between the junctions
-                // Try from source.to -> dest.from (most natural path)
-                std::vector<std::string> junctionPath = graphProcessor->findShortestPath(sourceToJunction, destFromJunction);
-                double pathLength = graphProcessor->getShortestPathLength(sourceToJunction, destFromJunction);
-                
-                if (!junctionPath.empty() && pathLength > 0 && std::isfinite(pathLength)) {
-                    // We found a valid path between junctions
-                    // Build a complete path: sourceRoad -> junction path -> destRoad
-                    std::vector<std::string> fullPath;
-                    fullPath.push_back(sourceRoad);
-                    
-                    // Add all intermediate roads from junction path
-                    // Each pair of consecutive junctions in the path corresponds to an edge
-                    for (size_t j = 0; j < junctionPath.size() - 1; j++) {
-                        const std::string& fromJunction = junctionPath[j];
-                        const std::string& toJunction = junctionPath[j + 1];
-                        
-                        // Find the edge that connects these junctions
+            if (!edgeFound) {
+                totalDistance += 100.0;
+            }
+        }
+        
+        // Calculate estimated travel time with an average speed
+        double averageSpeed = 13.89; // m/s
+        double estimatedTime = totalDistance / averageSpeed;
+        if (estimatedTime <= 0) {
+            estimatedTime = 1.0; // Set a minimum travel time
+        }
+        
+        // Set time window to 1.5-2.5 times the minimum travel time
+        double earliness = 1.5 * estimatedTime;
+        double tardiness = 2.5 * estimatedTime;
+        
+        // Update the time window for this destination
+        destObjects[i].timeWindow.earliness = earliness;
+        destObjects[i].timeWindow.tardiness = tardiness;
+    }
+    
+    if (destObjects.size() < vehicles.size()) {
+        EV << "[RSU] WARNING: Not enough destinations generated (" << destObjects.size() 
+           << " for " << vehicles.size() << " vehicles)" << std::endl;
+    }
+    
+    EV << "[RSU] Generated " << destObjects.size() << " destinations with time windows:" << std::endl;
+    for (size_t i = 0; i < destObjects.size(); ++i) {
+        const auto& dest = destObjects[i];
+        EV << "  - Destination for Vehicle " << i << " (Source: " << (i < sourceRoads.size() ? sourceRoads[i] : "N/A") << "): Edge " << dest.nodeId 
+           << " (Time window: " << dest.timeWindow.earliness 
+           << " - " << dest.timeWindow.tardiness << ")" << std::endl;
+    }
+
+    // Print the effective Cost Matrix based on assignments
+    EV << "\n[RSU] Effective Cost Matrix (Path Lengths for Assigned Routes):" << std::endl;
+    EV << "       "; // Header space for vehicle column
+    for(size_t j=0; j < destObjects.size(); ++j) {
+        std::string destHeader = "D_" + destObjects[j].nodeId.substr(0, 4);
+        EV << destHeader << "\t";
+    }
+    EV << std::endl;
+
+    for (size_t i = 0; i < sourceRoads.size(); ++i) {
+        std::string rowStr = "V_" + vehicles[i].id.substr(0,4) + "(E:" + sourceRoads[i].substr(0,4) + ")\t";
+        for (size_t j = 0; j < destObjects.size(); ++j) {
+            // Find the path length for this specific source vehicle to this specific destination edge
+            // This might not be the globally optimal if the number of dests < vehicles
+            // but it shows the cost for the assignment made if vehicle i got dest j
+            double pathLength = -1.0;
+            if (i < destObjects.size() && sourceRoads[i] == vehicles[i].from ) { // Ensure we are matching correctly
+                 // Dùng findEdgeShortestPath để có kết quả chính xác và nhất quán với hiển thị đường đi
+                 auto path = graphProcessor->findEdgeShortestPath(sourceRoads[i], destObjects[j].nodeId);
+                 pathLength = 0.0;
+                 
+                 // Tính độ dài đường đi bằng cách cộng chiều dài mỗi edge
+                 if (!path.empty()) {
+                    const Graph& graph = graphProcessor->getGraph();
+                    for (const auto& edgeId : path) {
                         bool edgeFound = false;
                         for (const auto& nodePair : graph.getAdjList()) {
-                            if (nodePair.first == fromJunction) {
-                                for (const auto& edge : nodePair.second) {
-                                    if (edge.getTo() == toJunction) {
-                                        fullPath.push_back(edge.getId());
-                                        edgeFound = true;
-                                        break;
-                                    }
+                            for (const auto& edge : nodePair.second) {
+                                if (edge.getId() == edgeId) {
+                                    pathLength += edge.getLength();
+                                    edgeFound = true;
+                                    break;
                                 }
                             }
                             if (edgeFound) break;
                         }
-                        
-                        // If no edge found between these junctions, add a placeholder
                         if (!edgeFound) {
-                            fullPath.push_back("(junction " + fromJunction + " to " + toJunction + ")");
+                            pathLength += 100.0; // Default length
                         }
                     }
-                    
-                    // Add the destination road
-                    fullPath.push_back(destRoad);
-                    
-                    bestPath = fullPath;
-                    bestPathLength = pathLength;
-                    bestDestRoad = destRoad;
-                    pathFound = true;
-                    break;
-                }
-                
-                // If that didn't work, try other junction combinations
-                // Try source.from -> dest.from
-                if (!pathFound) {
-                    junctionPath = graphProcessor->findShortestPath(sourceFromJunction, destFromJunction);
-                    pathLength = graphProcessor->getShortestPathLength(sourceFromJunction, destFromJunction);
-                    
-                    if (!junctionPath.empty() && pathLength > 0 && std::isfinite(pathLength)) {
-                        // Build complete path: sourceRoad -> junction path -> destRoad
-                        std::vector<std::string> fullPath;
-                        fullPath.push_back(sourceRoad);
-                        
-                        // Add all intermediate roads from junction path
-                        // Each pair of consecutive junctions in the path corresponds to an edge
-                        for (size_t j = 0; j < junctionPath.size() - 1; j++) {
-                            const std::string& fromJunction = junctionPath[j];
-                            const std::string& toJunction = junctionPath[j + 1];
-                            
-                            // Find the edge that connects these junctions
-                            bool edgeFound = false;
-                            for (const auto& nodePair : graph.getAdjList()) {
-                                if (nodePair.first == fromJunction) {
-                                    for (const auto& edge : nodePair.second) {
-                                        if (edge.getTo() == toJunction) {
-                                            fullPath.push_back(edge.getId());
-                                            edgeFound = true;
-                                            break;
-                                        }
-                                    }
-                                }
-                                if (edgeFound) break;
-                            }
-                            
-                            // If no edge found between these junctions, add a placeholder
-                            if (!edgeFound) {
-                                fullPath.push_back("(junction " + fromJunction + " to " + toJunction + ")");
-                            }
-                        }
-                        
-                        fullPath.push_back(destRoad);
-                        
-                        bestPath = fullPath;
-                        bestPathLength = pathLength;
-                        bestDestRoad = destRoad;
-                        pathFound = true;
-                        break;
-                    }
-                }
-                
-                // Try source.from -> dest.to
-                if (!pathFound) {
-                    junctionPath = graphProcessor->findShortestPath(sourceFromJunction, destToJunction);
-                    pathLength = graphProcessor->getShortestPathLength(sourceFromJunction, destToJunction);
-                    
-                    if (!junctionPath.empty() && pathLength > 0 && std::isfinite(pathLength)) {
-                        // Build complete path: sourceRoad -> junction path -> destRoad
-                        std::vector<std::string> fullPath;
-                        fullPath.push_back(sourceRoad);
-                        
-                        // Add all intermediate roads from junction path
-                        // Each pair of consecutive junctions in the path corresponds to an edge
-                        for (size_t j = 0; j < junctionPath.size() - 1; j++) {
-                            const std::string& fromJunction = junctionPath[j];
-                            const std::string& toJunction = junctionPath[j + 1];
-                            
-                            // Find the edge that connects these junctions
-                            bool edgeFound = false;
-                            for (const auto& nodePair : graph.getAdjList()) {
-                                if (nodePair.first == fromJunction) {
-                                    for (const auto& edge : nodePair.second) {
-                                        if (edge.getTo() == toJunction) {
-                                            fullPath.push_back(edge.getId());
-                                            edgeFound = true;
-                                            break;
-                                        }
-                                    }
-                                }
-                                if (edgeFound) break;
-                            }
-                            
-                            // If no edge found between these junctions, add a placeholder
-                            if (!edgeFound) {
-                                fullPath.push_back("(junction " + fromJunction + " to " + toJunction + ")");
-                            }
-                        }
-                        
-                        fullPath.push_back(destRoad);
-                        
-                        bestPath = fullPath;
-                        bestPathLength = pathLength;
-                        bestDestRoad = destRoad;
-                        pathFound = true;
-                        break;
-                    }
-                }
-                
-                // Try source.to -> dest.to
-                if (!pathFound) {
-                    junctionPath = graphProcessor->findShortestPath(sourceToJunction, destToJunction);
-                    pathLength = graphProcessor->getShortestPathLength(sourceToJunction, destToJunction);
-                    
-                    if (!junctionPath.empty() && pathLength > 0 && std::isfinite(pathLength)) {
-                        // Build complete path: sourceRoad -> junction path -> destRoad
-                        std::vector<std::string> fullPath;
-                        fullPath.push_back(sourceRoad);
-                        
-                        // Add all intermediate roads from junction path
-                        // Each pair of consecutive junctions in the path corresponds to an edge
-                        for (size_t j = 0; j < junctionPath.size() - 1; j++) {
-                            const std::string& fromJunction = junctionPath[j];
-                            const std::string& toJunction = junctionPath[j + 1];
-                            
-                            // Find the edge that connects these junctions
-                            bool edgeFound = false;
-                            for (const auto& nodePair : graph.getAdjList()) {
-                                if (nodePair.first == fromJunction) {
-                                    for (const auto& edge : nodePair.second) {
-                                        if (edge.getTo() == toJunction) {
-                                            fullPath.push_back(edge.getId());
-                                            edgeFound = true;
-                                            break;
-                                        }
-                                    }
-                                }
-                                if (edgeFound) break;
-                            }
-                            
-                            // If no edge found between these junctions, add a placeholder
-                            if (!edgeFound) {
-                                fullPath.push_back("(junction " + fromJunction + " to " + toJunction + ")");
-                            }
-                        }
-                        
-                        fullPath.push_back(destRoad);
-                        
-                        bestPath = fullPath;
-                        bestPathLength = pathLength;
-                        bestDestRoad = destRoad;
-                        pathFound = true;
-                        break;
-                    }
-                }
+                 } else {
+                    pathLength = -1.0; // No path found
+                 }
             }
-        }
-        
-        if (pathFound) {
-            // Find the index of the destination road in the potentialDestRoads array
-            size_t bestDestIdx = std::find(potentialDestRoads.begin(), potentialDestRoads.end(), bestDestRoad) - potentialDestRoads.begin();
-            
-            // Mark the destination as used
-            if (bestDestIdx < roadUsed.size()) {
-                roadUsed[bestDestIdx] = true;
-            }
-            
-            // Store the destination information
-            targetRoads.push_back(bestDestRoad);
-            
-            // Calculate travel time based on actual road lengths and speeds
-            double estimatedTime = 0.0;
-            
-            // If we have a full path with intermediate roads
-            if (!bestPath.empty()) {
-                // Calculate time based on each road segment's length and speed
-                for (const auto& roadId : bestPath) {
-                    // Skip junction placeholders
-                    if (roadId.find("(junction") == std::string::npos && 
-                        roadId.find("(path from") == std::string::npos) {
-                        
-                        // Find the edge object for this road
-                        for (const auto& nodePair : graph.getAdjList()) {
-                            for (const auto& edge : nodePair.second) {
-                                if (edge.getId() == roadId) {
-                                    // Get actual length and maximum speed
-                                    double length = edge.getLength();
-                                    double maxSpeed = edge.getMaxSpeed();
-                                    
-                                    // Use a speed that's 80% of the maximum (typical actual speed)
-                                    double speed = maxSpeed * 0.8;
-                                    
-                                    // Add time for this road segment
-                                    if (speed > 0.0) {
-                                        estimatedTime += length / speed;
-                                    } else {
-                                        // Fallback if speed is zero or invalid
-                                        estimatedTime += length / 13.89; // 50 km/h
-                                    }
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
+
+            if (pathLength > 0 && pathLength < 9999999.0) {
+                rowStr += std::to_string(static_cast<double>(pathLength)) + "\t";
             } else {
-                // Fallback to simple estimate if we don't have a detailed path
-                estimatedTime = bestPathLength / 13.89; // 50 km/h
-            }
-            
-            // Create time window with realistic values based on the actual path
-            double initialDelay = 20.0; // seconds
-            // More realistic time window: from 1.5x travel time to 2.5x travel time
-            double earliness = initialDelay + (estimatedTime * 1.5); 
-            double tardiness = initialDelay + (estimatedTime * 2.5);
-            
-            destinations.push_back(Destination(bestDestRoad, TimeWindow(earliness, tardiness)));
-            
-            // Store the path
-            vehiclePaths.push_back(bestPath);
-            
-            EV << "[RSU] Found path from " << sourceRoad << " to " << bestDestRoad << std::endl;
-        } else {
-            // If we couldn't find a valid path, assign any unused destination
-            for (size_t j = 0; j < potentialDestRoads.size(); j++) {
-                if (!roadUsed[j] && potentialDestRoads[j] != sourceRoad) {
-                    std::string destRoad = potentialDestRoads[j];
-                    targetRoads.push_back(destRoad);
-                    roadUsed[j] = true;
-                    
-                    // Calculate travel time based on actual road lengths and speeds
-                    double estimatedTime = 0.0;
-                    
-                    // If we have a full path with intermediate roads
-                    if (!bestPath.empty()) {
-                        // Get source and target roads
-                        const std::string& sourceRoad = bestPath.front();
-                        const std::string& targetRoad = bestPath.back();
-                        
-                        // Try to get a more detailed path between source and destination
-                        std::vector<std::string> detailedPath = graphProcessor->findEdgeShortestPath(sourceRoad, targetRoad);
-                        
-                        // Use the detailed path if available, otherwise use original path
-                        std::vector<std::string> pathToCalculate = (detailedPath.size() > 2) ? detailedPath : bestPath;
-                        
-                        // Calculate time based on each road segment's length and speed
-                        for (const auto& roadId : pathToCalculate) {
-                            // Skip junction placeholders
-                            if (roadId.find("(junction") == std::string::npos && 
-                                roadId.find("(path from") == std::string::npos) {
-                                
-                                // Find the edge object for this road
-                                for (const auto& nodePair : graph.getAdjList()) {
-                                    for (const auto& edge : nodePair.second) {
-                                        if (edge.getId() == roadId) {
-                                            // Get actual length and maximum speed
-                                            double length = edge.getLength();
-                                            double maxSpeed = edge.getMaxSpeed();
-                                            
-                                            // Use a speed that's 80% of the maximum (typical actual speed)
-                                            double speed = maxSpeed * 0.8;
-                                            
-                                            // Add time for this road segment
-                                            if (speed > 0.0) {
-                                                estimatedTime += length / speed;
-                                            } else {
-                                                // Fallback if speed is zero or invalid
-                                                estimatedTime += length / 13.89; // 50 km/h
-                                            }
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    } else {
-                        // Fallback to simple estimate if we don't have a detailed path
-                        estimatedTime = bestPathLength / 13.89; // 50 km/h
-                    }
-                    
-                    // Create time window with realistic values based on the actual path
-                    double initialDelay = 20.0; // seconds
-                    // More realistic time window: from 1.5x travel time to 2.5x travel time
-                    double earliness = initialDelay + (estimatedTime * 1.5);
-                    double tardiness = initialDelay + (estimatedTime * 2.5);
-                    
-                    destinations.push_back(Destination(destRoad, TimeWindow(earliness, tardiness)));
-                    
-                    // Create empty path (will show warning)
-                    vehiclePaths.push_back(std::vector<std::string>());
-                    
-                    EV << "[RSU] WARNING: Assigned road " << destRoad 
-                       << " to vehicle with source " << sourceRoad << " without a validated path" << std::endl;
-                    break;
-                }
+                rowStr += "INF\t";
             }
         }
+        EV << rowStr << std::endl;
     }
     
-    // Check if we assigned a destination to each vehicle
-    if (targetRoads.size() != sourceRoads.size()) {
-        EV << "[RSU] ERROR: Could not assign destinations to all vehicles" << std::endl;
-        EV << "[RSU] Only assigned " << targetRoads.size() << " destinations for " << sourceRoads.size() << " vehicles" << std::endl;
-        return;
-    }
-    
-    EV << "[RSU] Successfully created destination assignments" << std::endl;
-    
-    // Step 5: Print the destinations with their time windows
-    EV << "[RSU] Generated " << destinations.size() << " destinations with time windows:" << std::endl;
-    
-    int maxDestToDisplay = std::min(static_cast<size_t>(20), destinations.size());
-    for (int i = 0; i < maxDestToDisplay; i++) {
-        EV << "  - Destination " << i + 1 << ": Road " << destinations[i].nodeId 
-           << " (Time window: " << destinations[i].timeWindow.earliness 
-           << " - " << destinations[i].timeWindow.tardiness << ")" << std::endl;
-    }
-    
-    if (destinations.size() > maxDestToDisplay) {
-        EV << "  ... and " << (destinations.size() - maxDestToDisplay) << " more destinations" << std::endl;
-    }
-    
-    // Step 6: Compute and display routes for each vehicle to its assigned destination
     EV << "\n[RSU] Computing routes for each vehicle to its assigned destination:" << std::endl;
     
-    int maxRoutesToDisplay = std::min(static_cast<size_t>(10), vehicles.size());
-    for (int i = 0; i < maxRoutesToDisplay; i++) {
+//    const Graph& graph = graphProcessor->getGraph();
+    int processedVehicles = std::min(static_cast<int>(vehicles.size()), static_cast<int>(destObjects.size()));
+
+    for (int i = 0; i < processedVehicles; ++i) {
         const std::string& sourceRoad = sourceRoads[i];
-        const std::string& targetRoad = targetRoads[i];
-        const std::vector<std::string>& path = vehiclePaths[i];
+        const std::string& targetRoad = destObjects[i].nodeId;
         
-        // Get junction info for display
-        std::string sourceFromJunction = "unknown";
-        std::string sourceToJunction = "unknown";
-        std::string targetFromJunction = "unknown";
-        std::string targetToJunction = "unknown";
+        auto path = graphProcessor->findEdgeShortestPath(sourceRoad, targetRoad);
         
-        // Look up junctions
-        auto sourceIt = edgeToJunctions.find(sourceRoad);
-        if (sourceIt != edgeToJunctions.end()) {
-            sourceFromJunction = sourceIt->second.first;
-            sourceToJunction = sourceIt->second.second;
-        }
-        
-        auto targetIt = edgeToJunctions.find(targetRoad);
-        if (targetIt != edgeToJunctions.end()) {
-            targetFromJunction = targetIt->second.first;
-            targetToJunction = targetIt->second.second;
-        }
-        
-        // Calculate path length and travel time
-        double pathLength = 0;
-        if (!path.empty()) {
-            // For the same vehicle index i, get the path length directly from bestPathLength
-            // This avoids the need for iterator search that was causing type mismatch errors
-            
-            // Try to get accurate path length for this exact path
-            for (size_t vIdx = 0; vIdx < vehiclePaths.size(); vIdx++) {
-                if (&vehiclePaths[vIdx] == &path) {
-                    // This is the same path object, we found the right index
-                    if (vIdx < sourceRoads.size()) {
-                        // Get the actual accurate path length from GraphProcessor
-                        std::string srcRoad = sourceRoads[vIdx];
-                        std::string tgtRoad = targetRoads[vIdx];
-                        
-                        // Try to get a more accurate length from the graph
-                        auto srcIt = edgeToJunctions.find(srcRoad);
-                        auto tgtIt = edgeToJunctions.find(tgtRoad);
-                        
-                        if (srcIt != edgeToJunctions.end() && tgtIt != edgeToJunctions.end()) {
-                            const std::string& srcToJunction = srcIt->second.second;
-                            const std::string& tgtFromJunction = tgtIt->second.first;
-                            
-                            // Get the accurate path length
-                            double accurateLength = graphProcessor->getShortestPathLength(srcToJunction, tgtFromJunction);
-                            if (accurateLength > 0 && std::isfinite(accurateLength)) {
-                                // Add length of source and target roads
-                                double srcLength = getEdgeLength(srcRoad);
-                                double tgtLength = getEdgeLength(tgtRoad);
-                                pathLength = accurateLength + srcLength + tgtLength;
-                            }
-                        }
-                    }
-                    break; // We found the matching path, no need to continue loop
-                }
-            }
-            
-            // If we still don't have a valid path length, calculate based on edges
-            if (pathLength <= 0) {
-                // Calculate length by summing up edge lengths
-                for (const auto& edgeId : path) {
-                    // Skip junction placeholders
-                    if (edgeId.find("(junction") == std::string::npos && 
-                        edgeId.find("(path from") == std::string::npos) {
-                        double edgeLength = getEdgeLength(edgeId);
-                        if (edgeLength > 0) {
-                            pathLength += edgeLength;
-                        } else {
-                            // Use default length if not found
-                            pathLength += 100.0;
-                        }
-                    }
-                }
-            }
-            
-            // Sanity check - if still no valid length, use a reasonable default
-            if (pathLength <= 0) {
-                pathLength = (path.size() - 1) * 100.0 + 50.0; // Rough estimate with some variability
-            }
-        }
-        
-        // Calculate estimated travel time based on actual road lengths and speeds
-        double estimatedTime = 0.0;
-        double totalLength = 0.0;
-        double totalTravelTime = 0.0;
-        
-        // For debugging
-        EV << "    Detailed travel time calculation:" << std::endl;
-        
-        if (!path.empty()) {
-            // Get the detailed path with all intermediate segments
-            const std::string& sourceRoad = path.front();
-            const std::string& targetRoad = path.back();
-            
-            // Try to get a more detailed path between source and destination
-            std::vector<std::string> detailedPath = graphProcessor->findEdgeShortestPath(sourceRoad, targetRoad);
-            
-            // Use the detailed path if available, otherwise use original path
-            std::vector<std::string> pathToCalculate = (detailedPath.size() > 2) ? detailedPath : path;
-                
-            // Calculate time based on EACH road segment's length and speed
-            for (const auto& roadId : pathToCalculate) {
-                // Skip junction placeholders
-                if (roadId.find("(junction") == std::string::npos && 
-                    roadId.find("(path from") == std::string::npos) {
-                    
-                    bool foundEdge = false;
-                    // Find the edge object for this road
-                    for (const auto& nodePair : graph.getAdjList()) {
-                        for (const auto& edge : nodePair.second) {
-                            if (edge.getId() == roadId) {
-                                foundEdge = true;
-                                // Get actual length and maximum speed
-                                double length = edge.getLength();
-                                totalLength += length;
-                                
-                                double maxSpeed = edge.getMaxSpeed();
-                                if (maxSpeed <= 0.0) {
-                                    maxSpeed = 13.89; // Default to 50 km/h if no valid speed
-                                }
-                                
-                                // Use a realistic speed (80% of max speed)
-                                double speed = maxSpeed * 0.8;
-                                
-                                // Calculate segment travel time
-                                double segmentTime = length / speed;
-                                totalTravelTime += segmentTime;
-                                
-                                EV << "      Road " << roadId << ": length=" << length 
-                                   << "m, speed=" << speed << "m/s, time=" << segmentTime << "s" << std::endl;
-                                break;
-                            }
-                        }
-                        if (foundEdge) break;
-                    }
-                    
-                    if (!foundEdge) {
-                        EV << "      Road " << roadId << ": not found in graph" << std::endl;
-                    }
-                }
-            }
-            
-            // Set the final estimated time
-            estimatedTime = totalTravelTime;
-            
-            EV << "      Total path length: " << totalLength << "m, Total travel time: " 
-               << totalTravelTime << "s" << std::endl;
-            
-        } else if (pathLength > 0 && std::isfinite(pathLength)) {
-            // Fallback to simple estimate if we don't have a detailed path
-            estimatedTime = pathLength / 13.89; // 50 km/h
-            EV << "      Using fallback calculation: length=" << pathLength 
-               << "m / speed=13.89m/s = " << estimatedTime << "s" << std::endl;
-        }
-        
-        // Update time window with final accurate travel time calculation
-        double initialDelay = 20.0; // seconds
-        double newEarliness = initialDelay + (estimatedTime * 1.5);
-        double newTardiness = initialDelay + (estimatedTime * 2.5);
-        
-        // Update the destination time window with new values
-        destinations[i].timeWindow.earliness = newEarliness;
-        destinations[i].timeWindow.tardiness = newTardiness;
-        
-        // Print route information
         EV << "  - Vehicle " << vehicles[i].id << " route:" << std::endl;
-        EV << "    From: Road " << sourceRoad << " (Junction " << sourceFromJunction 
-           << " -> " << sourceToJunction << ")" << std::endl;
-        EV << "    To: Road " << targetRoad << " (Junction " << targetFromJunction 
-           << " -> " << targetToJunction << ")" << std::endl;
-        EV << "    Path length: " << (std::isfinite(pathLength) ? std::to_string(pathLength) : "unknown") << " m" << std::endl;
-        EV << "    Estimated travel time: " << (std::isfinite(estimatedTime) ? std::to_string(estimatedTime) : "unknown") << " s" << std::endl;
-        EV << "    Time window: " << destinations[i].timeWindow.earliness 
-           << " - " << destinations[i].timeWindow.tardiness << std::endl;
+        EV << "    From: Road " << sourceRoad << std::endl;
+        EV << "    To: Road " << targetRoad << std::endl;
         
-        // Print the path (showing all road IDs in the path, including intermediate roads)
-        if (!path.empty()) {
+        if (path.empty()) {
+            EV << "    WARNING: No path found!" << std::endl;
+            continue;
+        }
+        
+        double totalDistance = 0.0;
+        for (const auto& edgeId : path) {
+                            bool edgeFound = false;
+                            for (const auto& nodePair : graph.getAdjList()) {
+                                    for (const auto& edge : nodePair.second) {
+                    if (edge.getId() == edgeId) {
+                        totalDistance += edge.getLength();
+                                            edgeFound = true;
+                                            break;
+                                    }
+                                }
+                                if (edgeFound) break;
+                            }
+                            if (!edgeFound) {
+                totalDistance += 100.0; 
+            }
+        }
+        
+        double averageSpeed = 13.89;
+        double estimatedTime = totalDistance / averageSpeed;
+        if (estimatedTime <= 0) {
+            estimatedTime = 1.0; 
+        }
+        
+        EV << "    Path length: " << totalDistance << " m" << std::endl;
+        EV << "    Estimated travel time: " << estimatedTime << " s" << std::endl;
+        EV << "    Time window: " << destObjects[i].timeWindow.earliness 
+           << " - " << destObjects[i].timeWindow.tardiness 
+           << " (approx: " << (destObjects[i].timeWindow.earliness / estimatedTime) 
+           << "x - " << (destObjects[i].timeWindow.tardiness / estimatedTime) << "x of minimal travel time)" << std::endl;
+        
+        if (path.size() <= 20) {
             EV << "    Path: ";
-            
-            // Always try to get a more detailed path between source and destination roads
-            const std::string& sourceRoad = path.front();
-            const std::string& targetRoad = path.back();
-            
-            // Get a detailed path between source and destination
-            std::vector<std::string> detailedPath = graphProcessor->findEdgeShortestPath(sourceRoad, targetRoad);
-            
-            // If we got a detailed path, use it; otherwise, use junction-to-junction paths to build a complete path
-            if (detailedPath.size() > 2) {
-                // Print the detailed path with all intermediate roads
-                for (size_t j = 0; j < detailedPath.size(); j++) {
-                    EV << detailedPath[j];
-                    if (j < detailedPath.size() - 1) {
+            for (size_t j = 0; j < path.size(); j++) {
+                EV << path[j];
+                if (j < path.size() - 1) {
                         EV << " -> ";
                     }
                 }
-            }
-            else {
-                // Try to find intermediate road segments using junction connections from the original path
-                std::vector<std::string> intermediateRoads;
-                
-                // Since original path often just has start and end points or junction placeholders,
-                // try to find intermediate roads between junctions
-                auto sourceIt = edgeToJunctions.find(sourceRoad);
-                auto targetIt = edgeToJunctions.find(targetRoad);
-                
-                if (sourceIt != edgeToJunctions.end() && targetIt != edgeToJunctions.end()) {
-                    const std::string& sourceToJunction = sourceIt->second.second;
-                    const std::string& targetFromJunction = targetIt->second.first;
-                    
-                    // Get a path between junctions
-                    std::vector<std::string> junctionPath = graphProcessor->findShortestPath(
-                        sourceToJunction, targetFromJunction);
-                    
-                    // Build a complete path
-                    intermediateRoads.push_back(sourceRoad);
-                    
-                    // Add roads connecting the junctions
-                    for (size_t j = 0; j < junctionPath.size() - 1; j++) {
-                        const std::string& fromJunction = junctionPath[j];
-                        const std::string& toJunction = junctionPath[j + 1];
-                        
-                        // Find the edge that connects these junctions
-                        for (const auto& nodePair : graph.getAdjList()) {
-                            if (nodePair.first == fromJunction) {
-                                for (const auto& edge : nodePair.second) {
-                                    if (edge.getTo() == toJunction) {
-                                        intermediateRoads.push_back(edge.getId());
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    
-                    intermediateRoads.push_back(targetRoad);
-                } else {
-                    // Fallback to original path if junction info not available
-                    intermediateRoads = path;
-                }
-                
-                // Print the expanded intermediate roads
-                for (size_t j = 0; j < intermediateRoads.size(); j++) {
-                    // Skip junction placeholders
-                    if (intermediateRoads[j].find("(junction") == std::string::npos && 
-                        intermediateRoads[j].find("(path from") == std::string::npos) {
-                        
-                        EV << intermediateRoads[j];
-                        if (j < intermediateRoads.size() - 1) {
-                            EV << " -> ";
-                        }
-                    }
-                }
-            }
-            
             EV << std::endl;
         } else {
-            EV << "    WARNING: No path found!" << std::endl;
+            EV << "    Path: " << path[0] << " -> ... -> " << path[path.size()-1]
+               << " (" << path.size() << " segments)" << std::endl;
         }
-        
-        EV << std::endl;
     }
     
-    if (vehicles.size() > maxRoutesToDisplay) {
-        EV << "  ... and routes for " << (vehicles.size() - maxRoutesToDisplay) << " more vehicles" << std::endl;
+    for (size_t i = 0; i < processedVehicles; i++) {
+        LAddress::L2Type vehicleId = i; 
+        vehicleDataMap[vehicleId].assignedDestination = destObjects[i];
     }
     
+    EV << "\n[RSU] Assignment completed for " << processedVehicles << " vehicles" << std::endl;
     EV << "==============================================================\n" << std::endl;
-    
-    // Store the destinations in the vehicleDataMap for later reference
-    for (size_t i = 0; i < std::min(vehicles.size(), destinations.size()); i++) {
-        LAddress::L2Type vehicleId = i; // Simplified - in a real system, this would be the actual vehicle ID
-        vehicleDataMap[vehicleId].assignedDestination = destinations[i];
-    }
 }
 
 double RSUControlApp::getEdgeLength(const std::string& edgeId) const {
-    // Search for the edge in the graph and return its length
     if (graphProcessor) {
         const Graph& graph = graphProcessor->getGraph();
-        
-        // Check in all nodes' adjacency lists
         for (const auto& nodePair : graph.getAdjList()) {
             for (const auto& edge : nodePair.second) {
                 if (edge.getId() == edgeId) {
@@ -1697,6 +1100,5 @@ double RSUControlApp::getEdgeLength(const std::string& edgeId) const {
             }
         }
     }
-    
-    return 100.0;
+    return 0;
 }

@@ -14,7 +14,7 @@
 namespace veins {
 
 /**
- * RSU Control Application that manages the road network and provides 
+ * RSU Control Application that manages the road network and provides
  * routing capabilities through composition with specialized components.
  */
 class RSUControlApp : public TraCIDemoRSU11p {
@@ -30,15 +30,15 @@ protected:
 private:
     // Message for periodic status checks
     cMessage* statusCheckMsg;
-    
+
     // Specialized components (composition)
     std::unique_ptr<XMLProcessor> xmlProcessor;      // For processing road network XML
     std::unique_ptr<GraphProcessor> graphProcessor;  // For path finding
     std::unique_ptr<TaskGenerator> taskGenerator;    // For generating tasks
-    
+
     // Network file path
     std::string networkFilePath;
-    
+
     // Process vehicle messages and send responses
     void handleVehicleMessage(const std::string& message, LAddress::L2Type vehicleId);
     void sendRoadListMessage(LAddress::L2Type vehicleId, const std::vector<std::string>& roadList);

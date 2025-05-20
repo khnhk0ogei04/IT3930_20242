@@ -48,14 +48,9 @@ public:
         return lanes;
     }
 
-    // Get the maximum speed allowed on this edge (maximum of all lanes)
     double getMaxSpeed() const {
-        if (lanes.empty()) {
-            return 13.89; // Default 50 km/h in m/s if no lanes defined
-        }
-        
         double maxSpeed = 0.0;
-        for (const Lane& lane : lanes) {
+        for (Lane lane : lanes) {
             if (lane.speed > maxSpeed) {
                 maxSpeed = lane.speed;
             }

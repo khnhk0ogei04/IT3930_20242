@@ -36,6 +36,12 @@ public:
     bool isNetworkLoaded() const { return networkLoaded; }
     const Graph& getGraph() const { return roadNetwork; }
     
+    // Static method to extract roads from XML file
+    static std::vector<Edge> getRoadsFromXml(const std::string& filePath);
+    
+    // Static method to extract junctions from XML file
+    static std::unordered_map<std::string, Node> getJunctionsFromXml(const std::string& filePath);
+    
 private:
     Graph roadNetwork;
     bool networkLoaded;

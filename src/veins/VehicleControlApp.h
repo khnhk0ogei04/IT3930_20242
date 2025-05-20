@@ -45,7 +45,7 @@ class DemoServiceAdvertisment;
 struct VehicleTimeWindow {
     double earliness;
     double tardiness;
-    
+
     VehicleTimeWindow(double e = 0.0, double t = 0.0) : earliness(e), tardiness(t) {}
 };
 
@@ -55,7 +55,7 @@ struct VehicleTimeWindow {
 struct VehicleDestination {
     std::string nodeId;
     VehicleTimeWindow timeWindow;
-    
+
     VehicleDestination(const std::string& id, const VehicleTimeWindow& tw)
         : nodeId(id), timeWindow(tw) {}
 };
@@ -80,7 +80,7 @@ private:
     // Messages for periodic updates
     cMessage* statusUpdateMsg = nullptr;
     cMessage* requestRoadInfoMsg = nullptr;
-    
+
     // Current road and road network data
     std::string currentRoadId;
     std::vector<std::string> allRoads;
@@ -89,11 +89,11 @@ private:
     std::vector<std::string> currentPath;
     std::map<std::string, std::string> currentRoadAttributes;
     std::vector<VehicleDestination> destinations;
-    
+
     // Path finding components
     std::unique_ptr<GraphProcessor> graphProcessor;
     Graph roadNetwork;
-    
+
     // RSU communication methods
     void sendStatusUpdate();
     void requestAllRoads();
@@ -103,9 +103,8 @@ private:
     void requestShortestPath(const std::string& sourceId, const std::string& targetId);
     void requestKPaths(const std::string& sourceId, const std::string& targetId, int k);
     void requestDestinations(int count);
-    void requestOptimalDestinations(const std::vector<std::string>& sourceNodes, int count);
     void requestValidAssignment(const std::vector<std::string>& sources, const std::vector<std::string>& destinations);
-    
+
     // Response processing methods
     void processAllRoadsResponse(const std::string& data);
     void processAccessibleRoadsResponse(const std::string& data);
@@ -115,7 +114,7 @@ private:
     void processKPathsResponse(const std::string& data);
     void processDestinationsResponse(const std::string& data);
     void processValidAssignmentResponse(const std::string& data);
-    
+
     // Helper methods
     std::vector<std::string> parseRoadList(const std::string& data, char delimiter = ',');
     std::map<std::string, std::string> parseAttributes(const std::string& data);
@@ -125,7 +124,7 @@ private:
     // Local path finding methods
     std::vector<std::string> findShortestPath(const std::string& sourceId, const std::string& targetId);
     double getShortestPathLength(const std::string& sourceId, const std::string& targetId);
-    
+
     // Test methods
     void testPathFinding();
     void runPathFindingTests();
