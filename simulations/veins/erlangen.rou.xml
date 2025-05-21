@@ -12,7 +12,6 @@
     <trip id="t_12" depart="0.00" from="-588" to="2230" via="206 474 2165"/>
     <trip id="t_13" depart="0.00" from="-1755" to="-1766"/>
     <trip id="t_14" depart="0.00" from="2151" to="-1775"/>
-    <trip id="t_15" depart="0.00" from="474" to="15" via="206"/>
     <trip id="t_16" depart="0.00" from="-5" to="-1775" via="206 474"/>
     <trip id="t_17" depart="0.00" from="474" to="131" via="-206 -5 11 109"/>
     <trip id="t_18" depart="0.00" from="109" to="587" via="123 -15 3"/>
@@ -20,18 +19,15 @@
     <trip id="t_2" depart="0.00" from="-3" to="-120" via="15 -123"/>
     <trip id="t_20" depart="0.00" from="583" to="2199" via="-1956 1960"/>
     <trip id="t_21" depart="0.00" from="-2182" to="-2192"/>
-    <trip id="t_22" depart="0.00" from="583" to="190" via="-196"/>
     <trip id="t_23" depart="0.00" from="-219" to="184" via="-190"/>
     <trip id="t_24" depart="0.00" from="-172" to="-1972" via="2020"/>
     <trip id="t_25" depart="0.00" from="1992" to="1925"/>
     <trip id="t_26" depart="0.00" from="144" to="152" via="131"/>
     <trip id="t_27" depart="0.00" from="162" to="60" via="-75"/>
     <trip id="t_28" depart="0.00" from="31" to="-15" via="23 11"/>
-    <trip id="t_29" depart="0.00" from="-3" to="-588"/>
     <trip id="t_3" depart="0.00" from="-854" to="1737" via="852 879 1025 -1148 1150 1204 1474 1722"/>
     <trip id="t_30" depart="0.00" from="45" to="-3" via="-55 -444 587"/>
     <trip id="t_31" depart="0.00" from="-37" to="474" via="5 206"/>
-    <trip id="t_32" depart="0.00" from="162" to="75" via="-120"/>
     <trip id="t_33" depart="0.00" from="92" to="-75" via="214 -219 -190 -172 164 -162"/>
     <trip id="t_34" depart="0.00" from="-1774" to="1925"/>
     <trip id="t_35" depart="0.00" from="1469" to="-879" via="-1209 -1154 -1025"/>

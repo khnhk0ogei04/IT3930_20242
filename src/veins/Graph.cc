@@ -89,4 +89,3 @@ Edge Graph::getEdge(string edgeId) const {
     }
     return Edge();
 }
-

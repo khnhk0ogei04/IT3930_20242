@@ -30,6 +30,8 @@ protected:
 private:
     // Message for periodic status checks
     cMessage* statusCheckMsg;
+    // Message for triggering rerouting at t=2s
+    cMessage* rerouteMsg;
 
     // Specialized components (composition)
     std::unique_ptr<XMLProcessor> xmlProcessor;      // For processing road network XML
@@ -42,14 +44,24 @@ private:
     // Process vehicle messages and send responses
     void handleVehicleMessage(const std::string& message, LAddress::L2Type vehicleId);
     void sendRoadListMessage(LAddress::L2Type vehicleId, const std::vector<std::string>& roadList);
+    void sendRerouteMessage(LAddress::L2Type vehicleId, const std::vector<std::string>& edgePath);
 
     // Vehicle tracking data
     struct VehicleData {
         simtime_t lastMessageTime = 0;
         Destination assignedDestination; // Store the assigned destination
+        std::vector<std::string> assignedPath; // Store the assigned path
+        std::vector<std::string> lastSentPath; // Store the last path sent to the vehicle
+        int simulationId = -1; // Store the actual simulation ID of the vehicle
     };
     std::map<LAddress::L2Type, VehicleData> vehicleDataMap;
+    
+    // Map between RSU internal IDs and simulation IDs
+    std::map<int, LAddress::L2Type> simulationIdToAddressMap;
+    void updateVehicleIdMapping(LAddress::L2Type vehicleAddress, int simulationId);
+    
     void cleanupVehicleData();
+    void sendRerouteToAllVehicles();
     
     // Road network data access methods
     std::vector<std::string> getAllRoads() const;
@@ -58,16 +70,16 @@ private:
     // Path finding methods
     std::vector<std::string> findShortestPath(const std::string& sourceId, const std::string& targetId) const;
     double getShortestPathLength(const std::string& sourceId, const std::string& targetId) const;
-    
+
     // Information display methods
     void printRoadNetworkInfo() const;
     void printNodeInfo() const;
     void printVehicleRouteInfo(const std::vector<VehicleInfo>& vehicles);
     void generateAndAssignDestinations(const std::vector<VehicleInfo>& vehicles);
-    
+
     // Lane path finding method
     void findLanePathAndPrint(std::string sourceLaneId, std::string targetLaneId) const;
-    
+
     // Edge path finding method
     void findEdgePathAndPrint(std::string sourceEdgeId, std::string targetEdgeId) const;
     

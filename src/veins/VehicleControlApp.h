@@ -69,25 +69,29 @@ public:
     void finish() override;
 
 protected:
-    void onWSM(BaseFrame1609_4* wsm) override;
-    void handleSelfMsg(cMessage* msg) override;
-    void onBSM(DemoSafetyMessage* bsm) override;
-    void onWSA(DemoServiceAdvertisment* wsa) override;
-    void handleLowerMsg(cMessage* msg) override;
-    void handlePositionUpdate(cObject* obj) override;
+    virtual void onWSM(BaseFrame1609_4* wsm) override;
+    virtual void onBSM(DemoSafetyMessage* bsm) override;
+    virtual void onWSA(DemoServiceAdvertisment* wsa) override;
+    virtual void handleSelfMsg(cMessage* msg) override;
+    virtual void handlePositionUpdate(cObject* obj) override;
+    virtual void handleLowerMsg(cMessage* msg) override;
     
 private:
-    // Messages for periodic updates
-    cMessage* statusUpdateMsg = nullptr;
-    cMessage* requestRoadInfoMsg = nullptr;
+    // Messages for periodic communication
+    cMessage* statusUpdateMsg;
+    cMessage* requestRoadInfoMsg;
 
-    // Current road and road network data
+    // ID management
+    int myInternalId;       // The internal ID used by Veins/OMNeT++
+    int mySimulationId;     // The simulation ID visible in the TreeView
+    
+    // Road network data
     std::string currentRoadId;
     std::vector<std::string> allRoads;
     std::vector<std::string> accessibleRoads;
     std::vector<std::string> incomingRoads;
-    std::vector<std::string> currentPath;
     std::map<std::string, std::string> currentRoadAttributes;
+    std::vector<std::string> currentPath;
     std::vector<VehicleDestination> destinations;
 
     // Path finding components

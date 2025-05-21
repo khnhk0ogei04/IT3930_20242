@@ -62,15 +62,15 @@ std::vector<Destination> TaskGenerator::generateDestinations(int n, unsigned see
 }
 
 std::vector<std::vector<std::string>> TaskGenerator::findKPaths(
-    const std::string& sourceId, 
-    const std::string& destinationId, 
+    const std::string& sourceId,
+    const std::string& destinationId,
     int k) {
     
     return graphProcessor.findKShortestPaths(sourceId, destinationId, k);
 }
 
 bool TaskGenerator::existsValidAssignment(
-    const std::vector<std::string>& sources, 
+    const std::vector<std::string>& sources,
     const std::vector<std::string>& destinations) {
     
     return graphProcessor.existsValidAssignment(sources, destinations);
@@ -93,7 +93,7 @@ std::vector<std::string> TaskGenerator::getPotentialDestinationEdges(int n, cons
         for (const auto& edge : pair.second) {
             allPossibleEdges.push_back(edge.getId());
             if (++edgeCounter <= 10) {
-                std::cout << "DEBUG: Found edge " << edge.getId() << " from " 
+                std::cout << "DEBUG: Found edge " << edge.getId() << " from "
                          << pair.first << " to " << edge.getTo() << std::endl;
             }
         }
@@ -107,7 +107,7 @@ std::vector<std::string> TaskGenerator::getPotentialDestinationEdges(int n, cons
     // Remove duplicates
     std::sort(allPossibleEdges.begin(), allPossibleEdges.end());
     allPossibleEdges.erase(std::unique(allPossibleEdges.begin(), allPossibleEdges.end()), allPossibleEdges.end());
-    
+
     std::cout << "DEBUG: Found " << allPossibleEdges.size() << " unique edges in the graph" << std::endl;
 
     // Filter out source edges and keep only edges that are likely reachable
@@ -127,10 +127,10 @@ std::vector<std::string> TaskGenerator::getPotentialDestinationEdges(int n, cons
             for (const auto& edge : nodePair.second) {
                 if (edge.getId() == edgeId) {
                     edgeFound = true;
-                    
+
                     // Assume the edge is reachable if we found it
                     filteredEdges.push_back(edgeId);
-                    
+
                     // Try to verify if there might be a path from at least one source
                     for (const auto& srcEdge : currentSourceEdges) {
                         // Find source edge info
@@ -144,18 +144,18 @@ std::vector<std::string> TaskGenerator::getPotentialDestinationEdges(int n, cons
                             }
                             if (!srcEdgeToNode.empty()) break;
                         }
-                        
+
                         // Find target edge info
                         std::string destEdgeFromNode = nodePair.first;
-                        
+
                         // Check if there might be a path (same node means direct connection)
                         if (srcEdgeToNode == destEdgeFromNode) {
-                            std::cout << "DEBUG: Found potentially direct path: " << srcEdge 
+                            std::cout << "DEBUG: Found potentially direct path: " << srcEdge
                                      << " -> " << edgeId << std::endl;
                             break;
                         }
                     }
-                    
+
                     break;
                 }
             }
@@ -178,7 +178,7 @@ std::vector<std::string> TaskGenerator::getPotentialDestinationEdges(int n, cons
     }
 
     std::cout << "DEBUG: Have " << filteredEdges.size() << " filtered edges after removing sources" << std::endl;
-    
+
     // Shuffle the filtered edges
     std::shuffle(filteredEdges.begin(), filteredEdges.end(), rng);
 

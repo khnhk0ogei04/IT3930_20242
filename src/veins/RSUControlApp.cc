@@ -24,8 +24,64 @@ void RSUControlApp::initialize(int stage) {
     EV << "[RSU] Initialize called with stage " << stage << endl;
     if (stage == 0) {
         vehicleDataMap.clear();
+        simulationIdToAddressMap.clear();
+        
+        // Create a fixed mapping between RSU internal IDs and simulation IDs from TreeView
+        // This is the mapping from the TreeView: node[0] = Car id=14, node[1] = Car id=20, etc.
+        std::map<int, int> vehicleIdMapping = {
+            {0, 16},
+            {1, 22},
+            {2, 28},
+            {3, 34},
+            {4, 40},
+            {5, 46},
+            {6, 52},
+            {7, 58},
+            {8, 64},
+            {9, 70},
+            {10, 76},
+            {11, 82},
+            {12, 88},
+            {13, 94},
+            {14, 100},
+            {15, 106},
+            {16, 112},
+            {17, 118},
+            {18, 124},
+            {19, 130},
+            {20, 136},
+            {21, 142},
+            {22, 148},
+            {23, 154},
+            {24, 160},
+            {25, 166},
+            {26, 172},
+            {27, 178},
+            {28, 184},
+            {29, 190},
+            {30, 196},
+            {31, 202},
+            {32, 208},
+        };
+        
+        // Pre-populate the vehicle data map with correct simulation IDs
+        for (const auto& mapping : vehicleIdMapping) {
+            int internalId = mapping.first;
+            int simulationId = mapping.second;
+            
+            // Create an entry for this vehicle in our data structure
+            vehicleDataMap[internalId].simulationId = simulationId;
+            
+            EV << "[RSU] Pre-mapped internal vehicle " << internalId 
+               << " to simulation ID " << simulationId << std::endl;
+            std::cout << "RSU: Pre-mapped internal vehicle " << internalId 
+                      << " to simulation ID " << simulationId << std::endl;
+        }
+        
         statusCheckMsg = new cMessage("checkStatus");
+        rerouteMsg = new cMessage("rerouteVehicles");
         scheduleAt(simTime() + 1.0, statusCheckMsg);
+        scheduleAt(simTime() + 1.5, rerouteMsg); // Schedule rerouting at t=1.5s
         networkFilePath = par("netFile").stdstringValue();
         EV << "[RSU] Network file path parameter: " << networkFilePath << endl;
         
@@ -65,7 +121,62 @@ void RSUControlApp::onWSM(BaseFrame1609_4* wsm) {
     LAddress::L2Type senderId = msg->getSenderAddress();
     std::string data = msg->getDemoData();
     vehicleDataMap[senderId].lastMessageTime = simTime();
+    
+    // Check if this is a status message containing the simulation ID
+    if (data.find("STATUS:") == 0) {
+        // Extract simulation ID if present (new format uses simId= instead of id=)
+        size_t idPos = data.find("simId=");
+        if (idPos != std::string::npos) {
+            size_t idEnd = data.find(';', idPos);
+            if (idEnd != std::string::npos) {
+                std::string idStr = data.substr(idPos + 6, idEnd - idPos - 6); // +6 for "simId="
+                try {
+                    int simId = std::stoi(idStr);
+                    updateVehicleIdMapping(senderId, simId);
+                    
+                    // Debug output
+                    EV << "[RSU] Updated vehicle ID mapping from STATUS message: Address " << senderId 
+                       << " -> Simulation ID " << simId << std::endl;
+                    std::cout << "RSU: Updated vehicle ID mapping from STATUS: Address " << senderId 
+                              << " -> Simulation ID " << simId << std::endl;
+                } catch (const std::exception& e) {
+                    EV << "[RSU] Failed to parse simulation ID: " << e.what() << std::endl;
+                }
+            }
+        }
+        // Backward compatibility - check for old format with id=
+        else {
+            size_t idPos = data.find("id=");
+            if (idPos != std::string::npos) {
+                size_t idEnd = data.find(';', idPos);
+                if (idEnd != std::string::npos) {
+                    std::string idStr = data.substr(idPos + 3, idEnd - idPos - 3); // +3 for "id="
+                    try {
+                        int simId = std::stoi(idStr);
+                        updateVehicleIdMapping(senderId, simId);
+                        
+                        // Debug output
+                        EV << "[RSU] Updated vehicle ID mapping from old STATUS format: Address " << senderId 
+                           << " -> Simulation ID " << simId << std::endl;
+                        std::cout << "RSU: Updated vehicle ID mapping from old STATUS format: Address " << senderId 
+                                  << " -> Simulation ID " << simId << std::endl;
+                    } catch (const std::exception& e) {
+                        EV << "[RSU] Failed to parse simulation ID: " << e.what() << std::endl;
+                    }
+                }
+            }
+        }
+    }
+    
     handleVehicleMessage(data, senderId);
+}
+
+void RSUControlApp::updateVehicleIdMapping(LAddress::L2Type vehicleAddress, int simulationId) {
+    // Store the simulation ID in the vehicle data
+    vehicleDataMap[vehicleAddress].simulationId = simulationId;
+    
+    // Update the reverse mapping
+    simulationIdToAddressMap[simulationId] = vehicleAddress;
 }
 
 void RSUControlApp::handleVehicleMessage(const string& message, LAddress::L2Type vehicleId) {
@@ -393,13 +504,201 @@ void RSUControlApp::handleSelfMsg(cMessage* msg) {
             }
         }
         scheduleAt(simTime() + 2.0, statusCheckMsg);
-    } else {
+    } 
+    else if (msg == rerouteMsg) {
+        EV << "\n[RSU] ******************************************" << std::endl;
+        EV << "[RSU] REROUTING TRIGGERED AT t=" << simTime() << std::endl;
+        EV << "[RSU] ******************************************" << std::endl;
+        
+        // Print vehicle data map content
+        EV << "[RSU] Vehicle data map contains " << vehicleDataMap.size() << " vehicles:" << std::endl;
+        for (const auto& pair : vehicleDataMap) {
+            EV << "  Vehicle ID: " << pair.first 
+               << ", last message time: " << pair.second.lastMessageTime
+               << ", has destination: " << (!pair.second.assignedDestination.nodeId.empty() ? "yes" : "no")
+               << ", path size: " << pair.second.assignedPath.size() << std::endl;
+        }
+        
+        sendRerouteToAllVehicles();
+    }
+    else {
         TraCIDemoRSU11p::handleSelfMsg(msg);
+    }
+}
+
+void RSUControlApp::sendRerouteToAllVehicles() {
+    EV << "\n[RSU] ===== SENDING REROUTE MESSAGES TO ALL VEHICLES =====\n" << std::endl;
+    std::cout << "RSU is sending reroute messages to all vehicles at time " << simTime() << std::endl;
+
+    // We'll skip the direct TraCI access and just use the vehicle data map
+    std::cout << "Rerouting based on stored vehicle data" << std::endl;
+    
+    int vehiclesRerouted = 0;
+    
+    
+    // Process each vehicle in our data map
+    for (auto& vehiclePair : vehicleDataMap) {
+        LAddress::L2Type vehicleId = vehiclePair.first;
+        VehicleData& vehicleData = vehiclePair.second;
+        
+        EV << "[RSU] Processing vehicle " << vehicleId << ":" << std::endl;
+        std::cout << "Processing vehicle " << vehicleId << std::endl;
+        
+        // Find the path from the vehicle's current road to its assigned destination
+        vector<string> edgePath;
+        
+        // If we already stored the path during assignment, use that
+        if (!vehicleData.assignedPath.empty()) {
+            edgePath = vehicleData.assignedPath;
+            EV << "[RSU] Using previously calculated path for vehicle " << vehicleId << std::endl;
+            std::cout << "Using previously calculated path for vehicle " << vehicleId << std::endl;
+            
+            // Validate path: make sure it's not too long to avoid SUMO issues
+            if (edgePath.size() > 50) {
+                // If path is very long, truncate it to just source and destination
+                std::string sourceEdge = edgePath.front();
+                std::string destEdge = edgePath.back();
+                edgePath.clear();
+                edgePath.push_back(sourceEdge);
+                edgePath.push_back(destEdge);
+                
+                EV << "[RSU] Path truncated for vehicle " << vehicleId << " (too long)" << std::endl;
+                std::cout << "Path truncated for vehicle " << vehicleId << " (too long)" << std::endl;
+            }
+            
+            // Print the path
+            std::cout << "Path: ";
+            for (const auto& edge : edgePath) {
+                std::cout << edge << " ";
+            }
+            std::cout << std::endl;
+        }
+        else {
+            // We don't have a stored path, calculate a new one
+            std::string destEdge = vehicleData.assignedDestination.nodeId;
+            
+            // Since we don't know the current edge, use a default source edge
+            std::string sourceEdge = "-1154"; // Example source edge
+            EV << "[RSU] No stored path, calculating from " << sourceEdge << " to " << destEdge << std::endl;
+            std::cout << "No stored path, calculating from " << sourceEdge << " to " << destEdge << std::endl;
+            
+            if (graphProcessor) {
+                edgePath = graphProcessor->findEdgeShortestPath(sourceEdge, destEdge);
+                
+                // Print the calculated path
+                std::cout << "Calculated path: ";
+                for (const auto& edge : edgePath) {
+                    std::cout << edge << " ";
+                }
+                std::cout << std::endl;
+            }
+            else {
+                EV << "[RSU] ERROR: GraphProcessor not available" << std::endl;
+                std::cout << "ERROR: GraphProcessor not available" << std::endl;
+            }
+        }
+        
+        // Simplify the path if needed - sometimes we only need to send the destination
+        // This is a fallback if direct route changes fail
+        if (edgePath.size() > 1) {
+            // Create a direct path that just sends the first and last edge
+            std::vector<std::string> simplifiedPath;
+            simplifiedPath.push_back(edgePath.front()); // Current edge
+            simplifiedPath.push_back(edgePath.back());  // Destination edge
+            
+            // If the path is valid, send it
+            if (!edgePath.empty()) {
+                // First try sending the full path
+                sendRerouteMessage(vehicleId, edgePath);
+                vehiclesRerouted++;
+                
+                // Store the path we sent (for debugging/analysis)
+                vehicleData.lastSentPath = edgePath;
+            }
+        }
+        else if (!edgePath.empty()) {
+            // Just send the destination (single edge)
+            sendRerouteMessage(vehicleId, edgePath);
+            vehiclesRerouted++;
+            
+            // Store the path we sent
+            vehicleData.lastSentPath = edgePath;
+        }
+        else {
+            EV << "[RSU] No path found for vehicle " << vehicleId << " to destination " 
+               << vehicleData.assignedDestination.nodeId << std::endl;
+            std::cout << "No path found for vehicle " << vehicleId << " to destination "
+                      << vehicleData.assignedDestination.nodeId << std::endl;
+        }
+    }
+    
+    EV << "[RSU] Rerouted " << vehiclesRerouted << " vehicles out of " 
+       << vehicleDataMap.size() << " total vehicles" << std::endl;
+    std::cout << "Rerouted " << vehiclesRerouted << " vehicles out of "
+              << vehicleDataMap.size() << " total vehicles" << std::endl;
+    
+    EV << "\n[RSU] ===== REROUTING COMPLETE =====\n" << std::endl;
+}
+
+void RSUControlApp::sendRerouteMessage(LAddress::L2Type vehicleId, const std::vector<std::string>& edgePath) {
+    // Get the correct simulation ID for this vehicle
+    int simId = vehicleDataMap[vehicleId].simulationId;
+    if (simId == -1) {
+        // If no mapping exists, use the original ID (shouldn't happen with pre-mapping)
+        simId = vehicleId;
+        EV << "[RSU] WARNING: No simulation ID mapping for vehicle " << vehicleId << std::endl;
+        std::cout << "RSU WARNING: No simulation ID mapping for vehicle " << vehicleId << std::endl;
+    }
+    
+    // Build the CHANGE_ROUTE message with the complete path
+    std::ostringstream routeStr;
+    routeStr << "CHANGE_ROUTE:" << simId << ":";
+    
+    // Include all edges in the path
+    if (!edgePath.empty()) {
+        for (size_t i = 0; i < edgePath.size(); i++) {
+            routeStr << edgePath[i];
+            if (i < edgePath.size() - 1) {
+                routeStr << " ";  // Space-separated list of edges
+            }
+        }
+        
+        std::string message = routeStr.str();
+        
+        // Enhanced debug information
+        EV << "\n[RSU] ====== SENDING BROADCAST REROUTE MESSAGE ======" << std::endl;
+        EV << "[RSU] Target vehicle ID: " << simId << std::endl;
+        EV << "[RSU] Message content: " << message << std::endl;
+        EV << "[RSU] System time: " << simTime() << std::endl;
+        EV << "[RSU] ====================================" << std::endl;
+        
+        std::cout << "\nRSU SENDING BROADCAST: Target vehicle ID: " << simId << std::endl;
+        std::cout << "RSU SENDING: Message content: " << message << std::endl;
+        std::cout << "RSU SENDING: System time: " << simTime() << std::endl;
+        
+        // Create a broadcast message to all vehicles
+        auto* response = new TraCIDemo11pMessage();
+        response->setDemoData(message.c_str());
+        response->setSenderAddress(myId);
+        
+        auto* wsm = new BaseFrame1609_4();
+        wsm->encapsulate(response);
+        populateWSM(wsm);
+        // Important: Do not set a recipient address for broadcast
+        // wsm->setRecipientAddress(vehicleId); - Remove this line
+        
+        sendDown(wsm);
+        
+        EV << "[RSU] Broadcast reroute message for vehicle " << simId << ": " << message << std::endl;
+    } else {
+        EV << "[RSU] Error: Cannot send empty path for vehicle " << vehicleId << " (sim ID: " << simId << ")" << std::endl;
+        std::cout << "Error: Cannot send empty path for vehicle " << vehicleId << " (sim ID: " << simId << ")" << std::endl;
     }
 }
 
 void RSUControlApp::finish() {
     cancelAndDelete(statusCheckMsg);
+    cancelAndDelete(rerouteMsg); // Clean up the reroute message
     TraCIDemoRSU11p::finish();
 }
 
@@ -894,7 +1193,7 @@ void RSUControlApp::generateAndAssignDestinations(const std::vector<VehicleInfo>
     }
     
     EV << "[RSU] Generating optimal destinations for " << sourceRoads.size() << " vehicles" << std::endl;
-    int destsToGenerate = sourceRoads.size(); 
+    int destsToGenerate = sourceRoads.size();
     auto destinations = taskGenerator->getPotentialDestinationEdges(destsToGenerate, sourceRoads);
     
     // Create Destination objects from the edge IDs
@@ -937,26 +1236,26 @@ void RSUControlApp::generateAndAssignDestinations(const std::vector<VehicleInfo>
         if (estimatedTime <= 0) {
             estimatedTime = 1.0; // Set a minimum travel time
         }
-        
+
         // Set time window to 1.5-2.5 times the minimum travel time
         double earliness = 1.5 * estimatedTime;
         double tardiness = 2.5 * estimatedTime;
-        
+
         // Update the time window for this destination
         destObjects[i].timeWindow.earliness = earliness;
         destObjects[i].timeWindow.tardiness = tardiness;
     }
-    
+
     if (destObjects.size() < vehicles.size()) {
-        EV << "[RSU] WARNING: Not enough destinations generated (" << destObjects.size() 
+        EV << "[RSU] WARNING: Not enough destinations generated (" << destObjects.size()
            << " for " << vehicles.size() << " vehicles)" << std::endl;
     }
-    
+
     EV << "[RSU] Generated " << destObjects.size() << " destinations with time windows:" << std::endl;
     for (size_t i = 0; i < destObjects.size(); ++i) {
         const auto& dest = destObjects[i];
-        EV << "  - Destination for Vehicle " << i << " (Source: " << (i < sourceRoads.size() ? sourceRoads[i] : "N/A") << "): Edge " << dest.nodeId 
-           << " (Time window: " << dest.timeWindow.earliness 
+        EV << "  - Destination for Vehicle " << i << " (Source: " << (i < sourceRoads.size() ? sourceRoads[i] : "N/A") << "): Edge " << dest.nodeId
+           << " (Time window: " << dest.timeWindow.earliness
            << " - " << dest.timeWindow.tardiness << ")" << std::endl;
     }
 
@@ -980,7 +1279,7 @@ void RSUControlApp::generateAndAssignDestinations(const std::vector<VehicleInfo>
                  // Dùng findEdgeShortestPath để có kết quả chính xác và nhất quán với hiển thị đường đi
                  auto path = graphProcessor->findEdgeShortestPath(sourceRoads[i], destObjects[j].nodeId);
                  pathLength = 0.0;
-                 
+
                  // Tính độ dài đường đi bằng cách cộng chiều dài mỗi edge
                  if (!path.empty()) {
                     const Graph& graph = graphProcessor->getGraph();
@@ -1048,21 +1347,21 @@ void RSUControlApp::generateAndAssignDestinations(const std::vector<VehicleInfo>
                                 if (edgeFound) break;
                             }
                             if (!edgeFound) {
-                totalDistance += 100.0; 
+                totalDistance += 100.0;
             }
         }
         
         double averageSpeed = 13.89;
         double estimatedTime = totalDistance / averageSpeed;
         if (estimatedTime <= 0) {
-            estimatedTime = 1.0; 
+            estimatedTime = 1.0;
         }
         
         EV << "    Path length: " << totalDistance << " m" << std::endl;
         EV << "    Estimated travel time: " << estimatedTime << " s" << std::endl;
-        EV << "    Time window: " << destObjects[i].timeWindow.earliness 
-           << " - " << destObjects[i].timeWindow.tardiness 
-           << " (approx: " << (destObjects[i].timeWindow.earliness / estimatedTime) 
+        EV << "    Time window: " << destObjects[i].timeWindow.earliness
+           << " - " << destObjects[i].timeWindow.tardiness
+           << " (approx: " << (destObjects[i].timeWindow.earliness / estimatedTime)
            << "x - " << (destObjects[i].timeWindow.tardiness / estimatedTime) << "x of minimal travel time)" << std::endl;
         
         if (path.size() <= 20) {
@@ -1079,13 +1378,36 @@ void RSUControlApp::generateAndAssignDestinations(const std::vector<VehicleInfo>
                << " (" << path.size() << " segments)" << std::endl;
         }
     }
-    
+
     for (size_t i = 0; i < processedVehicles; i++) {
-        LAddress::L2Type vehicleId = i; 
+        LAddress::L2Type vehicleId = i;
         vehicleDataMap[vehicleId].assignedDestination = destObjects[i];
+        
+        // Store the assigned path
+        const std::string& sourceRoad = sourceRoads[i];
+        const std::string& targetRoad = destObjects[i].nodeId;
+        auto path = graphProcessor->findEdgeShortestPath(sourceRoad, targetRoad);
+        vehicleDataMap[vehicleId].assignedPath = path;
+        
+        // Print detailed path information for debugging
+        std::cout << "Stored path for vehicle " << vehicleId << " from " << sourceRoad << " to " << targetRoad << ":" << std::endl;
+        std::cout << "  Path has " << path.size() << " edges: ";
+        for (const auto& edge : path) {
+            std::cout << edge << " ";
+        }
+        std::cout << std::endl;
+    }
+
+    EV << "\n[RSU] Assignment completed for " << processedVehicles << " vehicles" << std::endl;
+    
+    // Print a summary of vehicle data map contents
+    std::cout << "Vehicle data map after assignment:" << std::endl;
+    for (const auto& pair : vehicleDataMap) {
+        std::cout << "  Vehicle ID: " << pair.first 
+                  << ", destination: " << pair.second.assignedDestination.nodeId
+                  << ", path size: " << pair.second.assignedPath.size() << std::endl;
     }
     
-    EV << "\n[RSU] Assignment completed for " << processedVehicles << " vehicles" << std::endl;
     EV << "==============================================================\n" << std::endl;
 }
 

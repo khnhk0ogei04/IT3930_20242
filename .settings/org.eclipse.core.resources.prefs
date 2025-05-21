@@ -3,6 +3,7 @@ encoding//simulations/veins/omnetpp.ini=UTF-8
 encoding//src/veins/Edge.h=UTF-8
 encoding//src/veins/Graph.cc=UTF-8
 encoding//src/veins/Graph.h=UTF-8
+encoding//src/veins/GraphProcessor.cc=UTF-8
 encoding//src/veins/GraphProcessor.h=UTF-8
 encoding//src/veins/Node.h=UTF-8
 encoding//src/veins/RSUControlApp.cc=UTF-8

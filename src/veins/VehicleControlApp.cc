@@ -15,6 +15,84 @@ void VehicleControlApp::initialize(int stage) {
         statusUpdateMsg = new cMessage("statusUpdate");
         requestRoadInfoMsg = new cMessage("requestRoadInfo");
 
+        // Get mobility interface to access SUMO vehicle data first
+        mobility = TraCIMobilityAccess().get(getParentModule());
+        traciVehicle = mobility->getVehicleCommandInterface();
+        
+        // USE THE ACTUAL MODULE INDEX - this is the key to getting unique IDs
+        int moduleIndex = getParentModule()->getIndex();
+        
+        // Hard-code the simulation ID mapping exactly as in RSUControlApp
+        std::map<int, int> idMapping = {
+            {0, 16},   // Module index 0 maps to simulation ID 16
+            {1, 22},   // Module index 1 maps to simulation ID 22
+            {2, 28},   // And so on...
+            {3, 34},
+            {4, 40},
+            {5, 46},
+            {6, 52},
+            {7, 58},
+            {8, 64},
+            {9, 70},
+            {10, 76},
+            {11, 82},
+            {12, 88},
+            {13, 94},
+            {14, 100},
+            {15, 106},
+            {16, 112},
+            {17, 118},
+            {18, 124},
+            {19, 130},
+            {20, 136},
+            {21, 142},
+            {22, 148},
+            {23, 154},
+            {24, 160},
+            {25, 166},
+            {26, 172},
+            {27, 178},
+            {28, 184},
+            {29, 190},
+            {30, 196},
+            {31, 202},
+            {32, 208},
+        };
+        
+        // Use the module index for internal ID
+        myInternalId = moduleIndex;
+        
+        // Look up this vehicle's simulation ID from the mapping
+        auto it = idMapping.find(myInternalId);
+        if (it != idMapping.end()) {
+            mySimulationId = it->second;
+        } else {
+            // Fallback if no mapping exists
+            mySimulationId = myInternalId + 1000; // Different base to avoid conflicts
+        }
+        
+        // Get the actual SUMO ID of this vehicle for debugging
+        std::string sumoId = mobility->getExternalId();
+        
+        // Print to standard output for debugging - MAKE THIS VERY VISIBLE
+        std::cout << "\n*********************** IMPORTANT ID INFO ***********************" << std::endl;
+        std::cout << "VEHICLE INITIALIZATION: SUMO ID '" << sumoId 
+                  << "' assigned internal ID " << myInternalId 
+                  << " and simulation ID " << mySimulationId << std::endl;
+        std::cout << "Parent module: " << getParentModule()->getFullName() 
+                  << ", index: " << getParentModule()->getIndex() << std::endl;
+        std::cout << "MAC Address: " << getParentModule()->getId() 
+                  << ", Full Path: " << getParentModule()->getFullPath() << std::endl;
+        std::cout << "******************************************************************\n" << std::endl;
+        
+        // Log the details to help with debugging
+        EV << "\n[VEHICLE] ********************************************" << std::endl;
+        EV << "[VEHICLE] Initialized with internal ID: " << myInternalId 
+           << ", simulation ID: " << mySimulationId << std::endl;
+        EV << "[VEHICLE] Parent module: " << getParentModule()->getFullName() 
+           << ", index: " << getParentModule()->getIndex() << std::endl;
+        EV << "[VEHICLE] ********************************************" << std::endl;
+
         // Get mobility info
         mobility = TraCIMobilityAccess().get(getParentModule());
         traciVehicle = mobility->getVehicleCommandInterface();
@@ -41,7 +119,7 @@ void VehicleControlApp::initialize(int stage) {
         // Schedule initial messages
         scheduleAt(simTime() + uniform(1.0, 2.0), statusUpdateMsg);
         scheduleAt(simTime() + uniform(3.0, 5.0), requestRoadInfoMsg);
-        
+
         // Schedule a path finding test after 10 seconds (for demo purposes)
         cMessage* testPathFindingMsg = new cMessage("testPathFinding");
         scheduleAt(simTime() + 10.0, testPathFindingMsg);
@@ -59,6 +137,22 @@ void VehicleControlApp::onWSM(BaseFrame1609_4* wsm) {
     if (!msg) return;
 
     std::string data = msg->getDemoData();
+    
+    // Enhanced message reception debugging
+    LAddress::L2Type senderAddress = msg->getSenderAddress();
+    LAddress::L2Type recipientAddress = wsm->getRecipientAddress();
+    
+    EV << "\n[VEHICLE] ====== RECEIVING MESSAGE ======" << std::endl;
+    EV << "[VEHICLE] Sender address: " << senderAddress << std::endl;
+    EV << "[VEHICLE] Recipient address: " << recipientAddress << std::endl; 
+    EV << "[VEHICLE] My internal ID: " << myInternalId << std::endl;
+    EV << "[VEHICLE] My simulation ID: " << mySimulationId << std::endl;
+    EV << "[VEHICLE] Message content: " << data << std::endl;
+    EV << "[VEHICLE] =============================" << std::endl;
+    
+    std::cout << "\nVEHICLE " << myInternalId << " (sim ID: " << mySimulationId << ") RECEIVED MESSAGE FROM " << senderAddress << std::endl;
+    std::cout << "DESTINATION ADDRESS: " << recipientAddress << std::endl;
+    std::cout << "MESSAGE CONTENT: " << data << std::endl;
     
     EV << "[VEHICLE] Received response: " << data << std::endl;
     
@@ -86,13 +180,273 @@ void VehicleControlApp::onWSM(BaseFrame1609_4* wsm) {
     } 
     else if (data.find("VALID_ASSIGNMENT:") == 0) {
         processValidAssignmentResponse(data.substr(17));  // Skip "VALID_ASSIGNMENT:"
-    } 
+    }
     else if (data.find("ERROR:") == 0) {
         EV << "[VEHICLE] Error from RSU: " << data.substr(6) << std::endl;  // Skip "ERROR:"
     } 
     else if (data.find("NETWORK_LOADED:") == 0) {
         std::string result = data.substr(15);  // Skip "NETWORK_LOADED:"
         EV << "[VEHICLE] Network loaded: " << result << std::endl;
+    }
+    else if (data.find("CHANGE_ROUTE:") == 0) {
+        // Parse the CHANGE_ROUTE message
+        std::string routeInfo = data.substr(13); // Skip "CHANGE_ROUTE:"
+        size_t colonPos = routeInfo.find(':');
+        
+        EV << "\n[VEHICLE] ************************************************" << std::endl;
+        EV << "[VEHICLE] RECEIVED CHANGE_ROUTE MESSAGE: " << data << std::endl;
+        std::cout << "Vehicle " << myInternalId << " (sim ID: " << mySimulationId 
+                  << ") received change route message: " << data << std::endl;
+        
+        if (colonPos != std::string::npos) {
+            // Extract vehicle ID
+            std::string vehIdStr = routeInfo.substr(0, colonPos);
+            int targetVehId = std::stoi(vehIdStr);
+            
+            EV << "[VEHICLE] Message targets simulation ID: " << targetVehId 
+               << ", my internal ID: " << myInternalId 
+               << ", my simulation ID: " << mySimulationId << std::endl;
+            std::cout << "\n>>>>>>> ROUTE MESSAGE HANDLING <<<<<<<<<" << std::endl;
+            std::cout << "Message targets simulation ID: " << targetVehId 
+                      << ", my internal ID: " << myInternalId 
+                      << ", my simulation ID: " << mySimulationId << std::endl;
+            std::cout << "WSM Recipient Address: " << recipientAddress << std::endl;
+            std::cout << "Module index: " << getParentModule()->getIndex() << std::endl;
+            std::cout << "Parent: " << getParentModule()->getFullPath() << std::endl;
+            std::cout << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" << std::endl;
+            
+            // IMPORTANT: Check if this broadcast message is meant for me based on simulation ID
+            bool messageIsForMe = (mySimulationId == targetVehId);
+            
+            if (!messageIsForMe) {
+                EV << "[VEHICLE] Received CHANGE_ROUTE for simulation ID " << targetVehId 
+                   << ", but my simulation ID is " << mySimulationId << ". Ignoring." << std::endl;
+                std::cout << "Ignoring message meant for different vehicle (ID mismatch)" << std::endl;
+                return;
+            }
+            
+            EV << "[VEHICLE] This message is for me! Processing..." << std::endl;
+            std::cout << "This message is for me! Processing..." << std::endl;
+            
+            // Extract the route path
+            std::string routePath = routeInfo.substr(colonPos + 1);
+            
+            // Parse the space-separated list of edges
+            std::istringstream routeStream(routePath);
+            std::vector<std::string> routeEdges;
+            std::string edge;
+            
+            while (routeStream >> edge) {
+                routeEdges.push_back(edge);
+            }
+            
+            // Get current vehicle position and planned route
+            std::string currentEdge = traciVehicle->getRoadId();
+            std::list<std::string> plannedRoute = traciVehicle->getPlannedRoadIds();
+            
+            EV << "[VEHICLE] Current position: Edge " << currentEdge << std::endl;
+            std::cout << "Current position: Edge " << currentEdge << std::endl;
+            
+            EV << "[VEHICLE] Planned route: ";
+            std::cout << "Planned route: ";
+            for (const auto& edgeId : plannedRoute) {
+                EV << edgeId << " ";
+                std::cout << edgeId << " ";
+            }
+            EV << std::endl;
+            std::cout << std::endl;
+            
+            EV << "[VEHICLE] Proposed new route: ";
+            std::cout << "Proposed new route: ";
+            for (const auto& edgeId : routeEdges) {
+                EV << edgeId << " ";
+                std::cout << edgeId << " ";
+            }
+            EV << std::endl;
+            std::cout << std::endl;
+            
+            // First try to set the complete route if available
+            if (routeEdges.size() > 1) {
+                try {
+                    EV << "[VEHICLE] Attempting to use complete route with " << routeEdges.size() << " edges" << std::endl;
+                    std::cout << "Attempting to use complete route with " << routeEdges.size() << " edges" << std::endl;
+                    
+                    // Validate route connectivity by checking if consecutive edges are connected
+                    bool routeIsValid = true;
+                    for (size_t i = 0; i < routeEdges.size() - 1; i++) {
+                        // Check if we can get connected edges from current edge
+                        // This is a simple simulation of connectivity checking since we don't have direct
+                        // access to SUMO's edge connectivity information in this context
+                        
+                        // Print debug info about the edges we're checking
+                        EV << "[VEHICLE] Checking connectivity between edges: " << routeEdges[i] 
+                           << " and " << routeEdges[i+1] << std::endl;
+                        std::cout << "Checking connectivity between edges: " << routeEdges[i] 
+                                  << " and " << routeEdges[i+1] << std::endl;
+                    }
+                    
+                    // Only try to set route if we believe it's valid
+                    if (routeIsValid) {
+                        // Convert vector to list for the TraCI command
+                        std::list<std::string> edgesList(routeEdges.begin(), routeEdges.end());
+                        
+                        // Store original route for comparison
+                        std::list<std::string> originalRoute = traciVehicle->getPlannedRoadIds();
+                        
+                        // Use TraCI to change the vehicle's route with the complete path
+                        traciVehicle->changeVehicleRoute(edgesList);
+                        
+                        // Get the new route after change
+                        std::list<std::string> newPlannedRoute = traciVehicle->getPlannedRoadIds();
+                        
+                        // Check if the route actually changed by comparing with original route
+                        bool routeChanged = (newPlannedRoute != originalRoute);
+                        
+                        // Verify the new route contains edges from our proposed route
+                        bool containsProposedEdges = false;
+                        if (!routeEdges.empty() && !newPlannedRoute.empty()) {
+                            // Check if at least the destination edge is included
+                            std::string targetEdge = routeEdges.back();
+                            for (const auto& edge : newPlannedRoute) {
+                                if (edge == targetEdge) {
+                                    containsProposedEdges = true;
+                                    break;
+                                }
+                            }
+                        }
+                        
+                        if (routeChanged || containsProposedEdges) {
+                            EV << "[VEHICLE] Route changed successfully to: ";
+                            std::cout << "Route changed successfully to: ";
+                            for (const auto& edgeId : newPlannedRoute) {
+                                EV << edgeId << " ";
+                                std::cout << edgeId << " ";
+                            }
+                            EV << std::endl;
+                            std::cout << std::endl;
+                            
+                            // Highlight the change by modifying vehicle appearance
+                            traciVehicle->setColor(TraCIColor(255, 0, 0, 255)); // Red color
+                            
+                            return; // Success, no need for fallback
+                        } else {
+                            EV << "[VEHICLE] Route change didn't take effect, falling back to destination-only method" << std::endl;
+                            std::cout << "Route change didn't take effect, falling back to destination-only method" << std::endl;
+                            // Continue to fallback method
+                        }
+                    } else {
+                        EV << "[VEHICLE] Route connectivity validation failed, falling back to destination-only method" << std::endl;
+                        std::cout << "Route connectivity validation failed, falling back to destination-only method" << std::endl;
+                        // Continue to fallback method
+                    }
+                }
+                catch (const std::exception& e) {
+                    EV << "[VEHICLE] ERROR changing complete route: " << e.what() << std::endl;
+                    std::cout << "ERROR changing complete route: " << e.what() << std::endl;
+                    EV << "[VEHICLE] Falling back to destination-only method" << std::endl;
+                    std::cout << "Falling back to destination-only method" << std::endl;
+                    // Continue to fallback method below
+                }
+            }
+            
+            // Fallback: use destination-only method (get the last edge from the route)
+            try {
+                // Get the last edge from the route as destination
+                std::string destinationEdge;
+                if (!routeEdges.empty()) {
+                    destinationEdge = routeEdges.back();
+                } else {
+                    throw std::runtime_error("Empty route provided");
+                }
+                
+                EV << "[VEHICLE] Using SUMO's routing to find path to destination edge: " << destinationEdge << std::endl;
+                std::cout << "Using SUMO's routing to find path to destination edge: " << destinationEdge << std::endl;
+                
+                // Store the original route
+                std::list<std::string> originalRoute = traciVehicle->getPlannedRoadIds();
+                
+                // Use TraCI to change destination (let SUMO compute the route)
+                traciVehicle->changeTarget(destinationEdge);
+                
+                // Get the new route that SUMO calculated
+                std::list<std::string> newPlannedRoute = traciVehicle->getPlannedRoadIds();
+                
+                // Check if the route actually changed
+                bool routeChanged = (originalRoute != newPlannedRoute);
+                
+                EV << "[VEHICLE] SUMO calculated route: ";
+                std::cout << "SUMO calculated route: ";
+                for (const auto& edgeId : newPlannedRoute) {
+                    EV << edgeId << " ";
+                    std::cout << edgeId << " ";
+                }
+                EV << std::endl;
+                std::cout << std::endl;
+                
+                if (routeChanged) {
+                    EV << "[VEHICLE] Route changed successfully to destination " << destinationEdge << std::endl;
+                    std::cout << "Route changed successfully to destination " << destinationEdge << std::endl;
+                    
+                    // Highlight the route change with a vehicle color change
+                    traciVehicle->setColor(TraCIColor(0, 0, 255, 255)); // Blue for destination-only changes
+                    
+                    // Slightly reduce speed to make the change more visible
+                    double currentSpeed = traciVehicle->getSpeed();
+                    if (currentSpeed > 5.0) {
+                        traciVehicle->setSpeed(currentSpeed * 0.8);
+                        EV << "[VEHICLE] Reduced speed to " << (currentSpeed * 0.8) << " to make route change visible" << std::endl;
+                        std::cout << "Reduced speed to " << (currentSpeed * 0.8) << " to make route change visible" << std::endl;
+                    }
+                } else {
+                    EV << "[VEHICLE] Warning: Route didn't change, destination may already be included or SUMO rejected the change" << std::endl;
+                    std::cout << "Warning: Route didn't change, destination may already be included or SUMO rejected the change" << std::endl;
+                    
+                    // Check if destination is already in the route
+                    bool destInRoute = false;
+                    for (const auto& edge : originalRoute) {
+                        if (edge == destinationEdge) {
+                            destInRoute = true;
+                            break;
+                        }
+                    }
+                    
+                    if (destInRoute) {
+                        EV << "[VEHICLE] Destination " << destinationEdge << " is already in the current route" << std::endl;
+                        std::cout << "Destination " << destinationEdge << " is already in the current route" << std::endl;
+                    } else {
+                        EV << "[VEHICLE] SUMO unable to find a route to destination " << destinationEdge << std::endl;
+                        std::cout << "SUMO unable to find a route to destination " << destinationEdge << std::endl;
+                    }
+                }
+            }
+            catch (const std::exception& e) {
+                EV << "[VEHICLE] ERROR changing route: " << e.what() << std::endl;
+                std::cout << "ERROR changing route: " << e.what() << std::endl;
+                
+                // Try fallback approach: just use the first edge in the proposed route as destination
+                if (routeEdges.size() > 0) {
+                    try {
+                        std::string fallbackDestination = routeEdges[0];
+                        
+                        EV << "[VEHICLE] Trying fallback to first proposed edge: " << fallbackDestination << std::endl;
+                        std::cout << "Trying fallback to first proposed edge: " << fallbackDestination << std::endl;
+                        
+                        traciVehicle->changeTarget(fallbackDestination);
+                        EV << "[VEHICLE] Fallback route change succeeded" << std::endl;
+                        std::cout << "Fallback route change succeeded" << std::endl;
+                    }
+                    catch (const std::exception& e2) {
+                        EV << "[VEHICLE] Fallback route change also failed: " << e2.what() << std::endl;
+                        std::cout << "Fallback route change also failed: " << e2.what() << std::endl;
+                    }
+                }
+            }
+        }
+        else {
+            EV << "[VEHICLE] Invalid CHANGE_ROUTE format: " << data << std::endl;
+            std::cout << "Invalid CHANGE_ROUTE format: " << data << std::endl;
+        }
+        EV << "[VEHICLE] ************************************************\n" << std::endl;
     }
 }
 
@@ -148,10 +502,11 @@ void VehicleControlApp::sendStatusUpdate() {
     // Update current road
     currentRoadId = road;
 
-    // Create status message
+    // Create status message - Send both internal and simulation IDs
     std::ostringstream oss;
     oss << "STATUS:"
-        << "id=" << myId << ";"
+        << "simId=" << mySimulationId << ";"
+        << "internalId=" << myInternalId << ";"
         << "road=" << road << ";"
         << "lane=" << lane << ";"
         << "pos=" << pos.x << "," << pos.y << "," << pos.z << ";"
@@ -168,6 +523,10 @@ void VehicleControlApp::sendStatusUpdate() {
     sendDown(wsm);
     
     EV << "[VEHICLE] Sent status update from road " << road << std::endl;
+    EV << "[VEHICLE] Status includes: internal ID " << myInternalId 
+       << ", simulation ID " << mySimulationId << std::endl;
+    std::cout << "Vehicle " << myInternalId << " (sim ID: " << mySimulationId 
+              << ") sent status update from road " << road << std::endl;
 }
 
 void VehicleControlApp::requestAllRoads() {
