@@ -66,11 +66,7 @@ void VehicleControlApp::initialize(int stage) {
         auto it = idMapping.find(myInternalId);
         if (it != idMapping.end()) {
             mySimulationId = it->second;
-        } else {
-            // Fallback if no mapping exists
-            mySimulationId = myInternalId + 1000; // Different base to avoid conflicts
         }
-        
         // Get the actual SUMO ID of this vehicle for debugging
         std::string sumoId = mobility->getExternalId();
         
@@ -206,14 +202,6 @@ void VehicleControlApp::onWSM(BaseFrame1609_4* wsm) {
             EV << "[VEHICLE] Message targets simulation ID: " << targetVehId 
                << ", my internal ID: " << myInternalId 
                << ", my simulation ID: " << mySimulationId << std::endl;
-            std::cout << "\n>>>>>>> ROUTE MESSAGE HANDLING <<<<<<<<<" << std::endl;
-            std::cout << "Message targets simulation ID: " << targetVehId 
-                      << ", my internal ID: " << myInternalId 
-                      << ", my simulation ID: " << mySimulationId << std::endl;
-            std::cout << "WSM Recipient Address: " << recipientAddress << std::endl;
-            std::cout << "Module index: " << getParentModule()->getIndex() << std::endl;
-            std::cout << "Parent: " << getParentModule()->getFullPath() << std::endl;
-            std::cout << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" << std::endl;
             
             // IMPORTANT: Check if this broadcast message is meant for me based on simulation ID
             bool messageIsForMe = (mySimulationId == targetVehId);
@@ -386,17 +374,8 @@ void VehicleControlApp::onWSM(BaseFrame1609_4* wsm) {
                 if (routeChanged) {
                     EV << "[VEHICLE] Route changed successfully to destination " << destinationEdge << std::endl;
                     std::cout << "Route changed successfully to destination " << destinationEdge << std::endl;
-                    
-                    // Highlight the route change with a vehicle color change
                     traciVehicle->setColor(TraCIColor(0, 0, 255, 255)); // Blue for destination-only changes
-                    
-                    // Slightly reduce speed to make the change more visible
-                    double currentSpeed = traciVehicle->getSpeed();
-                    if (currentSpeed > 5.0) {
-                        traciVehicle->setSpeed(currentSpeed * 0.8);
-                        EV << "[VEHICLE] Reduced speed to " << (currentSpeed * 0.8) << " to make route change visible" << std::endl;
-                        std::cout << "Reduced speed to " << (currentSpeed * 0.8) << " to make route change visible" << std::endl;
-                    }
+
                 } else {
                     EV << "[VEHICLE] Warning: Route didn't change, destination may already be included or SUMO rejected the change" << std::endl;
                     std::cout << "Warning: Route didn't change, destination may already be included or SUMO rejected the change" << std::endl;
@@ -708,58 +687,6 @@ void VehicleControlApp::processAllRoadsResponse(const std::string& data) {
 
     // Build the local road network from the received data
     buildLocalRoadNetwork();
-
-    // Immediately run path finding tests to print shortest paths
-    EV << "\n=============== IMMEDIATE PATH FINDING TEST ===============" << std::endl;
-
-    // Kiểm tra đường đi giữa các con đường
-    if (allRoads.size() >= 2) {
-        std::string source1 = allRoads.front();
-        std::string target1 = allRoads.back();
-        EV << "Test 1: Finding path from road " << source1 << " to road " << target1 << std::endl;
-        std::vector<std::string> path = findShortestPath(source1, target1);
-        double pathLength = getShortestPathLength(source1, target1);
-        
-        if (!path.empty() && pathLength > 0) {
-            EV << "SUCCESS: Path found with length " << pathLength << std::endl;
-            // In đường đi trên một dòng với mũi tên phân tách
-            EV << "Path: ";
-            for (size_t i = 0; i < path.size(); i++) {
-                EV << path[i];
-                if (i < path.size() - 1) {
-                    EV << " -> ";
-                }
-            }
-            EV << std::endl;
-        } else {
-            EV << "NO PATH found between " << source1 << " and " << target1 << std::endl;
-        }
-
-        // Kiểm tra đường đi giữa đoạn đầu và giữa
-        if (allRoads.size() >= 3) {
-            std::string target2 = allRoads[allRoads.size() / 2];
-            EV << "\nTest 2: Finding path from road " << source1 << " to road " << target2 << std::endl;
-            path = findShortestPath(source1, target2);
-            pathLength = getShortestPathLength(source1, target2);
-            
-            if (!path.empty() && pathLength > 0) {
-                EV << "SUCCESS: Path found with length " << pathLength << std::endl;
-                // In đường đi trên một dòng với mũi tên phân tách
-                EV << "Path: ";
-                for (size_t i = 0; i < path.size(); i++) {
-                    EV << path[i];
-                    if (i < path.size() - 1) {
-                        EV << " -> ";
-                    }
-                }
-                EV << std::endl;
-            } else {
-                EV << "NO PATH found between " << source1 << " and " << target2 << std::endl;
-            }
-        }
-    } else {
-        EV << "Not enough roads to perform path finding tests" << std::endl;
-    }
     
     EV << "===========================================" << std::endl;
 
