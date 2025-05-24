@@ -16,7 +16,9 @@ public:
     void addEdge(const Edge& edge);
     size_t getNodeCount() const;
     size_t getEdgeCount() const;
-    const unordered_map<string, Node>& getNodes() const { return nodes; }
+    const unordered_map<string, Node>& getNodes() const {
+        return nodes;
+    }
     const unordered_map<string, vector<Edge>>& getAdjList() const {
         return adjList;
     }

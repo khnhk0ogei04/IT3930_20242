@@ -9,11 +9,9 @@ using namespace std;
 
 namespace veins {
 GraphProcessor::GraphProcessor(const Graph& graph) : roadNetwork(graph) {
-
 }
 
 GraphProcessor::~GraphProcessor() {
-    // Nothing to clean up
 }
 
 vector<string> GraphProcessor::findShortestPath(string sourceId, string targetId) const {
@@ -22,43 +20,24 @@ vector<string> GraphProcessor::findShortestPath(string sourceId, string targetId
 }
 
 double GraphProcessor::getShortestPathLength(string sourceId, string targetId) const {
-    // Print debug information
-    std::cout << "DEBUG: Finding shortest path length from " << sourceId << " to " << targetId << std::endl;
-
-    // Run Dijkstra's algorithm from the source node
     auto dijkstraResult = dijkstra(sourceId);
-    
-    // Check if the target node was reached
     auto it = dijkstraResult.find(targetId);
-    if (it == dijkstraResult.end()) {
-        std::cout << "DEBUG: No path found from " << sourceId << " to " << targetId << std::endl;
-        return -1.0;  // No path exists
+    if (it != dijkstraResult.end()){
+        cout << "path found with length " << it->second.first << std::endl;
+        return it->second.first;
     }
-
-    // Return the distance to the target node
-    std::cout << "DEBUG: Path found with length " << it->second.first << std::endl;
-    return it->second.first;
+    return -1.0;
 }
 
-std::vector<std::vector<std::string>> GraphProcessor::findKShortestPaths(
-    string sourceId, string targetId, int k) const {
-
-    std::vector<std::vector<std::string>> result;
-
-    // Find the shortest path first
+vector<vector<string>> GraphProcessor::findKShortestPaths(string sourceId, string targetId, int k) const {
+    vector<vector<string>> result;
     auto shortestPath = findShortestPath(sourceId, targetId);
-    if (shortestPath.empty()) {
-        return result;  // No path exists
-    }
-
     result.push_back(shortestPath);
-    if (k <= 1) {
-        return result;
-    }
-    std::vector<std::pair<std::vector<std::string>, double>> potentialPaths;
-    std::set<std::vector<std::string>> addedPaths;
+    if (k <= 1) return result;
+    vector<pair<vector<string>, double>> potentialPaths;
+    set<vector<string>> addedPaths;
     addedPaths.insert(shortestPath);
-    auto calculatePathLength = [this](const std::vector<std::string>& path) {
+    auto calculatePathLength = [this](const vector<string>& path) {
         double length = 0.0;
         for (const auto& edgeId : path) {
             for (const auto& nodePair : roadNetwork.getAdjList()) {
@@ -73,20 +52,13 @@ std::vector<std::vector<std::string>> GraphProcessor::findKShortestPaths(
         return length;
     };
 
-    // For each path already found, find potential next-best paths
     for (int i = 0; result.size() < k && i < result.size(); ++i) {
         const auto& path = result[i];
-
-        // For each node in the path (except the last), try alternative routes
         string lastNodeId = sourceId;
-        std::vector<string> rootPath;
-
-        for (size_t j = 0; j < path.size(); ++j) {
-            // Get the current edge and its destination node
+        vector<string> rootPath;
+        for (int j = 0; j < path.size(); ++j) {
             string currentEdgeId = path[j];
             string currentNodeId = "";
-
-            // Find where this edge goes to
             for (const auto& nodePair : roadNetwork.getAdjList()) {
                 for (const auto& edge : nodePair.second) {
                     if (edge.getId() == currentEdgeId) {
@@ -96,24 +68,16 @@ std::vector<std::vector<std::string>> GraphProcessor::findKShortestPaths(
                 }
                 if (!currentNodeId.empty()) break;
             }
-
             if (currentNodeId.empty()) continue;
-
-            // The root path up to current deviation point
-            std::vector<string> spurRootPath = rootPath;
-
-            // Remove the links that were in previous k-shortest paths
-            std::map<std::pair<string, string>, double> removedEdges;
-
+            // the root path up to current deviation point
+            vector<string> spurRootPath = rootPath;
+            // remove the links that were in previous k-shortest paths
+            map<pair<string, string>, double> removedEdges;
             for (const auto& prevPath : result) {
                 if (j < prevPath.size() && spurRootPath.size() <= prevPath.size() &&
-                    std::equal(spurRootPath.begin(), spurRootPath.end(), prevPath.begin())) {
-
-                    // Find the next edge in the previous path
+                    equal(spurRootPath.begin(), spurRootPath.end(), prevPath.begin())) {
                     if (j < prevPath.size()) {
                         string edgeToRemove = prevPath[j];
-
-                        // Find the source node of this edge
                         for (const auto& nodePair : roadNetwork.getAdjList()) {
                             for (const auto& edge : nodePair.second) {
                                 if (edge.getId() == edgeToRemove) {
@@ -125,62 +89,35 @@ std::vector<std::vector<std::string>> GraphProcessor::findKShortestPaths(
                     }
                 }
             }
-
-            // Create a temporary modified graph excluding removed edges
-            Graph tempGraph = roadNetwork;  // Make a copy (this is a deep copy in the original code)
-            for (const auto& edgePair : removedEdges) {
-                // We need to modify the real graph - but since we're in a const method,
-                // we can't modify the original graph
-                // For simplicity, we'll implement this by using Dijkstra with avoided edges
-                // ...
-            }
-
-            // Find shortest path from deviation node to target with modified graph
-            // Since we can't easily modify the graph in a const method, we'll use a modified
-            // version of dijkstra that avoids certain edges
-
-            // Run a modified Dijkstra's algorithm
-            std::map<std::string, double> distances;
-            std::map<std::string, std::string> previous;
-            std::set<std::string> visited;
-
-            // Initialize distances
+            Graph tempGraph = roadNetwork;
+            map<string, double> distances;
+            map<string, string> previous;
+            set<string> visited;
             for (const auto& nodePair : roadNetwork.getNodes()) {
-                distances[nodePair.first] = std::numeric_limits<double>::infinity();
+                distances[nodePair.first] = numeric_limits<double>::infinity();
             }
             distances[lastNodeId] = 0.0;
-
-            // Priority queue for Dijkstra's algorithm
-            std::set<std::pair<double, std::string>> pq;
-            pq.insert(std::make_pair(0.0, lastNodeId));
-
-            // Dijkstra's algorithm that avoids specific edges
+            set<pair<double, string>> pq;
+            pq.insert(make_pair(0.0, lastNodeId));
             while (!pq.empty()) {
                 auto it = pq.begin();
                 double dist = it->first;
-                std::string current = it->second;
+                string current = it->second;
                 pq.erase(it);
-
                 if (current == targetId) {
                     break;
                 }
-
                 if (visited.find(current) != visited.end()) {
                     continue;
                 }
                 visited.insert(current);
-
                 auto adjIt = roadNetwork.getAdjList().find(current);
                 if (adjIt != roadNetwork.getAdjList().end()) {
                     for (const auto& edge : adjIt->second) {
-                        std::string neighbor = edge.getTo();
-
-                        // Skip edges that were removed
+                        string neighbor = edge.getTo();
                         if (removedEdges.find({current, neighbor}) != removedEdges.end()) {
                             continue;
                         }
-
-                        // Also check if this node is in the root path to avoid loops
                         bool inRootPath = false;
                         for (const auto& rootEdgeId : spurRootPath) {
                             for (const auto& nodePair : roadNetwork.getAdjList()) {
@@ -195,36 +132,27 @@ std::vector<std::vector<std::string>> GraphProcessor::findKShortestPaths(
                             }
                             if (inRootPath) break;
                         }
-
                         if (inRootPath) continue;
-
                         double newDist = dist + edge.getLength();
                         if (newDist < distances[neighbor]) {
                             distances[neighbor] = newDist;
                             previous[neighbor] = edge.getId();
-                            pq.insert(std::make_pair(newDist, neighbor));
+                            pq.insert(make_pair(newDist, neighbor));
                         }
                     }
                 }
             }
-
-            // If we found a path from deviation to target
-            if (distances[targetId] != std::numeric_limits<double>::infinity()) {
-                // Reconstruct the path
-                std::vector<std::string> spurPath;
-                std::string current = targetId;
-
+            if (distances[targetId] != numeric_limits<double>::infinity()) {
+                vector<string> spurPath;
+                string current = targetId;
                 while (current != lastNodeId) {
                     auto prevIt = previous.find(current);
                     if (prevIt == previous.end()) {
                         spurPath.clear();
                         break;
                     }
-
-                    std::string edgeId = prevIt->second;
+                    string edgeId = prevIt->second;
                     spurPath.push_back(edgeId);
-
-                    // Find where this edge comes from
                     bool found = false;
                     for (const auto& nodePair : roadNetwork.getAdjList()) {
                         for (const auto& edge : nodePair.second) {
@@ -242,33 +170,23 @@ std::vector<std::vector<std::string>> GraphProcessor::findKShortestPaths(
                         break;
                     }
                 }
-
-                // Reverse the spur path (we built it backwards)
-                std::reverse(spurPath.begin(), spurPath.end());
-
-                // Combine root path and spur path
-                std::vector<std::string> totalPath = spurRootPath;
+                reverse(spurPath.begin(), spurPath.end());
+                vector<string> totalPath = spurRootPath;
                 totalPath.insert(totalPath.end(), spurPath.begin(), spurPath.end());
-
-                // If this path is new, add it to potential paths
                 if (addedPaths.find(totalPath) == addedPaths.end()) {
                     double pathLength = calculatePathLength(totalPath);
                     potentialPaths.push_back({totalPath, pathLength});
                 }
             }
-
-            // Update the root path to include the current edge
             rootPath.push_back(currentEdgeId);
             lastNodeId = currentNodeId;
         }
 
-        // Sort potential paths by length
-        std::sort(potentialPaths.begin(), potentialPaths.end(),
-            [](const std::pair<std::vector<std::string>, double>& a,
-               const std::pair<std::vector<std::string>, double>& b) {
+        sort(potentialPaths.begin(), potentialPaths.end(),
+            [](const pair<vector<string>, double>& a,
+               const pair<vector<string>, double>& b) {
                 return a.second < b.second;
             });
-
         // Add the next best path to the result
         while (!potentialPaths.empty() && result.size() < k) {
             auto bestPath = potentialPaths.front();
@@ -281,30 +199,18 @@ std::vector<std::vector<std::string>> GraphProcessor::findKShortestPaths(
             }
         }
     }
-
-    // If we didn't find enough paths, try the alternative approach from the original implementation
     if (result.size() < k) {
-        // Extract all edges from the shortest path
-        std::set<std::string> shortestPathEdges(shortestPath.begin(), shortestPath.end());
-
-        // For each edge in the shortest path, try to find an alternative path that doesn't use it
+        set<string> shortestPathEdges(shortestPath.begin(), shortestPath.end());
         for (const auto& edgeToAvoid : shortestPathEdges) {
-            // Run a modified Dijkstra's algorithm that avoids this edge
-            std::map<std::string, double> distances;
-            std::map<std::string, std::string> previous;
-            std::set<std::string> visited;
-
-            // Initialize distances
+            map<string, double> distances;
+            map<string, string> previous;
+            set<string> visited;
             for (const auto& nodePair : roadNetwork.getNodes()) {
-                distances[nodePair.first] = std::numeric_limits<double>::infinity();
+                distances[nodePair.first] = numeric_limits<double>::infinity();
             }
             distances[sourceId] = 0.0;
-
-            // Priority queue for Dijkstra's algorithm
             std::set<std::pair<double, std::string>> pq;
             pq.insert(std::make_pair(0.0, sourceId));
-
-            // Dijkstra's algorithm
             while (!pq.empty()) {
                 auto it = pq.begin();
                 double dist = it->first;
@@ -374,15 +280,12 @@ std::vector<std::vector<std::string>> GraphProcessor::findKShortestPaths(
                     }
                 }
 
-                // Reverse the path (we built it backwards)
+                // reverse the path
                 std::reverse(path.begin(), path.end());
-
-                // Check if this is a valid path and differs from paths we already have
                 if (!path.empty()) {
                     if (addedPaths.find(path) == addedPaths.end()) {
                         addedPaths.insert(path);
                         result.push_back(path);
-
                         if (result.size() >= k) {
                             break;
                         }
@@ -391,12 +294,9 @@ std::vector<std::vector<std::string>> GraphProcessor::findKShortestPaths(
             }
         }
     }
-
-    // Final safety check to ensure we don't return more than k paths
     if (result.size() > k) {
         result.resize(k);
     }
-
     return result;
 }
 
@@ -601,52 +501,37 @@ std::vector<std::string> GraphProcessor::reconstructPath(
     return path;
 }
 
-bool GraphProcessor::hungarianAlgorithm(const std::vector<std::vector<double>>& costMatrix) const {
-    // Simplified implementation that checks if each source can reach at least one target
-    // and each target can be reached by at least one source
-
-    const size_t n = costMatrix.size();
-
-    // Check if each source can reach at least one target
-    for (size_t i = 0; i < n; ++i) {
+bool GraphProcessor::hungarianAlgorithm(const vector<vector<double>>& costMatrix) const {
+    int n = costMatrix.size();
+    // check if each source can reach at least one target
+    for (int i = 0; i < n; ++i) {
         bool canReachAnyTarget = false;
-
-        for (size_t j = 0; j < n; ++j) {
-            if (costMatrix[i][j] != std::numeric_limits<double>::max()) {
+        for (int j = 0; j < n; ++j) {
+            if (costMatrix[i][j] != numeric_limits<double>::max()) {
                 canReachAnyTarget = true;
                 break;
             }
         }
-
-        if (!canReachAnyTarget) {
-            return false;  // This source can't reach any target
-        }
+        return false;
     }
-
-    // Check if each target can be reached by at least one source
-    for (size_t j = 0; j < n; ++j) {
+    // check if each target can be reached by at least one source
+    for (int j = 0; j < n; ++j) {
         bool canBeReachedByAnySource = false;
-
-        for (size_t i = 0; i < n; ++i) {
-            if (costMatrix[i][j] != std::numeric_limits<double>::max()) {
+        for (int i = 0; i < n; ++i) {
+            if (costMatrix[i][j] != numeric_limits<double>::max()) {
                 canBeReachedByAnySource = true;
                 break;
             }
         }
-
         if (!canBeReachedByAnySource) {
-            return false;  // This target can't be reached by any source
+            return false;
         }
     }
-
     return true;
 }
 
-// Implementation for findLaneShortestPath
 vector<GraphProcessor::LanePath> GraphProcessor::findLaneShortestPath(string sourceLaneId, string targetLaneId) const {
     vector<LanePath> result;
-
-    // Extract edge IDs and lane indices from the lane IDs
     string sourceEdgeId = extractEdgeIdFromLane(sourceLaneId);
     string targetEdgeId = extractEdgeIdFromLane(targetLaneId);
     int sourceLaneIndex = extractLaneIndexFromLane(sourceLaneId);
@@ -770,41 +655,33 @@ vector<GraphProcessor::LanePath> GraphProcessor::findLaneShortestPath(string sou
 }
 
 string GraphProcessor::extractEdgeIdFromLane(string laneId) const {
-    // In SUMO, lane IDs typically have the format "edgeId_laneIndex"
-    size_t pos = laneId.find_last_of('_');
+    int pos = laneId.find_last_of('_');
     if (pos != string::npos) {
         return laneId.substr(0, pos);
     }
-
-    // If the lane ID doesn't contain an underscore, it might just be the edge ID
-    // with a minus sign for direction (common in some SUMO networks)
     return laneId;
 }
 
 int GraphProcessor::extractLaneIndexFromLane(string laneId) const {
-    // In SUMO, lane IDs typically have the format "edgeId_laneIndex"
-    size_t pos = laneId.find_last_of('_');
+    int pos = laneId.find_last_of('_');
     if (pos != string::npos && pos < laneId.length() - 1) {
         try {
             return stoi(laneId.substr(pos + 1));
         } catch (const std::invalid_argument&) {
-            return 0; // Default to lane 0 if conversion fails
+            return 0;
         }
     }
-
-    // If no lane index is specified, default to 0
     return 0;
 }
 
 int GraphProcessor::findBestLaneForEdge(string edgeId) const {
-    // Find the edge in the graph
     for (const auto& nodePair : roadNetwork.getAdjList()) {
         for (const auto& edge : nodePair.second) {
             if (edge.getId() == edgeId) {
                 const auto& lanes = edge.getLanes();
 
                 if (lanes.empty()) {
-                    return 0; // Default to lane 0 if no lanes are defined
+                    return 0;
                 }
 
                 // Find the lane with the highest speed
@@ -817,13 +694,10 @@ int GraphProcessor::findBestLaneForEdge(string edgeId) const {
                         bestLaneIndex = lane.index;
                     }
                 }
-
                 return bestLaneIndex;
             }
         }
     }
-
-    // If edge not found, default to lane 0
     return 0;
 }
 
@@ -1198,9 +1072,7 @@ std::vector<int> GraphProcessor::getOptimalVehicleAssignment(
             }
         }
     }
-
-    // Print reduced cost matrix
-    std::cout << "\nINFO: Reduced Cost Matrix:" << std::endl;
+    cout << "\nINFO: Reduced Cost Matrix:" << std::endl;
     for (int i = 0; i < numVehicles; ++i) {
         std::string rowStr = "V_" + std::to_string(i) + "\t";
         for (int j = 0; j < numDestinations; ++j) {
@@ -1210,16 +1082,11 @@ std::vector<int> GraphProcessor::getOptimalVehicleAssignment(
                 rowStr += std::to_string(static_cast<int>(costMatrix[i][j])) + "\t";
             }
         }
-        std::cout << rowStr << std::endl;
+        cout << rowStr << std::endl;
     }
-
-    // For simplicity, we'll use a greedy approach on the reduced matrix
-    // A full Hungarian implementation would be more complex
-    std::vector<int> assignment(numVehicles, -1);
-    std::vector<bool> destAssigned(numDestinations, false);
+    vector<int> assignment(numVehicles, -1);
+    vector<bool> destAssigned(numDestinations, false);
     int assignmentsMade = 0;
-
-    // First pass: assign zeros in the reduced matrix
     for (int i = 0; i < numVehicles && assignmentsMade < std::min(numVehicles, numDestinations); ++i) {
         for (int j = 0; j < numDestinations; ++j) {
             if (costMatrix[i][j] == 0 && !destAssigned[j] && assignment[i] == -1) {
@@ -1230,10 +1097,8 @@ std::vector<int> GraphProcessor::getOptimalVehicleAssignment(
             }
         }
     }
-
-    // Second pass: assign remaining vehicles using minimum cost
     for (int i = 0; i < numVehicles; ++i) {
-        if (assignment[i] == -1) { // Vehicle not assigned yet
+        if (assignment[i] == -1) {
             double minCost = NO_PATH_PENALTY;
             int bestDest = -1;
             for (int j = 0; j < numDestinations; ++j) {
@@ -1250,7 +1115,7 @@ std::vector<int> GraphProcessor::getOptimalVehicleAssignment(
         }
     }
 
-    std::cout << "\nINFO: Assignment Results:" << std::endl;
+    cout << "\nINFO: Assignment Results:" << std::endl;
     for (int i = 0; i < numVehicles; ++i) {
         if (assignment[i] != -1) {
             int j = assignment[i];
@@ -1271,23 +1136,15 @@ std::vector<int> GraphProcessor::getOptimalVehicleAssignment(
                         }
                         if (edgeFound) break;
                     }
-                    if (!edgeFound) {
-                        pathCost += 100.0; // Default length
-                    }
                 }
             } else {
                 pathCost = NO_PATH_PENALTY;
             }
-            
-            std::cout << "Vehicle " << i << " (Edge " << sourceEdges[i] << ") assigned to Destination "
-                      << j << " (Edge " << destEdges[j] << ") with path length " << pathCost << std::endl;
         } else {
-            std::cout << "Vehicle " << i << " (Edge " << sourceEdges[i] << ") could not be assigned" << std::endl;
+            cout << "Vehicle " << i << " (Edge " << sourceEdges[i] << ") could not be assigned" << std::endl;
         }
     }
-    std::cout << "Total assignments made: " << assignmentsMade << "/" << numVehicles << std::endl;
-
+    cout << "Total assignments made: " << assignmentsMade << "/" << numVehicles << std::endl;
     return assignment;
 }
-
 } // namespace veins

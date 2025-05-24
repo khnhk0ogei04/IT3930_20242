@@ -11,12 +11,9 @@
 #include "GraphProcessor.h"
 #include "TaskGenerator.h"
 
-namespace veins {
+using namespace std;
 
-/**
- * RSU Control Application that manages the road network and provides
- * routing capabilities through composition with specialized components.
- */
+namespace veins {
 class RSUControlApp : public TraCIDemoRSU11p {
 public:
     void initialize(int stage) override;
@@ -28,66 +25,50 @@ protected:
     void handleSelfMsg(cMessage* msg) override;
     
 private:
-    // Message for periodic status checks
-    cMessage* statusCheckMsg;
-    // Message for triggering rerouting at t=2s
-    cMessage* rerouteMsg;
-
-    // Specialized components (composition)
-    std::unique_ptr<XMLProcessor> xmlProcessor;      // For processing road network XML
-    std::unique_ptr<GraphProcessor> graphProcessor;  // For path finding
-    std::unique_ptr<TaskGenerator> taskGenerator;    // For generating tasks
-
-    // Network file path
-    std::string networkFilePath;
-
-    // Process vehicle messages and send responses
-    void handleVehicleMessage(const std::string& message, LAddress::L2Type vehicleId);
-    void sendRoadListMessage(LAddress::L2Type vehicleId, const std::vector<std::string>& roadList);
-    void sendRerouteMessage(LAddress::L2Type vehicleId, const std::vector<std::string>& edgePath);
-
-    // Vehicle tracking data
     struct VehicleData {
-        simtime_t lastMessageTime = 0;
-        Destination assignedDestination; // Store the assigned destination
-        std::vector<std::string> assignedPath; // Store the assigned path
-        std::vector<std::string> lastSentPath; // Store the last path sent to the vehicle
-        int simulationId = -1; // Store the actual simulation ID of the vehicle
+       simtime_t lastMessageTime = 0;
+       Destination assignedDestination; // assigned destination
+       vector<string> assignedPath; // assigned path
+       vector<string> lastSentPath; // last path sent to the vehicle
+       int simulationId = -1; // actual simulation ID of the vehicle
     };
-    std::map<LAddress::L2Type, VehicleData> vehicleDataMap;
+
+    cMessage* statusCheckMsg;
+    cMessage* rerouteMsg;
+    unique_ptr<XMLProcessor> xmlProcessor;      // for processing road network XML
+    unique_ptr<GraphProcessor> graphProcessor;  // for path finding
+    unique_ptr<TaskGenerator> taskGenerator;    // for generating tasks
+
+    string networkFilePath;
+    void handleVehicleMessage(const string& message, LAddress::L2Type vehicleId);
+    void sendRoadListMessage(LAddress::L2Type vehicleId, const vector<string>& roadList);
+    void sendRerouteMessage(LAddress::L2Type vehicleId, const vector<string>& edgePath);
+    map<LAddress::L2Type, VehicleData> vehicleDataMap;
     
-    // Map between RSU internal IDs and simulation IDs
-    std::map<int, LAddress::L2Type> simulationIdToAddressMap;
+    // map between RSU internal IDs and simulation IDs
+    map<int, LAddress::L2Type> simulationIdToAddressMap;
     void updateVehicleIdMapping(LAddress::L2Type vehicleAddress, int simulationId);
-    
     void cleanupVehicleData();
     void sendRerouteToAllVehicles();
-    
-    // Road network data access methods
-    std::vector<std::string> getAllRoads() const;
-    std::vector<std::string> getAllNodes() const;
+    vector<string> getAllRoads() const;
+    vector<string> getAllNodes() const;
 
-    // Path finding methods
-    std::vector<std::string> findShortestPath(const std::string& sourceId, const std::string& targetId) const;
-    double getShortestPathLength(const std::string& sourceId, const std::string& targetId) const;
+    // path finding
+    vector<string> findShortestPath(const string& sourceId, const string& targetId) const;
+    double getShortestPathLength(const string& sourceId, const string& targetId) const;
 
-    // Information display methods
+    // information display methods
     void printRoadNetworkInfo() const;
     void printNodeInfo() const;
-    void printVehicleRouteInfo(const std::vector<VehicleInfo>& vehicles);
-    void generateAndAssignDestinations(const std::vector<VehicleInfo>& vehicles);
+    void printVehicleRouteInfo(const vector<VehicleInfo>& vehicles);
+    void generateAndAssignDestinations(const vector<VehicleInfo>& vehicles);
 
-    // Lane path finding method
-    void findLanePathAndPrint(std::string sourceLaneId, std::string targetLaneId) const;
+    // void findLanePathAndPrint(std::string sourceLaneId, std::string targetLaneId) const;
 
     // Edge path finding method
-    void findEdgePathAndPrint(std::string sourceEdgeId, std::string targetEdgeId) const;
-    
-    // Test methods
+    void findEdgePathAndPrint(string sourceEdgeId, string targetEdgeId) const;
     void testTaskGenerator();
-
-    // Helper method to get edge length
-    double getEdgeLength(const std::string& edgeId) const;
+    double getEdgeLength(const string& edgeId) const; // get edge length
 };
 
 } // namespace veins

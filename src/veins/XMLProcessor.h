@@ -12,45 +12,35 @@ using namespace std;
 namespace veins {
 
 struct VehicleInfo {
-    std::string id;
+    string id;
     double depart;
-    std::string from;
-    std::string to;
-    std::string via; // Can be empty
+    string from;
+    string to;
+    string via;
 };
 
 class XMLProcessor {
 public:
     XMLProcessor();
     ~XMLProcessor() = default;
-    
-    bool loadNetworkFile(const std::string& filePath);
-    std::vector<std::string> getAllRoads() const;
-    std::vector<std::string> getAccessibleRoads(const std::string& roadId) const;
-    std::vector<std::string> getIncomingRoads(const std::string& roadId) const;
-    std::map<std::string, std::string> getRoadAttributes(const std::string& roadId) const;
-
-    bool loadRouteFile(const std::string& filePath);
-    std::vector<VehicleInfo> getVehicles() const;
-
+    bool loadNetworkFile(const string& filePath);
+    vector<string> getAllRoads() const;
+    vector<string> getAccessibleRoads(const string& roadId) const;
+    vector<string> getIncomingRoads(const string& roadId) const;
+    map<string, string> getRoadAttributes(const string& roadId) const;
+    bool loadRouteFile(const string& filePath);
+    vector<VehicleInfo> getVehicles() const;
     bool isNetworkLoaded() const { return networkLoaded; }
     const Graph& getGraph() const { return roadNetwork; }
-    
-    // Static method to extract roads from XML file
-    static std::vector<Edge> getRoadsFromXml(const std::string& filePath);
-    
-    // Static method to extract junctions from XML file
-    static std::unordered_map<std::string, Node> getJunctionsFromXml(const std::string& filePath);
-    
+    static vector<Edge> getRoadsFromXml(const string& filePath);
+    static unordered_map<string, Node> getJunctionsFromXml(const string& filePath);
 private:
     Graph roadNetwork;
     bool networkLoaded;
     bool parseNetXml(const std::string& filePath, Graph& graph);
-    
-    std::map<std::string, std::map<std::string, std::string>> roadAttributes;
-    std::map<std::string, std::vector<std::string>> incomingRoadsMap;
-    
-    std::map<std::string, std::string> extractAttributes(const tinyxml2::XMLElement* element) const;
+    map<string, map<string, string>> roadAttributes;
+    map<string, vector<string>> incomingRoadsMap;
+    map<string, string> extractAttributes(const tinyxml2::XMLElement* element) const;
     void buildIncomingRoadsMap();
     vector<VehicleInfo> vehicleData;
 };

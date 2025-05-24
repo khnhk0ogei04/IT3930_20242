@@ -11,22 +11,15 @@ Register_Class(VehicleControlApp);
 void VehicleControlApp::initialize(int stage) {
     TraCIDemo11p::initialize(stage);
     if (stage == 0) {
-        // Initialize messages
         statusUpdateMsg = new cMessage("statusUpdate");
         requestRoadInfoMsg = new cMessage("requestRoadInfo");
-
-        // Get mobility interface to access SUMO vehicle data first
         mobility = TraCIMobilityAccess().get(getParentModule());
         traciVehicle = mobility->getVehicleCommandInterface();
-        
-        // USE THE ACTUAL MODULE INDEX - this is the key to getting unique IDs
         int moduleIndex = getParentModule()->getIndex();
-        
-        // Hard-code the simulation ID mapping exactly as in RSUControlApp
         std::map<int, int> idMapping = {
-            {0, 16},   // Module index 0 maps to simulation ID 16
-            {1, 22},   // Module index 1 maps to simulation ID 22
-            {2, 28},   // And so on...
+            {0, 16},   // index 0 maps to simulation ID 16
+            {1, 22},   // index 1 maps to simulation ID 22
+            {2, 28},
             {3, 34},
             {4, 40},
             {5, 46},
@@ -58,42 +51,20 @@ void VehicleControlApp::initialize(int stage) {
             {31, 202},
             {32, 208},
         };
-        
-        // Use the module index for internal ID
         myInternalId = moduleIndex;
-        
-        // Look up this vehicle's simulation ID from the mapping
         auto it = idMapping.find(myInternalId);
         if (it != idMapping.end()) {
             mySimulationId = it->second;
         }
-        // Get the actual SUMO ID of this vehicle for debugging
-        std::string sumoId = mobility->getExternalId();
-        
-        // Print to standard output for debugging - MAKE THIS VERY VISIBLE
-        std::cout << "\n*********************** IMPORTANT ID INFO ***********************" << std::endl;
-        std::cout << "VEHICLE INITIALIZATION: SUMO ID '" << sumoId 
-                  << "' assigned internal ID " << myInternalId 
-                  << " and simulation ID " << mySimulationId << std::endl;
-        std::cout << "Parent module: " << getParentModule()->getFullName() 
-                  << ", index: " << getParentModule()->getIndex() << std::endl;
-        std::cout << "MAC Address: " << getParentModule()->getId() 
-                  << ", Full Path: " << getParentModule()->getFullPath() << std::endl;
-        std::cout << "******************************************************************\n" << std::endl;
-        
-        // Log the details to help with debugging
-        EV << "\n[VEHICLE] ********************************************" << std::endl;
+        EV << "\n[VEHICLE]" << std::endl;
         EV << "[VEHICLE] Initialized with internal ID: " << myInternalId 
            << ", simulation ID: " << mySimulationId << std::endl;
         EV << "[VEHICLE] Parent module: " << getParentModule()->getFullName() 
            << ", index: " << getParentModule()->getIndex() << std::endl;
         EV << "[VEHICLE] ********************************************" << std::endl;
 
-        // Get mobility info
         mobility = TraCIMobilityAccess().get(getParentModule());
         traciVehicle = mobility->getVehicleCommandInterface();
-
-        // Initialize data structures
         currentRoadId = "";
         allRoads.clear();
         accessibleRoads.clear();
@@ -101,29 +72,17 @@ void VehicleControlApp::initialize(int stage) {
         currentRoadAttributes.clear();
         currentPath.clear();
         destinations.clear();
-
-        // Initialize the graph processor (will populate with data when we receive roads)
         graphProcessor.reset(new GraphProcessor(roadNetwork));
-
-        // Request all roads from the RSU immediately to get the road network data
         requestAllRoads();
-
-        // Print a message that we're waiting for road data
         EV << "\n[VEHICLE] Requesting road network data from RSU..." << std::endl;
         EV << "[VEHICLE] Road information will be printed once received." << std::endl;
     } else if (stage == 1) {
-        // Schedule initial messages
         scheduleAt(simTime() + uniform(1.0, 2.0), statusUpdateMsg);
         scheduleAt(simTime() + uniform(3.0, 5.0), requestRoadInfoMsg);
-
-        // Schedule a path finding test after 10 seconds (for demo purposes)
         cMessage* testPathFindingMsg = new cMessage("testPathFinding");
         scheduleAt(simTime() + 10.0, testPathFindingMsg);
-
-        // Schedule TaskGenerator test after 15 seconds
         cMessage* testTaskGeneratorMsg = new cMessage("testTaskGenerator");
         scheduleAt(simTime() + 15.0, testTaskGeneratorMsg);
-
         EV << "[VEHICLE] Vehicle " << myId << " initialized" << std::endl;
     }
 }
@@ -131,10 +90,7 @@ void VehicleControlApp::initialize(int stage) {
 void VehicleControlApp::onWSM(BaseFrame1609_4* wsm) {
     auto* msg = dynamic_cast<TraCIDemo11pMessage*>(wsm->getEncapsulatedPacket());
     if (!msg) return;
-
-    std::string data = msg->getDemoData();
-    
-    // Enhanced message reception debugging
+    string data = msg->getDemoData();
     LAddress::L2Type senderAddress = msg->getSenderAddress();
     LAddress::L2Type recipientAddress = wsm->getRecipientAddress();
     
@@ -262,11 +218,6 @@ void VehicleControlApp::onWSM(BaseFrame1609_4* wsm) {
                     // Validate route connectivity by checking if consecutive edges are connected
                     bool routeIsValid = true;
                     for (size_t i = 0; i < routeEdges.size() - 1; i++) {
-                        // Check if we can get connected edges from current edge
-                        // This is a simple simulation of connectivity checking since we don't have direct
-                        // access to SUMO's edge connectivity information in this context
-                        
-                        // Print debug info about the edges we're checking
                         EV << "[VEHICLE] Checking connectivity between edges: " << routeEdges[i] 
                            << " and " << routeEdges[i+1] << std::endl;
                         std::cout << "Checking connectivity between edges: " << routeEdges[i] 
@@ -275,25 +226,13 @@ void VehicleControlApp::onWSM(BaseFrame1609_4* wsm) {
                     
                     // Only try to set route if we believe it's valid
                     if (routeIsValid) {
-                        // Convert vector to list for the TraCI command
                         std::list<std::string> edgesList(routeEdges.begin(), routeEdges.end());
-                        
-                        // Store original route for comparison
                         std::list<std::string> originalRoute = traciVehicle->getPlannedRoadIds();
-                        
-                        // Use TraCI to change the vehicle's route with the complete path
                         traciVehicle->changeVehicleRoute(edgesList);
-                        
-                        // Get the new route after change
                         std::list<std::string> newPlannedRoute = traciVehicle->getPlannedRoadIds();
-                        
-                        // Check if the route actually changed by comparing with original route
                         bool routeChanged = (newPlannedRoute != originalRoute);
-                        
-                        // Verify the new route contains edges from our proposed route
                         bool containsProposedEdges = false;
                         if (!routeEdges.empty() && !newPlannedRoute.empty()) {
-                            // Check if at least the destination edge is included
                             std::string targetEdge = routeEdges.back();
                             for (const auto& edge : newPlannedRoute) {
                                 if (edge == targetEdge) {
@@ -378,9 +317,6 @@ void VehicleControlApp::onWSM(BaseFrame1609_4* wsm) {
 
                 } else {
                     EV << "[VEHICLE] Warning: Route didn't change, destination may already be included or SUMO rejected the change" << std::endl;
-                    std::cout << "Warning: Route didn't change, destination may already be included or SUMO rejected the change" << std::endl;
-                    
-                    // Check if destination is already in the route
                     bool destInRoute = false;
                     for (const auto& edge : originalRoute) {
                         if (edge == destinationEdge) {
@@ -391,18 +327,14 @@ void VehicleControlApp::onWSM(BaseFrame1609_4* wsm) {
                     
                     if (destInRoute) {
                         EV << "[VEHICLE] Destination " << destinationEdge << " is already in the current route" << std::endl;
-                        std::cout << "Destination " << destinationEdge << " is already in the current route" << std::endl;
                     } else {
                         EV << "[VEHICLE] SUMO unable to find a route to destination " << destinationEdge << std::endl;
-                        std::cout << "SUMO unable to find a route to destination " << destinationEdge << std::endl;
                     }
                 }
             }
             catch (const std::exception& e) {
                 EV << "[VEHICLE] ERROR changing route: " << e.what() << std::endl;
                 std::cout << "ERROR changing route: " << e.what() << std::endl;
-                
-                // Try fallback approach: just use the first edge in the proposed route as destination
                 if (routeEdges.size() > 0) {
                     try {
                         std::string fallbackDestination = routeEdges[0];
@@ -1038,26 +970,11 @@ void VehicleControlApp::buildLocalRoadNetwork() {
                 }
             }
         } else {
-            // If we have real connectivity information, use it
-            // First add the nodes if they don't exist
             roadNetwork.addNode(fromNodeId);
             roadNetwork.addNode(toNodeId);
-
-            // Add edge between nodes
             roadNetwork.addEdge(fromNodeId, toNodeId, length);
-
-            // Also connect the road to its nodes
-            roadNetwork.addEdge(roadId, toNodeId, 10.0); // Short connection
-            roadNetwork.addEdge(fromNodeId, roadId, 10.0); // Short connection
-
-            // Print real connectivity info for a few roads
-            static int infoCount = 0;
-            if (infoCount < 5) {
-                EV << "[VEHICLE] Added real connectivity: Road " << roadId 
-                         << " connects from " << fromNodeId << " to " << toNodeId 
-                         << " (length: " << length << ")" << std::endl;
-                infoCount++;
-            }
+            roadNetwork.addEdge(roadId, toNodeId, 10.0);
+            roadNetwork.addEdge(fromNodeId, roadId, 10.0);
         }
     }
 
@@ -1125,9 +1042,7 @@ void VehicleControlApp::runPathFindingTests() {
 void VehicleControlApp::testPathBetween(const std::string& source, const std::string& target, const std::string& testName) {
     EV << "\n--- Test: " << testName << " ---" << std::endl;
     EV << "Finding path from " << source << " to " << target << std::endl;
-
-    // First try with our local GraphProcessor
-    std::vector<std::string> path = findShortestPath(source, target);
+    vector<string> path = findShortestPath(source, target);
     double pathLength = getShortestPathLength(source, target);
     
     if (!path.empty() && pathLength > 0) {
@@ -1155,30 +1070,17 @@ void VehicleControlApp::testPathBetween(const std::string& source, const std::st
         
         EV << "Source exists in graph: " << (sourceExists ? "Yes" : "No") << std::endl;
         EV << "Target exists in graph: " << (targetExists ? "Yes" : "No") << std::endl;
-
-        // Request from RSU as fallback
         EV << "Requesting path from RSU..." << std::endl;
         requestShortestPath(source, target);
     }
 }
 
 void VehicleControlApp::testPathFinding() {
-    EV << "\n[VEHICLE] Manual path finding test triggered" << std::endl;
-
-    // Run a more focused path finding test
-    if (allRoads.size() < 2) {
-        EV << "[VEHICLE] Not enough roads for path finding tests" << std::endl;
-        return;
-    }
-
-    // Select specific source and target roads from available roads
-    std::string source = allRoads[0];
-    std::string target = allRoads[allRoads.size() / 2];
+    string source = allRoads[0];
+    string target = allRoads[allRoads.size() / 2];
     
     EV << "[VEHICLE] Finding path from " << source << " to " << target << std::endl;
-
-    // Use local graph processor to find path
-    std::vector<std::string> path = findShortestPath(source, target);
+    vector<string> path = findShortestPath(source, target);
     double pathLength = getShortestPathLength(source, target);
     
     if (!path.empty() && pathLength > 0) {
@@ -1193,43 +1095,21 @@ void VehicleControlApp::testPathFinding() {
             }
         }
         EV << std::endl;
-    } else {
-        EV << "[VEHICLE] NO PATH found between " << source << " and " << target << std::endl;
-        EV << "[VEHICLE] Requesting path from RSU as fallback..." << std::endl;
-        requestShortestPath(source, target);
     }
-
-    // Also test k-paths functionality
     int k = 2;
     EV << "\n[VEHICLE] Finding " << k << " alternative paths from " << source << " to " << target << std::endl;
     requestKPaths(source, target, k);
 }
 
-std::vector<std::string> VehicleControlApp::findShortestPath(const std::string& sourceId, const std::string& targetId) {
-    if (!graphProcessor) {
-        EV << "[VEHICLE] GraphProcessor not initialized" << std::endl;
-        return std::vector<std::string>();
-    }
-
-    // Use the GraphProcessor to find the shortest path
-    std::vector<std::string> path = graphProcessor->findShortestPath(sourceId, targetId);
-
-    // Store the path for later use if it's valid
+vector<string> VehicleControlApp::findShortestPath(const std::string& sourceId, const std::string& targetId) {
+    vector<string> path = graphProcessor->findShortestPath(sourceId, targetId);
     if (!path.empty()) {
         currentPath = path;
     }
-    
     return path;
 }
 
 double VehicleControlApp::getShortestPathLength(const std::string& sourceId, const std::string& targetId) {
-    if (!graphProcessor) {
-        EV << "[VEHICLE] GraphProcessor not initialized" << std::endl;
-        return -1.0;
-    }
-
-    // Use the GraphProcessor to get the shortest path length
     double length = graphProcessor->getShortestPathLength(sourceId, targetId);
-
     return length;
 }

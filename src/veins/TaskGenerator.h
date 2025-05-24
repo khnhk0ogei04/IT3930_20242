@@ -11,9 +11,8 @@ using namespace std;
 namespace veins {
 
 struct TimeWindow {
-    double earliness;  // Earliest arrival time
-    double tardiness;  // Latest arrival time
-    
+    double earliness;
+    double tardiness;
     TimeWindow(double early = 0.0, double late = 0.0)
         : earliness(early), tardiness(late) {}
 };
@@ -21,10 +20,8 @@ struct TimeWindow {
 struct Destination {
     string nodeId; 
     TimeWindow timeWindow;  
-    
     Destination(const string& id = "", const TimeWindow& tw = TimeWindow())
         : nodeId(id), timeWindow(tw) {}
-        
     bool operator<(const Destination& other) const {
         if (nodeId != other.nodeId)
             return nodeId < other.nodeId;
@@ -44,9 +41,8 @@ public:
     mt19937& getRNG() { return rng; }
 private:
     const GraphProcessor& graphProcessor;
-    mt19937 rng;
+    mt19937 rng; // random number generator
 };
-
-} // namespace veins
+}
 
 #endif // TASK_GENERATOR_H

@@ -32,37 +32,22 @@
 #include <map>
 
 using namespace omnetpp;
+using namespace std;
 
 namespace veins {
-
-// Forward declarations
 class DemoSafetyMessage;
 class DemoServiceAdvertisment;
-
-/**
- * Structure to represent a time window
- */
 struct VehicleTimeWindow {
     double earliness;
     double tardiness;
-
-    VehicleTimeWindow(double e = 0.0, double t = 0.0) : earliness(e), tardiness(t) {}
+    VehicleTimeWindow(double earliness = 0.0, double tardiness = 0.0) : earliness(earliness), tardiness(tardiness) {}
 };
-
-/**
- * Structure to represent a destination with time constraints
- */
 struct VehicleDestination {
-    std::string nodeId;
+    string nodeId;
     VehicleTimeWindow timeWindow;
-
-    VehicleDestination(const std::string& id, const VehicleTimeWindow& tw)
-        : nodeId(id), timeWindow(tw) {}
+    VehicleDestination(const std::string& id, const VehicleTimeWindow& tw): nodeId(id), timeWindow(tw) {}
 };
 
-/**
- * Vehicle Control Application that communicates with RSUs to get road information
- */
 class VehicleControlApp : public TraCIDemo11p {
 public:
     void initialize(int stage) override;
@@ -77,62 +62,51 @@ protected:
     virtual void handleLowerMsg(cMessage* msg) override;
     
 private:
-    // Messages for periodic communication
     cMessage* statusUpdateMsg;
     cMessage* requestRoadInfoMsg;
+    int myInternalId;
+    int mySimulationId;
+    string currentRoadId;
+    vector<string> allRoads;
+    vector<string> accessibleRoads;
+    vector<string> incomingRoads;
+    map<string, string> currentRoadAttributes;
+    vector<string> currentPath;
+    vector<VehicleDestination> destinations;
 
-    // ID management
-    int myInternalId;       // The internal ID used by Veins/OMNeT++
-    int mySimulationId;     // The simulation ID visible in the TreeView
-    
-    // Road network data
-    std::string currentRoadId;
-    std::vector<std::string> allRoads;
-    std::vector<std::string> accessibleRoads;
-    std::vector<std::string> incomingRoads;
-    std::map<std::string, std::string> currentRoadAttributes;
-    std::vector<std::string> currentPath;
-    std::vector<VehicleDestination> destinations;
-
-    // Path finding components
-    std::unique_ptr<GraphProcessor> graphProcessor;
+    unique_ptr<GraphProcessor> graphProcessor;
     Graph roadNetwork;
-
-    // RSU communication methods
+    
     void sendStatusUpdate();
     void requestAllRoads();
-    void requestAccessibleRoads(const std::string& roadId);
-    void requestIncomingRoads(const std::string& roadId);
-    void requestRoadAttributes(const std::string& roadId);
-    void requestShortestPath(const std::string& sourceId, const std::string& targetId);
-    void requestKPaths(const std::string& sourceId, const std::string& targetId, int k);
+    void requestAccessibleRoads(const string& roadId);
+    void requestIncomingRoads(const string& roadId);
+    void requestRoadAttributes(const string& roadId);
+    void requestShortestPath(const string& sourceId, const string& targetId);
+    void requestKPaths(const string& sourceId, const string& targetId, int k);
     void requestDestinations(int count);
-    void requestValidAssignment(const std::vector<std::string>& sources, const std::vector<std::string>& destinations);
-
-    // Response processing methods
-    void processAllRoadsResponse(const std::string& data);
-    void processAccessibleRoadsResponse(const std::string& data);
-    void processIncomingRoadsResponse(const std::string& data);
-    void processRoadAttributesResponse(const std::string& data);
-    void processShortestPathResponse(const std::string& data);
-    void processKPathsResponse(const std::string& data);
-    void processDestinationsResponse(const std::string& data);
-    void processValidAssignmentResponse(const std::string& data);
+    void requestValidAssignment(const vector<string>& sources, const vector<string>& destinations);
+    void processAllRoadsResponse(const string& data);
+    void processAccessibleRoadsResponse(const string& data);
+    void processIncomingRoadsResponse(const string& data);
+    void processRoadAttributesResponse(const string& data);
+    void processShortestPathResponse(const string& data);
+    void processKPathsResponse(const string& data);
+    void processDestinationsResponse(const string& data);
+    void processValidAssignmentResponse(const string& data);
 
     // Helper methods
-    std::vector<std::string> parseRoadList(const std::string& data, char delimiter = ',');
-    std::map<std::string, std::string> parseAttributes(const std::string& data);
+    vector<string> parseRoadList(const string& data, char delimiter = ',');
+    map<string, string> parseAttributes(const string& data);
     void printRoadInfo();
     void buildLocalRoadNetwork();
     
-    // Local path finding methods
-    std::vector<std::string> findShortestPath(const std::string& sourceId, const std::string& targetId);
-    double getShortestPathLength(const std::string& sourceId, const std::string& targetId);
+    vector<string> findShortestPath(const string& sourceId, const string& targetId);
+    double getShortestPathLength(const string& sourceId, const string& targetId);
 
-    // Test methods
     void testPathFinding();
     void runPathFindingTests();
-    void testPathBetween(const std::string& source, const std::string& target, const std::string& testName);
+    void testPathBetween(const string& source, const string& target, const string& testName);
 };
 
 } // namespace veins
