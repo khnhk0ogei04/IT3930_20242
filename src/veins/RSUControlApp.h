@@ -35,6 +35,7 @@ private:
 
     cMessage* statusCheckMsg;
     cMessage* rerouteMsg;
+//    cMessage* periodicRerouteMsg;
     unique_ptr<XMLProcessor> xmlProcessor;      // for processing road network XML
     unique_ptr<GraphProcessor> graphProcessor;  // for path finding
     unique_ptr<TaskGenerator> taskGenerator;    // for generating tasks

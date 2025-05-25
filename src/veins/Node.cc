@@ -8,6 +8,10 @@ Node::Node(){
     this->y = 0.0;
 }
 
+//Node::~Node(){
+//
+//}
+
 Node::Node(string id, double x, double y){
     this->id = id;
     this->x = x;

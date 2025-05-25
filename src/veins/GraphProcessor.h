@@ -38,7 +38,6 @@ public:
     };
     vector<LanePath> findLaneShortestPath(string sourceLaneId, string targetLaneId) const;
 
-    // New method to get optimal vehicle-to-destination assignment using Hungarian algorithm
     vector<int> getOptimalVehicleAssignment(
         const vector<string>& sourceNodes,
         const vector<string>& destNodes) const;
@@ -65,4 +64,4 @@ private:
 
 } // namespace veins
 
-#endif // GRAPH_PROCESSOR_H
+#endif

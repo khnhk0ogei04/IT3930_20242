@@ -96,31 +96,26 @@ vector<string> NetworkSourceManager::getConnectedEdges(string edgeId) const {
 
 string NetworkSourceManager::getEdgeSource(string edgeId) const {
     if (!networkLoaded) return "";
-    
-    const Edge* edge = findEdge(edgeId);
-    if (edge) {
-        return edge->getFrom();
+    const Edge* currentEdge = findEdge(edgeId);
+    if (currentEdge){
+        return currentEdge->getFrom();
     }
     return "";
 }
 
 string NetworkSourceManager::getEdgeTarget(string edgeId) const {
     if (!networkLoaded) return "";
-    
-    const Edge* edge = findEdge(edgeId);
-    if (edge) {
-        return edge->getTo();
+    const Edge* currentEdge = findEdge(edgeId);
+    if (currentEdge){
+        return currentEdge->getTo();
     }
     return "";
 }
 
 double NetworkSourceManager::getEdgeLength(string edgeId) const {
     if (!networkLoaded) return 0.0;
-    
-    const Edge* edge = findEdge(edgeId);
-    if (edge) {
-        return edge->getLength();
-    }
+    const Edge* currentEdge = findEdge(edgeId);
+    if (currentEdge) return currentEdge->getLength();
     return 0.0;
 }
 
@@ -136,7 +131,6 @@ const Edge* NetworkSourceManager::findEdge(string edgeId) const {
             }
         }
     }
-    
     return nullptr;
 }
 

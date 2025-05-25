@@ -12,6 +12,7 @@ private:
 
 public:
     Node();
+    // ~Node();
     Node(string id, double x = 0.0, double y = 0.0);
     string getId() const {return id;}
     double getX() const {return x;}

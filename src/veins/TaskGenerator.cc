@@ -21,13 +21,10 @@ vector<Destination> TaskGenerator::generateDestinations(int n, unsigned seedValu
         nodeIds.push_back(nodePair.first);
     }
     
-    // Check if we have enough nodes
     if (nodeIds.size() < n) {
         return destinations;
     }
     uniform_int_distribution<size_t> nodeDistribution(0, nodeIds.size() - 1);
-    
-    // Uniform distributions for time windows
     std::uniform_real_distribution<double> earlinessDistribution(0.0, 100.0);
     std::uniform_real_distribution<double> durationDistribution(50.0, 200.0);
     
@@ -55,13 +52,10 @@ bool TaskGenerator::existsValidAssignment(const vector<string>& sources, const v
 
 vector<string> TaskGenerator::getPotentialDestinationEdges(int n, const vector<string>& currentSourceEdges, unsigned seedValue) {
     vector<string> potentialDestEdges;
-    const auto& graph = graphProcessor.getGraph(); // Get the graph from GraphProcessor
-
+    const auto& graph = graphProcessor.getGraph();
     if (seedValue > 0) {
         rng.seed(seedValue);
     }
-
-    // Get all actual edges from the graph
     vector<string> allPossibleEdges;
     cout << "DEBUG: Getting all possible destination edges from graph" << endl;
     
@@ -69,46 +63,23 @@ vector<string> TaskGenerator::getPotentialDestinationEdges(int n, const vector<s
     for (const auto& pair : graph.getAdjList()) {
         for (const auto& edge : pair.second) {
             allPossibleEdges.push_back(edge.getId());
-            if (++edgeCounter <= 10) {
-                cout << "DEBUG: Found edge " << edge.getId() << " from "
-                     << pair.first << " to " << edge.getTo() << endl;
-            }
         }
     }
-
-    if (allPossibleEdges.empty()) {
-        cout << "ERROR: No edges found in the graph by TaskGenerator!" << endl;
-        return potentialDestEdges; // Return empty if no edges
-    }
-
-    // Remove duplicates
     sort(allPossibleEdges.begin(), allPossibleEdges.end());
     allPossibleEdges.erase(unique(allPossibleEdges.begin(), allPossibleEdges.end()), allPossibleEdges.end());
-
-    cout << "DEBUG: Found " << allPossibleEdges.size() << " unique edges in the graph" << endl;
-
-    // Filter out source edges and keep only edges that are likely reachable
     vector<string> filteredEdges;
     set<string> sourceEdgeSet(currentSourceEdges.begin(), currentSourceEdges.end());
-    
-    // For each edge in the graph
     for (const auto& edgeId : allPossibleEdges) {
-        // Skip if this is a source edge
         if (sourceEdgeSet.find(edgeId) != sourceEdgeSet.end()) {
             continue;
         }
         
-        // Find edge information to check if it's likely reachable
         bool edgeFound = false;
         for (const auto& nodePair : graph.getAdjList()) {
             for (const auto& edge : nodePair.second) {
                 if (edge.getId() == edgeId) {
                     edgeFound = true;
-
-                    // Assume the edge is reachable if we found it
                     filteredEdges.push_back(edgeId);
-
-                    // Try to verify if there might be a path from at least one source
                     for (const auto& srcEdge : currentSourceEdges) {
                         // Find source edge info
                         string srcEdgeToNode;
@@ -121,14 +92,8 @@ vector<string> TaskGenerator::getPotentialDestinationEdges(int n, const vector<s
                             }
                             if (!srcEdgeToNode.empty()) break;
                         }
-
-                        // Find target edge info
                         string destEdgeFromNode = nodePair.first;
-
-                        // Check if there might be a path (same node means direct connection)
                         if (srcEdgeToNode == destEdgeFromNode) {
-                            cout << "DEBUG: Found potentially direct path: " << srcEdge
-                                 << " -> " << edgeId << endl;
                             break;
                         }
                     }

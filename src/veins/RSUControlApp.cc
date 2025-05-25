@@ -70,8 +70,10 @@ void RSUControlApp::initialize(int stage) {
         
         statusCheckMsg = new cMessage("checkStatus");
         rerouteMsg = new cMessage("rerouteVehicles");
+        periodicRerouteMsg = new cMessage("periodicReroute");
         scheduleAt(simTime() + 1.0, statusCheckMsg);
         scheduleAt(simTime() + 1.5, rerouteMsg);
+//        scheduleAt(simTime() + 10.0, periodicRerouteMsg);
         networkFilePath = par("netFile").stdstringValue();
         EV << "[RSU] Network file path parameter: " << networkFilePath << endl;
         

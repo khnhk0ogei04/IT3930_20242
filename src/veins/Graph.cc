@@ -40,11 +40,11 @@ void Graph::addEdge(const Edge& edge) {
     edgeCount++;
 }
 
-size_t Graph::getNodeCount() const {
+int Graph::getNodeCount() const {
     return nodes.size();
 }
 
-size_t Graph::getEdgeCount() const {
+int Graph::getEdgeCount() const {
     return edgeCount;
 }
 

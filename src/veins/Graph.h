@@ -14,8 +14,8 @@ public:
     void addNode(string id, double x = 0.0, double y = 0.0);
     void addEdge(string from, string to, double length, string id = "");
     void addEdge(const Edge& edge);
-    size_t getNodeCount() const;
-    size_t getEdgeCount() const;
+    int getNodeCount() const;
+    int getEdgeCount() const;
     const unordered_map<string, Node>& getNodes() const {
         return nodes;
     }

@@ -209,12 +209,12 @@ vector<vector<string>> GraphProcessor::findKShortestPaths(string sourceId, strin
                 distances[nodePair.first] = numeric_limits<double>::infinity();
             }
             distances[sourceId] = 0.0;
-            std::set<std::pair<double, std::string>> pq;
-            pq.insert(std::make_pair(0.0, sourceId));
+            set<pair<double, string>> pq;
+            pq.insert(make_pair(0.0, sourceId));
             while (!pq.empty()) {
                 auto it = pq.begin();
                 double dist = it->first;
-                std::string current = it->second;
+                string current = it->second;
                 pq.erase(it);
 
                 if (current == targetId) {
@@ -260,8 +260,6 @@ vector<vector<string>> GraphProcessor::findKShortestPaths(string sourceId, strin
 
                     std::string edgeId = prevIt->second;
                     path.push_back(edgeId);
-
-                    // Find where this edge comes from
                     bool found = false;
                     for (const auto& nodePair : roadNetwork.getAdjList()) {
                         for (const auto& edge : nodePair.second) {
@@ -325,8 +323,6 @@ bool GraphProcessor::existsValidAssignment(
             }
         }
     }
-
-    // Apply the Hungarian algorithm to check if a valid assignment exists
     return hungarianAlgorithm(costMatrix);
 }
 
@@ -345,7 +341,6 @@ std::map<std::string, std::pair<double, std::string>> GraphProcessor::dijkstra(s
         }
     }
 
-    // Also check if it exists in the adjacency list
     auto adjIt = roadNetwork.getAdjList().find(sourceId);
     bool sourceInAdj = (adjIt != roadNetwork.getAdjList().end());
 
@@ -363,8 +358,6 @@ std::map<std::string, std::pair<double, std::string>> GraphProcessor::dijkstra(s
     if (sourceInAdj) {
         outgoingEdges = adjIt->second.size();
         std::cout << "DEBUG: Source has " << outgoingEdges << " outgoing edges" << std::endl;
-
-        // Print first few outgoing edges
         int count = 0;
         for (const auto& edge : adjIt->second) {
             if (count++ < 5) {
@@ -408,12 +401,8 @@ std::map<std::string, std::pair<double, std::string>> GraphProcessor::dijkstra(s
         if (visited.find(current.id) != visited.end()) {
             continue;
         }
-
-        // Mark the node as visited
         visited.insert(current.id);
         nodesProcessed++;
-
-        // Process all outgoing edges from the current node
         auto it = roadNetwork.getAdjList().find(current.id);
         if (it != roadNetwork.getAdjList().end()) {
             const auto& edges = it->second;
@@ -421,13 +410,9 @@ std::map<std::string, std::pair<double, std::string>> GraphProcessor::dijkstra(s
             for (const auto& edge : edges) {
                 std::string neighborId = edge.getTo();
                 double weight = edge.getLength();
-
-                // Skip if the neighbor has already been visited
                 if (visited.find(neighborId) != visited.end()) {
                     continue;
                 }
-
-                // Relaxation step
                 double newDistance = result[current.id].first + weight;
 
                 // Ensure the neighbor exists in the result map
@@ -453,8 +438,6 @@ std::map<std::string, std::pair<double, std::string>> GraphProcessor::dijkstra(s
             reachableCount++;
         }
     }
-    std::cout << "DEBUG: Found " << reachableCount << " reachable nodes from source " << sourceId << std::endl;
-
     return result;
 }
 
@@ -503,7 +486,6 @@ std::vector<std::string> GraphProcessor::reconstructPath(
 
 bool GraphProcessor::hungarianAlgorithm(const vector<vector<double>>& costMatrix) const {
     int n = costMatrix.size();
-    // check if each source can reach at least one target
     for (int i = 0; i < n; ++i) {
         bool canReachAnyTarget = false;
         for (int j = 0; j < n; ++j) {
@@ -514,7 +496,6 @@ bool GraphProcessor::hungarianAlgorithm(const vector<vector<double>>& costMatrix
         }
         return false;
     }
-    // check if each target can be reached by at least one source
     for (int j = 0; j < n; ++j) {
         bool canBeReachedByAnySource = false;
         for (int i = 0; i < n; ++i) {
@@ -538,11 +519,10 @@ vector<GraphProcessor::LanePath> GraphProcessor::findLaneShortestPath(string sou
     int targetLaneIndex = extractLaneIndexFromLane(targetLaneId);
 
     if (sourceEdgeId.empty() || targetEdgeId.empty() || sourceLaneIndex < 0 || targetLaneIndex < 0) {
-        // Invalid lane IDs
         return result;
     }
 
-    // Find the shortest path between the edges using the existing method
+    // find the shortest ;atn
     vector<string> edgePath = findShortestPath(sourceEdgeId, targetEdgeId);
 
     if (edgePath.empty() && sourceEdgeId != targetEdgeId) {
@@ -562,7 +542,6 @@ vector<GraphProcessor::LanePath> GraphProcessor::findLaneShortestPath(string sou
         for (const auto& nodePair : roadNetwork.getAdjList()) {
             for (const auto& edge : nodePair.second) {
                 if (edge.getId() == sourceEdgeId) {
-                    // Cost is the length of the edge
                     segment.cost = edge.getLength();
                     found = true;
                     break;
@@ -574,19 +553,14 @@ vector<GraphProcessor::LanePath> GraphProcessor::findLaneShortestPath(string sou
         result.push_back(segment);
         return result;
     }
-
-    // Add source edge (with source lane)
     if (!edgePath.empty()) {
         LanePath sourceSegment;
         sourceSegment.edgeId = sourceEdgeId;
         sourceSegment.laneIndex = sourceLaneIndex;
-
-        // Find the source edge in the graph to calculate cost
         bool found = false;
         for (const auto& nodePair : roadNetwork.getAdjList()) {
             for (const auto& edge : nodePair.second) {
                 if (edge.getId() == sourceEdgeId) {
-                    // Cost is the length of the edge
                     sourceSegment.cost = edge.getLength();
                     found = true;
                     break;
@@ -610,8 +584,6 @@ vector<GraphProcessor::LanePath> GraphProcessor::findLaneShortestPath(string sou
         LanePath segment;
         segment.edgeId = edgeId;
         segment.laneIndex = findBestLaneForEdge(edgeId);
-
-        // Find the edge in the graph to calculate cost
         bool found = false;
         for (const auto& nodePair : roadNetwork.getAdjList()) {
             for (const auto& edge : nodePair.second) {
@@ -628,18 +600,15 @@ vector<GraphProcessor::LanePath> GraphProcessor::findLaneShortestPath(string sou
         result.push_back(segment);
     }
 
-    // Add target edge (with target lane)
     if (!edgePath.empty() || sourceEdgeId == targetEdgeId) {
         LanePath targetSegment;
         targetSegment.edgeId = targetEdgeId;
         targetSegment.laneIndex = targetLaneIndex;
-
-        // Find the target edge in the graph to calculate cost
         bool found = false;
         for (const auto& nodePair : roadNetwork.getAdjList()) {
             for (const auto& edge : nodePair.second) {
                 if (edge.getId() == targetEdgeId) {
-                    // Cost is the length of the edge
+                    // cost: length of edge
                     targetSegment.cost = edge.getLength();
                     found = true;
                     break;
@@ -942,48 +911,34 @@ double GraphProcessor::getEdgeShortestPathLength(string sourceEdgeId, string tar
 }
 
 // Implementation of the getOptimalVehicleAssignment method
-std::vector<int> GraphProcessor::getOptimalVehicleAssignment(
-    const std::vector<std::string>& sourceEdges,
-    const std::vector<std::string>& destEdges) const {
+vector<int> GraphProcessor::getOptimalVehicleAssignment(
+    const vector<std::string>& sourceEdges,
+    const vector<std::string>& destEdges) const {
 
     int numVehicles = sourceEdges.size();
     int numDestinations = destEdges.size();
 
     if (numVehicles == 0 || numDestinations == 0) {
-        std::cout << "INFO: No vehicles or destinations to assign." << std::endl;
         return std::vector<int>();
     }
-
-    // Create cost matrix with proper dimensions
     int n = std::max(numVehicles, numDestinations);
-    std::vector<std::vector<double>> costMatrix(n, std::vector<double>(n, 0));
+    vector<std::vector<double>> costMatrix(n, std::vector<double>(n, 0));
     const double NO_PATH_PENALTY = 9999999.0;
-    const double SAME_EDGE_PENALTY = 5000.0; // High, but allows assignment if necessary
-
-    std::cout << "INFO: Building Cost Matrix for Hungarian Assignment (" << numVehicles
-              << " vehicles, " << numDestinations << " dests):" << std::endl;
-
-    // Fill the cost matrix with edge-to-edge path costs
+    const double SAME_EDGE_PENALTY = 5000.0;
     for (int i = 0; i < numVehicles; ++i) {
-        const std::string& sourceEdgeId = sourceEdges[i];
+        const string& sourceEdgeId = sourceEdges[i];
 
         for (int j = 0; j < numDestinations; ++j) {
             const std::string& destEdgeId = destEdges[j];
-
-            // Special case: same edge assignment
             if (sourceEdgeId == destEdgeId) {
                 costMatrix[i][j] = SAME_EDGE_PENALTY;
-                std::cout << "DEBUG: Source " << i << " and dest " << j
-                          << " are the same edge, cost = " << SAME_EDGE_PENALTY << std::endl;
                 continue;
             }
-
-            // Calculate path using findEdgeShortestPath() và tính tổng độ dài
             auto path = findEdgeShortestPath(sourceEdgeId, destEdgeId);
             double pathLength = 0.0;
 
             if (!path.empty()) {
-                // Tính tổng chiều dài của đường đi
+                // calculate the length of the path
                 for (const auto& edgeId : path) {
                     bool edgeFound = false;
                     for (const auto& nodePair : roadNetwork.getAdjList()) {
@@ -997,7 +952,7 @@ std::vector<int> GraphProcessor::getOptimalVehicleAssignment(
                         if (edgeFound) break;
                     }
                     if (!edgeFound) {
-                        pathLength += 100.0; // Default length
+                        pathLength += 0.0; // Default length
                     }
                 }
 
@@ -1024,17 +979,15 @@ std::vector<int> GraphProcessor::getOptimalVehicleAssignment(
             costMatrix[i][j] = NO_PATH_PENALTY;
         }
     }
-
-    // Print the cost matrix for debugging
     std::cout << "\nINFO: Cost Matrix for Hungarian Algorithm:" << std::endl;
     std::string header = "       ";
     for (int j = 0; j < numDestinations; ++j) {
         header += "D_" + destEdges[j].substr(0, std::min((size_t)4, destEdges[j].length())) + "\t";
     }
-    std::cout << header << std::endl;
+    cout << header << endl;
 
     for (int i = 0; i < numVehicles; ++i) {
-        std::string rowStr = "V_" + std::to_string(i) + "(" + sourceEdges[i].substr(0, std::min((size_t)4, sourceEdges[i].length())) + ")\t";
+        string rowStr = "V_" + std::to_string(i) + "(" + sourceEdges[i].substr(0, std::min((size_t)4, sourceEdges[i].length())) + ")\t";
         for (int j = 0; j < numDestinations; ++j) {
             if (costMatrix[i][j] >= NO_PATH_PENALTY) {
                 rowStr += "INF\t";
@@ -1042,14 +995,11 @@ std::vector<int> GraphProcessor::getOptimalVehicleAssignment(
                 rowStr += std::to_string(static_cast<int>(costMatrix[i][j])) + "\t";
             }
         }
-        std::cout << rowStr << std::endl;
+        cout << rowStr << endl;
     }
-
-    // Hungarian algorithm implementation
-    // Step 1: Subtract minimum value from each row
     for (int i = 0; i < n; ++i) {
         double minVal = *std::min_element(costMatrix[i].begin(), costMatrix[i].end());
-        if (minVal < NO_PATH_PENALTY) {  // Only subtract if row has valid paths
+        if (minVal < NO_PATH_PENALTY) {
             for (int j = 0; j < n; ++j) {
                 if (costMatrix[i][j] < NO_PATH_PENALTY) {
                     costMatrix[i][j] -= minVal;
@@ -1057,14 +1007,12 @@ std::vector<int> GraphProcessor::getOptimalVehicleAssignment(
             }
         }
     }
-
-    // Step 2: Subtract minimum value from each column
     for (int j = 0; j < n; ++j) {
         double minVal = NO_PATH_PENALTY;
         for (int i = 0; i < n; ++i) {
             minVal = std::min(minVal, costMatrix[i][j]);
         }
-        if (minVal < NO_PATH_PENALTY) {  // Only subtract if column has valid paths
+        if (minVal < NO_PATH_PENALTY) {
             for (int i = 0; i < n; ++i) {
                 if (costMatrix[i][j] < NO_PATH_PENALTY) {
                     costMatrix[i][j] -= minVal;
@@ -1120,7 +1068,7 @@ std::vector<int> GraphProcessor::getOptimalVehicleAssignment(
         if (assignment[i] != -1) {
             int j = assignment[i];
             
-            // Get the accurate cost by recalculating path length using the exact same method
+            // recalculating path
             double pathCost = 0;
             auto path = findEdgeShortestPath(sourceEdges[i], destEdges[j]);
             if (!path.empty()) {
