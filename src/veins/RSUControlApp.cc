@@ -3,7 +3,13 @@
 #include <sstream>
 #include <iostream>
 #include <cstring>
-#include <algorithm>
+#include <algorithm> // Add include for std::min
+#include <fstream>   // Add include for ofstream
+#include <iomanip>   // Add include for setprecision
+#include <chrono>    // Add include for time measurement
+#include <cctype>    // Add include for std::isdigit
+
+// Platform-specific includes for getting working directory
 #ifdef _WIN32
 #include <direct.h>
 #define GetCurrentDir _getcwd
@@ -23,8 +29,10 @@ void RSUControlApp::initialize(int stage) {
     if (stage == 0) {
         vehicleDataMap.clear();
         simulationIdToAddressMap.clear();
-        // mapping from the TreeView: node[0] = Car id=16, node[1] = Car id=22
-        map<int, int> vehicleIdMapping = {
+
+        // Create a fixed mapping between RSU internal IDs and simulation IDs from TreeView
+        // This is the mapping from the TreeView: node[0] = Car id=14, node[1] = Car id=20, etc.
+        std::map<int, int> vehicleIdMapping = {
             {0, 16},
             {1, 22},
             {2, 28},
@@ -59,40 +67,58 @@ void RSUControlApp::initialize(int stage) {
             {31, 202},
             {32, 208},
         };
+
+        // Pre-populate the vehicle data map with correct simulation IDs
         for (const auto& mapping : vehicleIdMapping) {
             int internalId = mapping.first;
             int simulationId = mapping.second;
+
+            // Create an entry for this vehicle in our data structure
             vehicleDataMap[internalId].simulationId = simulationId;
             
-            EV << "[RSU] Pre-mapped internal vehicle " << internalId << " to simulation ID " << simulationId << std::endl;
-            cout << "RSU: Pre-mapped internal vehicle " << internalId << " to simulation ID " << simulationId << std::endl;
+            EV << "[RSU] Pre-mapped internal vehicle " << internalId
+               << " to simulation ID " << simulationId << std::endl;
+            std::cout << "RSU: Pre-mapped internal vehicle " << internalId
+                      << " to simulation ID " << simulationId << std::endl;
         }
+        
+        // Set simulation information for logging
+        mapName = "erlangen";
+        routingAlgorithm = "ShortestPath";
+        implementationVersion = "2.0";
+        
+        // Initialize SimulationLogger
+        SimulationLogger::getInstance().setSimulationInfo(mapName, routingAlgorithm, implementationVersion);
         
         statusCheckMsg = new cMessage("checkStatus");
         rerouteMsg = new cMessage("rerouteVehicles");
-        periodicRerouteMsg = new cMessage("periodicReroute");
         scheduleAt(simTime() + 1.0, statusCheckMsg);
-        scheduleAt(simTime() + 1.5, rerouteMsg);
-//        scheduleAt(simTime() + 10.0, periodicRerouteMsg);
+        scheduleAt(simTime() + 1.5, rerouteMsg); // Schedule rerouting at t=1.5s
         networkFilePath = par("netFile").stdstringValue();
         EV << "[RSU] Network file path parameter: " << networkFilePath << endl;
         
         if (!networkFilePath.empty()) {
             xmlProcessor.reset(new XMLProcessor());
-            EV << "[RSU] Attempting to load network file from: " << networkFilePath << endl;
+
+            EV << "[RSU] Attempting to load network file from: " << networkFilePath << std::endl;
+
             if (xmlProcessor->loadNetworkFile(networkFilePath)) {
-                EV << "[RSU] Successfully loaded road network from " << networkFilePath << endl;
+                EV << "[RSU] Successfully loaded road network from " << networkFilePath << std::endl;
                 graphProcessor.reset(new GraphProcessor(xmlProcessor->getGraph()));
-                EV << "[RSU] Successfully initialized GraphProcessor" << endl;
+                EV << "[RSU] Successfully initialized GraphProcessor" << std::endl;
                 taskGenerator.reset(new TaskGenerator(*graphProcessor));
-                EV << "[RSU] Successfully initialized TaskGenerator" << endl;
+                EV << "[RSU] Successfully initialized TaskGenerator" << std::endl;
                 printRoadNetworkInfo();
                 printNodeInfo();
                 testTaskGenerator();
-                EV << "[RSU] Attempting to load route information" << endl;
+
+                // Load and print vehicle information from route file
+                EV << "[RSU] Attempting to load route information" << std::endl;
                 if (xmlProcessor->loadRouteFile("./erlangen.rou.xml")) {
-                    vector<VehicleInfo> vehicles = xmlProcessor->getVehicles();
+                    std::vector<VehicleInfo> vehicles = xmlProcessor->getVehicles();
                     printVehicleRouteInfo(vehicles);
+                } else {
+                    EV << "[RSU] Failed to load route file" << std::endl;
                 }
             }
         }
@@ -105,43 +131,49 @@ void RSUControlApp::onWSM(BaseFrame1609_4* wsm) {
     if (!msg) return;
 
     LAddress::L2Type senderId = msg->getSenderAddress();
-    string data = msg->getDemoData();
+    std::string data = msg->getDemoData();
     vehicleDataMap[senderId].lastMessageTime = simTime();
     
-    // check if this is a status message containing the simulation ID
+    // Check if this is a status message containing the simulation ID
     if (data.find("STATUS:") == 0) {
-        // extract simulation ID
-        int idPos = data.find("simId=");
-        if (idPos != string::npos) {
-            int idEnd = data.find(';', idPos);
-            if (idEnd != string::npos) {
-                string idStr = data.substr(idPos + 6, idEnd - idPos - 6); // +6 for "simId="
+        // Extract simulation ID if present (new format uses simId= instead of id=)
+        size_t idPos = data.find("simId=");
+        if (idPos != std::string::npos) {
+            size_t idEnd = data.find(';', idPos);
+            if (idEnd != std::string::npos) {
+                std::string idStr = data.substr(idPos + 6, idEnd - idPos - 6); // +6 for "simId="
                 try {
-                    int simId = stoi(idStr);
+                    int simId = std::stoi(idStr);
                     updateVehicleIdMapping(senderId, simId);
+
+                    // Debug output
                     EV << "[RSU] Updated vehicle ID mapping from STATUS message: Address " << senderId 
-                       << " -> Simulation ID " << simId << endl;
-                } catch (const exception& e) {
+                       << " -> Simulation ID " << simId << std::endl;
+                    std::cout << "RSU: Updated vehicle ID mapping from STATUS: Address " << senderId
+                              << " -> Simulation ID " << simId << std::endl;
+                } catch (const std::exception& e) {
                     EV << "[RSU] Failed to parse simulation ID: " << e.what() << std::endl;
                 }
             }
         }
-        // backward compatibility - check for old format with id=
+        // Backward compatibility - check for old format with id=
         else {
-            int idPos = data.find("id=");
-            if (idPos != string::npos) {
-                int idEnd = data.find(';', idPos);
+            size_t idPos = data.find("id=");
+            if (idPos != std::string::npos) {
+                size_t idEnd = data.find(';', idPos);
                 if (idEnd != std::string::npos) {
-                    string idStr = data.substr(idPos + 3, idEnd - idPos - 3); // +3 for "id="
+                    std::string idStr = data.substr(idPos + 3, idEnd - idPos - 3); // +3 for "id="
                     try {
-                        int simId = stoi(idStr);
+                        int simId = std::stoi(idStr);
                         updateVehicleIdMapping(senderId, simId);
                         
                         // Debug output
                         EV << "[RSU] Updated vehicle ID mapping from old STATUS format: Address " << senderId 
                            << " -> Simulation ID " << simId << std::endl;
-                    } catch (const exception& e) {
-                        EV << "[RSU] Failed to parse simulation ID: " << e.what() << endl;
+                        std::cout << "RSU: Updated vehicle ID mapping from old STATUS format: Address " << senderId
+                                  << " -> Simulation ID " << simId << std::endl;
+                    } catch (const std::exception& e) {
+                        EV << "[RSU] Failed to parse simulation ID: " << e.what() << std::endl;
                     }
                 }
             }
@@ -152,12 +184,22 @@ void RSUControlApp::onWSM(BaseFrame1609_4* wsm) {
 }
 
 void RSUControlApp::updateVehicleIdMapping(LAddress::L2Type vehicleAddress, int simulationId) {
+    // Store the simulation ID in the vehicle data
     vehicleDataMap[vehicleAddress].simulationId = simulationId;
+
+    // Update the reverse mapping
     simulationIdToAddressMap[simulationId] = vehicleAddress;
 }
 
 void RSUControlApp::handleVehicleMessage(const string& message, LAddress::L2Type vehicleId) {
+    if (!xmlProcessor || !xmlProcessor->isNetworkLoaded()) {
+        EV << "[RSU] XML processor not initialized or network not loaded" << std::endl;
+        vector<string> errorMsg = {"ERROR: Network not loaded"};
+        sendRoadListMessage(vehicleId, errorMsg);
+        return;
+    }
     EV << "[RSU] Received message from vehicle: '" << message << "'" << endl;
+
     if (message == "GET_ALL_ROADS") {
         auto roads = xmlProcessor->getAllRoads();
         EV << "[RSU] Responding with " << roads.size() << " roads for GET_ALL_ROADS request" << endl;
@@ -174,20 +216,23 @@ void RSUControlApp::handleVehicleMessage(const string& message, LAddress::L2Type
             }
         }
         EV << endl;
-        EV << "[RSU] Source road '" << roadId << "' details:" << endl;
+        EV << "[RSU] Source road '" << roadId << "' details:" << std::endl;
         const Graph& graph = xmlProcessor->getGraph();
         bool sourceRoadFound = false;
         for (const auto& nodePair : graph.getAdjList()) {
             for (const auto& edge : nodePair.second) {
                 if (edge.getId() == roadId) {
                     sourceRoadFound = true;
+
+                    // Print source road info
                     EV << "[RSU] <edge id=\"" << edge.getId() 
                        << "\" from=\"" << edge.getFrom() 
                        << "\" to=\"" << edge.getTo() 
-                       << "\" length=\"" << edge.getLength() << "\">" << endl;
+                       << "\" length=\"" << edge.getLength() << "\">" << std::endl;
 
+                    // Get the lanes for this edge
                     const auto& lanes = edge.getLanes();
-                    EV << "[RSU]   Source road has " << lanes.size() << " lanes" << endl;
+                    EV << "[RSU]   Source road has " << lanes.size() << " lanes" << std::endl;
                     
                     for (const auto& lane : lanes) {
                         EV << "[RSU]   <lane id=\"" << lane.id 
@@ -203,40 +248,57 @@ void RSUControlApp::handleVehicleMessage(const string& message, LAddress::L2Type
             }
             if (sourceRoadFound) break;
         }
+
+        if (!sourceRoadFound) {
+            EV << "[RSU] Source road '" << roadId << "' not found in graph" << std::endl;
+        }
+
         sendRoadListMessage(vehicleId, accessibleRoads);
     }
+    // Handle request for incoming roads
     else if (message.find("GET_INCOMING_ROADS:") == 0) {
-        string roadId = message.substr(19);
-        EV << "[RSU] Looking for incoming roads to '" << roadId << "'" << endl;
+        std::string roadId = message.substr(19);
+        EV << "[RSU] Looking for incoming roads to '" << roadId << "'" << std::endl;
         auto incomingRoads = xmlProcessor->getIncomingRoads(roadId);
-        EV << "[RSU] Found " << incomingRoads.size() << " incoming roads to '" << roadId << "'" << endl;
+        EV << "[RSU] Found " << incomingRoads.size() << " incoming roads to '" << roadId << "'" << std::endl;
         sendRoadListMessage(vehicleId, incomingRoads);
     }
+    // Handle request for road attributes
     else if (message.find("GET_ROAD_ATTRIBUTES:") == 0) {
-        string roadId = message.substr(20);
+        std::string roadId = message.substr(20);
+
         auto attrs = xmlProcessor->getRoadAttributes(roadId);
+
+        // Find the edge object to get lane information
         const Graph& graph = xmlProcessor->getGraph();
         bool edgeFound = false;
+
         for (const auto& nodePair : graph.getAdjList()) {
             for (const auto& edge : nodePair.second) {
                 if (edge.getId() == roadId) {
                     edgeFound = true;
+
+                    // Add lane information to attributes
                     const auto& lanes = edge.getLanes();
-                    attrs["laneCount"] = to_string(lanes.size());
+                    attrs["laneCount"] = std::to_string(lanes.size());
+
+                    // Add detailed lane information
                     for (size_t i = 0; i < lanes.size(); ++i) {
                         const auto& lane = lanes[i];
-                        string lanePrefix = "lane" + to_string(i) + "_";
+                        std::string lanePrefix = "lane" + std::to_string(i) + "_";
                         attrs[lanePrefix + "id"] = lane.id;
-                        attrs[lanePrefix + "index"] = to_string(lane.index);
-                        attrs[lanePrefix + "speed"] = to_string(lane.speed);
-                        attrs[lanePrefix + "length"] = to_string(lane.length);
+                        attrs[lanePrefix + "index"] = std::to_string(lane.index);
+                        attrs[lanePrefix + "speed"] = std::to_string(lane.speed);
+                        attrs[lanePrefix + "length"] = std::to_string(lane.length);
                     }
+
                     break;
                 }
             }
             if (edgeFound) break;
         }
-        string attrStr = roadId + ":";
+
+        std::string attrStr = roadId + ":";
         for (const auto& attr : attrs) {
             attrStr += attr.first + "=" + attr.second + ";";
         }
@@ -249,7 +311,9 @@ void RSUControlApp::handleVehicleMessage(const string& message, LAddress::L2Type
         wsm->encapsulate(response);
         populateWSM(wsm);
         wsm->setRecipientAddress(vehicleId);
+
         sendDown(wsm);
+
         EV << "[RSU] Sent attributes for road " << roadId << ": " << attrs.size() << " attributes" << std::endl;
     }
     // Handle shortest path request
@@ -295,58 +359,78 @@ void RSUControlApp::handleVehicleMessage(const string& message, LAddress::L2Type
     else if (message.find("GENERATE_DESTINATIONS:") == 0 && taskGenerator) {
         EV << "[RSU] DEBUG: Received GENERATE_DESTINATIONS request: " << message << std::endl;
         
-        int count = std::stoi(message.substr(22)); // Skip "GENERATE_DESTINATIONS:"
-        EV << "[RSU] Generating " << count << " random destinations" << std::endl;
-        
-        auto destinations = taskGenerator->generateDestinations(count);
-        vector<string> destStrings;
-        for (const auto& dest : destinations) {
-            string destStr = dest.nodeId + "," + to_string(dest.timeWindow.earliness) + "," + to_string(dest.timeWindow.tardiness);
-            destStrings.push_back(destStr);
-            EV << "[RSU] DEBUG: Generated destination: " << destStr << std::endl;
+        try {
+            int count = std::stoi(message.substr(22)); // Skip "GENERATE_DESTINATIONS:"
+            EV << "[RSU] Generating " << count << " random destinations" << std::endl;
+            
+            auto destinations = taskGenerator->generateDestinations(count);
+
+            // Convert destinations to a string format
+            std::vector<std::string> destStrings;
+            for (const auto& dest : destinations) {
+                std::string destStr = dest.nodeId + "," +
+                                     std::to_string(dest.timeWindow.earliness) + "," +
+                                     std::to_string(dest.timeWindow.tardiness);
+                destStrings.push_back(destStr);
+                EV << "[RSU] DEBUG: Generated destination: " << destStr << std::endl;
+            }
+            
+            EV << "[RSU] Sending " << destStrings.size() << " destinations to vehicle" << std::endl;
+            sendRoadListMessage(vehicleId, destStrings);
         }
-        
-        EV << "[RSU] Sending " << destStrings.size() << " destinations to vehicle" << std::endl;
-        sendRoadListMessage(vehicleId, destStrings);
+        catch (const std::exception& e) {
+            EV << "[RSU] ERROR in GENERATE_DESTINATIONS: " << e.what() << std::endl;
+            std::vector<std::string> errorMsg = {"ERROR: Failed to generate destinations"};
+            sendRoadListMessage(vehicleId, errorMsg);
+        }
     }
     // Handle K paths request
     else if (message.find("FIND_K_PATHS:") == 0 && graphProcessor && taskGenerator) {
         EV << "[RSU] DEBUG: Received FIND_K_PATHS request: " << message << std::endl;
-        std::string params = message.substr(13);
-        size_t firstComma = params.find(',');
-        size_t secondComma = params.find(',', firstComma + 1);
-        
-        if (firstComma != std::string::npos && secondComma != std::string::npos) {
-            std::string sourceId = params.substr(0, firstComma);
-            std::string targetId = params.substr(firstComma + 1, secondComma - firstComma - 1);
-            int k = std::stoi(params.substr(secondComma + 1));
+        try {
+            std::string params = message.substr(13);
+            size_t firstComma = params.find(',');
+            size_t secondComma = params.find(',', firstComma + 1);
             
-            EV << "[RSU] Finding " << k << " paths from " << sourceId << " to " << targetId << std::endl;
-            
-            auto paths = taskGenerator->findKPaths(sourceId, targetId, k);
-            
-            EV << "[RSU] Found " << paths.size() << " paths" << std::endl;
-            std::vector<std::string> flattenedPaths;
-            for (size_t i = 0; i < paths.size(); i++) {
-                const auto& path = paths[i];
+            if (firstComma != std::string::npos && secondComma != std::string::npos) {
+                std::string sourceId = params.substr(0, firstComma);
+                std::string targetId = params.substr(firstComma + 1, secondComma - firstComma - 1);
+                int k = std::stoi(params.substr(secondComma + 1));
                 
-                // Log each path for debugging
-                EV << "[RSU] DEBUG: Path " << (i+1) << " (length " << path.size() << "): ";
-                for (size_t j = 0; j < path.size(); j++) {
-                    EV << path[j];
-                    if (j < path.size() - 1) EV << " -> ";
-                }
-                EV << std::endl;
+                EV << "[RSU] Finding " << k << " paths from " << sourceId << " to " << targetId << std::endl;
                 
-                for (const auto& roadId : path) {
-                    flattenedPaths.push_back(roadId);
+                auto paths = taskGenerator->findKPaths(sourceId, targetId, k);
+                
+                EV << "[RSU] Found " << paths.size() << " paths" << std::endl;
+                std::vector<std::string> flattenedPaths;
+                for (size_t i = 0; i < paths.size(); i++) {
+                    const auto& path = paths[i];
+                    
+                    // Log each path for debugging
+                    EV << "[RSU] DEBUG: Path " << (i+1) << " (length " << path.size() << "): ";
+                    for (size_t j = 0; j < path.size(); j++) {
+                        EV << path[j];
+                        if (j < path.size() - 1) EV << " -> ";
+                    }
+                    EV << std::endl;
+                    
+                    for (const auto& roadId : path) {
+                        flattenedPaths.push_back(roadId);
+                    }
+                    flattenedPaths.push_back("PATH_SEPARATOR");
                 }
-                flattenedPaths.push_back("PATH_SEPARATOR");
+                
+                sendRoadListMessage(vehicleId, flattenedPaths);
+            } else {
+                EV << "[RSU] ERROR: Malformed K paths request" << std::endl;
+                std::vector<std::string> errorMsg = {"ERROR: Malformed K paths request"};
+                sendRoadListMessage(vehicleId, errorMsg);
             }
-            
-            sendRoadListMessage(vehicleId, flattenedPaths);
-        } else {
-            EV << "[RSU] ERROR: Malformed K paths request" << std::endl;
+        }
+        catch (const std::exception& e) {
+            EV << "[RSU] ERROR in FIND_K_PATHS: " << e.what() << std::endl;
+            std::vector<std::string> errorMsg = {"ERROR: Failed to find paths"};
+            sendRoadListMessage(vehicleId, errorMsg);
         }
     }
     // Handle valid assignment check
@@ -408,7 +492,7 @@ void RSUControlApp::handleVehicleMessage(const string& message, LAddress::L2Type
 void RSUControlApp::sendRoadListMessage(LAddress::L2Type vehicleId, const vector<string>& roadList) {
     std::ostringstream oss;
     oss << "ROAD_LIST:";
-    
+
     for (size_t i = 0; i < roadList.size(); ++i) {
         oss << roadList[i];
         if (i < roadList.size() - 1) {
@@ -424,7 +508,7 @@ void RSUControlApp::sendRoadListMessage(LAddress::L2Type vehicleId, const vector
     wsm->encapsulate(response);
     populateWSM(wsm);
     wsm->setRecipientAddress(vehicleId);
-    
+
     sendDown(wsm);
 }
 
@@ -448,7 +532,7 @@ void RSUControlApp::handleSelfMsg(cMessage* msg) {
             }
         }
         scheduleAt(simTime() + 2.0, statusCheckMsg);
-    } 
+    }
     else if (msg == rerouteMsg) {
         EV << "\n[RSU] ******************************************" << std::endl;
         EV << "[RSU] REROUTING TRIGGERED AT t=" << simTime() << std::endl;
@@ -478,8 +562,8 @@ void RSUControlApp::sendRerouteToAllVehicles() {
     std::cout << "Rerouting based on stored vehicle data" << std::endl;
     
     int vehiclesRerouted = 0;
-    
-    
+
+
     // Process each vehicle in our data map
     for (auto& vehiclePair : vehicleDataMap) {
         LAddress::L2Type vehicleId = vehiclePair.first;
@@ -496,7 +580,7 @@ void RSUControlApp::sendRerouteToAllVehicles() {
             edgePath = vehicleData.assignedPath;
             EV << "[RSU] Using previously calculated path for vehicle " << vehicleId << std::endl;
             std::cout << "Using previously calculated path for vehicle " << vehicleId << std::endl;
-            
+
             // Validate path: make sure it's not too long to avoid SUMO issues
             if (edgePath.size() > 50) {
                 // If path is very long, truncate it to just source and destination
@@ -505,11 +589,11 @@ void RSUControlApp::sendRerouteToAllVehicles() {
                 edgePath.clear();
                 edgePath.push_back(sourceEdge);
                 edgePath.push_back(destEdge);
-                
+
                 EV << "[RSU] Path truncated for vehicle " << vehicleId << " (too long)" << std::endl;
                 std::cout << "Path truncated for vehicle " << vehicleId << " (too long)" << std::endl;
             }
-            
+
             // Print the path
             std::cout << "Path: ";
             for (const auto& edge : edgePath) {
@@ -520,12 +604,12 @@ void RSUControlApp::sendRerouteToAllVehicles() {
         else {
             // We don't have a stored path, calculate a new one
             std::string destEdge = vehicleData.assignedDestination.nodeId;
-            
+
             // Since we don't know the current edge, use a default source edge
             std::string sourceEdge = "-1154"; // Example source edge
             EV << "[RSU] No stored path, calculating from " << sourceEdge << " to " << destEdge << std::endl;
             std::cout << "No stored path, calculating from " << sourceEdge << " to " << destEdge << std::endl;
-            
+
             if (graphProcessor) {
                 edgePath = graphProcessor->findEdgeShortestPath(sourceEdge, destEdge);
                 
@@ -536,45 +620,71 @@ void RSUControlApp::sendRerouteToAllVehicles() {
                 }
                 std::cout << std::endl;
             }
+            else {
+                EV << "[RSU] ERROR: GraphProcessor not available" << std::endl;
+                std::cout << "ERROR: GraphProcessor not available" << std::endl;
+            }
         }
+
+        // Simplify the path if needed - sometimes we only need to send the destination
+        // This is a fallback if direct route changes fail
         if (edgePath.size() > 1) {
             // Create a direct path that just sends the first and last edge
             std::vector<std::string> simplifiedPath;
             simplifiedPath.push_back(edgePath.front()); // Current edge
             simplifiedPath.push_back(edgePath.back());  // Destination edge
-            
+
             // If the path is valid, send it
             if (!edgePath.empty()) {
+                // First try sending the full path
                 sendRerouteMessage(vehicleId, edgePath);
                 vehiclesRerouted++;
+
+                // Store the path we sent (for debugging/analysis)
                 vehicleData.lastSentPath = edgePath;
             }
         }
         else if (!edgePath.empty()) {
+            // Just send the destination (single edge)
             sendRerouteMessage(vehicleId, edgePath);
             vehiclesRerouted++;
+
+            // Store the path we sent
             vehicleData.lastSentPath = edgePath;
         }
         else {
-            EV << "[RSU] No path found for vehicle " << vehicleId << " to destination " 
+            EV << "[RSU] No path found for vehicle " << vehicleId << " to destination "
                << vehicleData.assignedDestination.nodeId << std::endl;
             std::cout << "No path found for vehicle " << vehicleId << " to destination "
                       << vehicleData.assignedDestination.nodeId << std::endl;
         }
     }
-    
-    EV << "[RSU] Rerouted " << vehiclesRerouted << " vehicles out of " 
+
+    EV << "[RSU] Rerouted " << vehiclesRerouted << " vehicles out of "
        << vehicleDataMap.size() << " total vehicles" << std::endl;
+    std::cout << "Rerouted " << vehiclesRerouted << " vehicles out of "
+              << vehicleDataMap.size() << " total vehicles" << std::endl;
+
     EV << "\n[RSU] ===== REROUTING COMPLETE =====\n" << std::endl;
 }
 
 void RSUControlApp::sendRerouteMessage(LAddress::L2Type vehicleId, const std::vector<std::string>& edgePath) {
     // Get the correct simulation ID for this vehicle
     int simId = vehicleDataMap[vehicleId].simulationId;
-    // build the CHANGE_ROUTE message with the complete path
+    if (simId == -1) {
+        // If no mapping exists, use the original ID (shouldn't happen with pre-mapping)
+        simId = vehicleId;
+        EV << "[RSU] WARNING: No simulation ID mapping for vehicle " << vehicleId << std::endl;
+        std::cout << "RSU WARNING: No simulation ID mapping for vehicle " << vehicleId << std::endl;
+    }
+
+    // Verification debug output
+    std::cout << "DEBUG: Vehicle internal ID: " << vehicleId << ", using simulation ID: " << simId << std::endl;
+
+    // Build the CHANGE_ROUTE message with the complete path
     std::ostringstream routeStr;
     routeStr << "CHANGE_ROUTE:" << simId << ":";
-    
+
     // Include all edges in the path
     if (!edgePath.empty()) {
         for (size_t i = 0; i < edgePath.size(); i++) {
@@ -585,29 +695,29 @@ void RSUControlApp::sendRerouteMessage(LAddress::L2Type vehicleId, const std::ve
         }
         
         std::string message = routeStr.str();
-        
+
         // Enhanced debug information
         EV << "\n[RSU] ====== SENDING BROADCAST REROUTE MESSAGE ======" << std::endl;
         EV << "[RSU] Target vehicle ID: " << simId << std::endl;
         EV << "[RSU] Message content: " << message << std::endl;
         EV << "[RSU] System time: " << simTime() << std::endl;
         EV << "[RSU] ====================================" << std::endl;
-        
+
         std::cout << "\nRSU SENDING BROADCAST: Target vehicle ID: " << simId << std::endl;
         std::cout << "RSU SENDING: Message content: " << message << std::endl;
         std::cout << "RSU SENDING: System time: " << simTime() << std::endl;
-        
+
         // Create a broadcast message to all vehicles
         auto* response = new TraCIDemo11pMessage();
         response->setDemoData(message.c_str());
         response->setSenderAddress(myId);
-        
+
         auto* wsm = new BaseFrame1609_4();
         wsm->encapsulate(response);
         populateWSM(wsm);
         // Important: Do not set a recipient address for broadcast
         // wsm->setRecipientAddress(vehicleId); - Remove this line
-        
+
         sendDown(wsm);
         
         EV << "[RSU] Broadcast reroute message for vehicle " << simId << ": " << message << std::endl;
@@ -618,8 +728,16 @@ void RSUControlApp::sendRerouteMessage(LAddress::L2Type vehicleId, const std::ve
 }
 
 void RSUControlApp::finish() {
+    // Save all statistics to CSV files
+    SimulationLogger::getInstance().saveToCSV("vehicle_stats.csv", "simulation_summary.csv");
+    
+    // Print summary
+    SimulationLogger::getInstance().printSummary();
+    
+    // Clean up messages
     cancelAndDelete(statusCheckMsg);
-    cancelAndDelete(rerouteMsg); // Clean up the reroute message
+    cancelAndDelete(rerouteMsg);
+    
     TraCIDemoRSU11p::finish();
 }
 
@@ -777,11 +895,32 @@ void RSUControlApp::printRoadNetworkInfo() const {
 }
 
 void RSUControlApp::printNodeInfo() const {
+    if (!xmlProcessor || !xmlProcessor->isNetworkLoaded()) {
+        EV << "[RSU] No road network loaded" << endl;
+        return;
+    }
+
     const Graph& graph = xmlProcessor->getGraph();
     const auto& nodes = graph.getNodes();
     
     EV << "\n[RSU] ========== NODE INFORMATION ==========\n" << endl;
     EV << "[RSU] Total number of nodes: " << nodes.size() << endl;
+
+    int count = 0;
+    for (const auto& nodePair : nodes) {
+        if (count >= 20) break;
+
+        const Node& node = nodePair.second;
+        EV << "[RSU] Node ID: " << node.getId()
+           << " X: " << node.getX()
+           << " Y: " << node.getY() << endl;
+        count++;
+    }
+
+    if (nodes.size() > 20) {
+        EV << "[RSU] ... and " << (nodes.size() - 20) << " more nodes" << endl;
+    }
+
     EV << "\n[RSU] =======================================\n" << endl;
 }
 
@@ -791,14 +930,26 @@ void RSUControlApp::testTaskGenerator() {
         return;
     }
     
-    // Test 1: Find k shortest paths
+    EV << "\n[RSU] ========== TASK GENERATOR TEST ==========\n" << endl;
+
+    // Test 1: Generate random destinations
+    EV << "[RSU] Test 1: Generating 3 random destinations" << std::endl;
+    auto destinations = taskGenerator->generateDestinations(3);
+
+    EV << "[RSU] Generated " << destinations.size() << " destinations:" << std::endl;
+    for (const auto& dest : destinations) {
+        EV << "  - Node " << dest.nodeId << " (time window: "
+           << dest.timeWindow.earliness << " - " << dest.timeWindow.tardiness << ")" << std::endl;
+    }
+
+    // Test 2: Find k shortest paths
     if (graphProcessor) {
         const auto& roads = getAllRoads();
         if (roads.size() >= 10) {
-            string sourceId = "830";
-            string targetId = "1914";
+            std::string sourceId = "830";
+            std::string targetId = "1914";
 
-            EV << "\n[RSU] Test 1: Finding 16 shortest paths from " << sourceId << " to " << targetId << std::endl;
+            EV << "\n[RSU] Test 2: Finding 16 shortest paths from " << sourceId << " to " << targetId << std::endl;
 
             auto paths = taskGenerator->findKPaths(sourceId, targetId, 16);
 
@@ -832,22 +983,67 @@ void RSUControlApp::testTaskGenerator() {
         }
     }
     
+    // Test 3: Check valid assignment
+    //    EV << "\n[RSU] Test 3: Testing valid assignment" << std::endl;
+    //
+    //    std::vector<std::string> sources = {"1024", "213", "337"};
+    //    std::vector<std::string> targets = {"1985", "853", "205"};
+    //
+    //    bool validAssignment = taskGenerator->existsValidAssignment(sources, targets);
+
+    //    EV << "[RSU] Valid assignment exists: " << (validAssignment ? "YES" : "NO") << std::endl;
+
     EV << "\n[RSU] Test 3: Tìm đường đi giữa các edge" << std::endl;
     findEdgePathAndPrint("-184", "1939");
 
     EV << "\n[RSU] =========================================\n" << std::endl;
 }
 
+void RSUControlApp::findLanePathAndPrint(std::string sourceLaneId, std::string targetLaneId) const {
+    if (!graphProcessor) {
+        return;
+    }
+
+    EV << "[RSU] Tìm đường đi ngắn nhất từ làn " << sourceLaneId << " đến làn " << targetLaneId << std::endl;
+
+    auto lanePath = graphProcessor->findLaneShortestPath(sourceLaneId, targetLaneId);
+
+    if (lanePath.empty()) {
+        EV << "[RSU] Không tìm thấy đường đi giữa hai làn đường" << std::endl;
+        return;
+    }
+
+    double totalCost = 0.0;
+    for (const auto& segment : lanePath) {
+        totalCost += segment.cost;
+    }
+
+    EV << "[RSU] Đã tìm thấy đường đi với " << lanePath.size() << " phân đoạn, tổng chi phí: " << totalCost << std::endl;
+
+    for (size_t i = 0; i < lanePath.size(); i++) {
+        const auto& segment = lanePath[i];
+        EV << "  - Edge: " << segment.edgeId << ", Lane: " << segment.laneIndex
+           << ", Chi phí: " << segment.cost << std::endl;
+    }
+}
+
 void RSUControlApp::findEdgePathAndPrint(std::string sourceEdgeId, std::string targetEdgeId) const {
-    EV << "[RSU] Tìm đường đi ngắn nhất từ edge " << sourceEdgeId << " đến edge " << targetEdgeId << std::endl;
+    if (!graphProcessor) {
+        EV << "[RSU] GraphProcessor chưa được khởi tạo" << std::endl;
+        return;
+    }
     
+    EV << "[RSU] Tìm đường đi ngắn nhất từ edge " << sourceEdgeId << " đến edge " << targetEdgeId << std::endl;
+
     // Get the graph of roads
     const Graph& graph = graphProcessor->getGraph();
     
     bool sourceEdgeFound = false;
     bool targetEdgeFound = false;
-    string sourceNodeId, targetNodeId;
-    map<string, pair<string, string>> edgeToJunctions;
+    std::string sourceNodeId, targetNodeId;
+
+    // Build a map from edge ID to "from" and "to" junctions
+    std::map<std::string, std::pair<std::string, std::string>> edgeToJunctions;
     
     for (const auto& nodePair : graph.getAdjList()) {
         const std::string& fromJunction = nodePair.first;
@@ -860,28 +1056,33 @@ void RSUControlApp::findEdgePathAndPrint(std::string sourceEdgeId, std::string t
                 sourceEdgeFound = true;
                 sourceNodeId = nodePair.first;
                 EV << "[RSU] Source edge " << sourceEdgeId << " found: connects from node " 
-                   << edge.getFrom() << " to node " << edge.getTo() << endl;
+                   << edge.getFrom() << " to node " << edge.getTo() << std::endl;
             }
             if (edge.getId() == targetEdgeId) {
                 targetEdgeFound = true;
                 targetNodeId = nodePair.first;
                 EV << "[RSU] Target edge " << targetEdgeId << " found: connects from node " 
-                   << edge.getFrom() << " to node " << edge.getTo() << endl;
+                   << edge.getFrom() << " to node " << edge.getTo() << std::endl;
             }
         }
     }
     
-    if (!sourceEdgeFound || !targetEdgeFound) {
+    if (!sourceEdgeFound) {
+        EV << "[RSU] ERROR: Source edge " << sourceEdgeId << " not found in graph!" << std::endl;
+        return;
+    }
+    if (!targetEdgeFound) {
+        EV << "[RSU] ERROR: Target edge " << targetEdgeId << " not found in graph!" << std::endl;
         return;
     }
 
     if (!sourceNodeId.empty() && !targetNodeId.empty()) {
-        EV << "[RSU] DEBUG: Checking if there's a node path from " << sourceNodeId << " to " << targetNodeId << endl;
+        EV << "[RSU] DEBUG: Checking if there's a node path from " << sourceNodeId << " to " << targetNodeId << std::endl;
         std::vector<std::string> nodePath = graphProcessor->findShortestPath(sourceNodeId, targetNodeId);
         if (!nodePath.empty()) {
-            EV << "[RSU] DEBUG: Node path exists with " << nodePath.size() << " segments" <<endl;
+            EV << "[RSU] DEBUG: Node path exists with " << nodePath.size() << " segments" << std::endl;
         } else {
-            EV << "[RSU] DEBUG: No node path exists between the nodes" << endl;
+            EV << "[RSU] DEBUG: No node path exists between the nodes" << std::endl;
         }
     }
     
@@ -901,16 +1102,22 @@ void RSUControlApp::findEdgePathAndPrint(std::string sourceEdgeId, std::string t
     }
     
     EV << "[RSU] Đã tìm thấy đường đi với " << edgePath.size() << " phân đoạn, tổng độ dài: " << totalLength << std::endl;
+
+    // Print the path (showing all road IDs in the path, including intermediate roads)
     if (!edgePath.empty()) {
         EV << "[RSU] Đường đi: ";
-        const string& sourceRoad = edgePath.front();
-        const string& targetRoad = edgePath.back();
+
+        // Always try to get a more detailed path between source and destination roads
+        const std::string& sourceRoad = edgePath.front();
+        const std::string& targetRoad = edgePath.back();
         
         // Get a detailed path between source and destination
-        vector<std::string> detailedPath = graphProcessor->findEdgeShortestPath(sourceRoad, targetRoad);
+        std::vector<std::string> detailedPath = graphProcessor->findEdgeShortestPath(sourceRoad, targetRoad);
 
+        // If we got a detailed path, use it; otherwise, use junction-to-junction paths to build a complete path
         if (detailedPath.size() > 2) {
-            for (int j = 0; j < detailedPath.size(); j++) {
+            // Print the detailed path with all intermediate roads
+            for (size_t j = 0; j < detailedPath.size(); j++) {
                 EV << detailedPath[j];
                 if (j < detailedPath.size() - 1) {
                     EV << " -> ";
@@ -918,18 +1125,31 @@ void RSUControlApp::findEdgePathAndPrint(std::string sourceEdgeId, std::string t
             }
         }
         else {
-            vector<string> intermediateRoads;
+            // Try to find intermediate road segments using junction connections from the original path
+            std::vector<std::string> intermediateRoads;
+
+            // Since original path often just has start and end points or junction placeholders,
+            // try to find intermediate roads between junctions
             auto sourceIt = edgeToJunctions.find(sourceRoad);
             auto targetIt = edgeToJunctions.find(targetRoad);
             
             if (sourceIt != edgeToJunctions.end() && targetIt != edgeToJunctions.end()) {
-                const string& sourceToJunction = sourceIt->second.second;
-                const string& targetFromJunction = targetIt->second.first;
-                vector<string> junctionPath = graphProcessor->findShortestPath(sourceToJunction, targetFromJunction);
+                const std::string& sourceToJunction = sourceIt->second.second;
+                const std::string& targetFromJunction = targetIt->second.first;
+
+                // Get a path between junctions
+                std::vector<std::string> junctionPath = graphProcessor->findShortestPath(
+                    sourceToJunction, targetFromJunction);
+
+                // Build a complete path
                 intermediateRoads.push_back(sourceRoad);
+
+                // Add roads connecting the junctions
                 for (size_t j = 0; j < junctionPath.size() - 1; j++) {
-                    const string& fromJunction = junctionPath[j];
-                    const string& toJunction = junctionPath[j + 1];
+                    const std::string& fromJunction = junctionPath[j];
+                    const std::string& toJunction = junctionPath[j + 1];
+
+                    // Find the edge that connects these junctions
                     for (const auto& nodePair : graph.getAdjList()) {
                         if (nodePair.first == fromJunction) {
                             for (const auto& edge : nodePair.second) {
@@ -941,13 +1161,19 @@ void RSUControlApp::findEdgePathAndPrint(std::string sourceEdgeId, std::string t
                         }
                     }
                 }
+
                 intermediateRoads.push_back(targetRoad);
             } else {
+                // Fallback to original path if junction info not available
                 intermediateRoads = edgePath;
             }
+
+            // Print the expanded intermediate roads
             for (size_t j = 0; j < intermediateRoads.size(); j++) {
+                // Skip junction placeholders
                 if (intermediateRoads[j].find("(junction") == std::string::npos && 
                     intermediateRoads[j].find("(path from") == std::string::npos) {
+
                     EV << intermediateRoads[j];
                     if (j < intermediateRoads.size() - 1) {
                         EV << " -> ";
@@ -956,7 +1182,7 @@ void RSUControlApp::findEdgePathAndPrint(std::string sourceEdgeId, std::string t
             }
         }
         
-        EV << endl;
+        EV << std::endl;
     } else {
         EV << "[RSU] Không tìm thấy đường đi!" << std::endl;
     }
@@ -985,31 +1211,97 @@ void RSUControlApp::printVehicleRouteInfo(const std::vector<VehicleInfo>& vehicl
     }
     
     EV << "=========================================================" << std::endl;
+
+    // Generate destinations for vehicles
     EV << "[RSU] Generating random destinations for vehicles..." << std::endl;
     generateAndAssignDestinations(vehicles);
 }
 
-void RSUControlApp::generateAndAssignDestinations(const vector<VehicleInfo>& vehicles) {
+// Helper to check if a string can be converted to an integer
+bool isConvertibleToInt(const std::string& str) {
+    try {
+        size_t pos = 0;
+        std::stoi(str, &pos);
+        return pos == str.length(); // Check if all characters were processed
+    } catch (...) {
+        return false;
+    }
+}
+
+// Helper to extract the numeric index from vehicle IDs like "t_X", "t_1", etc.
+// This is a fallback method, now we use the sequential index from VehicleInfo
+int extractVehicleIndex(const std::string& vehicleId) {
+    // Check if the ID is in format "t_X" where X is a number
+    if (vehicleId.length() > 2 && vehicleId.substr(0, 2) == "t_") {
+        try {
+            return std::stoi(vehicleId.substr(2)); // Extract the number after "t_"
+        } catch (...) {
+            // If conversion fails, return -1
+            return -1;
+        }
+    }
+    
+    // If it's already a numeric ID, try to convert it directly
+    try {
+        return std::stoi(vehicleId);
+    } catch (...) {
+        return -1; // Invalid ID
+    }
+}
+
+void RSUControlApp::generateAndAssignDestinations(const std::vector<VehicleInfo>& vehicles) {
+    if (!taskGenerator || !graphProcessor || vehicles.empty()) {
+        EV << "[RSU] ERROR: Cannot generate destinations - required components not initialized" << std::endl;
+        return;
+    }
+
     EV << "\n=============== VEHICLE DESTINATION ASSIGNMENT ===============" << std::endl;
     
-    vector<string> sourceRoads;
+    // Store vehicles and their source roads
+    std::vector<std::string> sourceRoads;
+    
     for (const auto& vehicle : vehicles) {
         sourceRoads.push_back(vehicle.from);
-        EV << "[RSU] Vehicle " << vehicle.id << " starting at road " << vehicle.from << endl;
+        
+        // Record vehicle start using the vehicle's index
+        double startTime = vehicle.depart;
+        try {
+            recordVehicleStart(vehicle.index, vehicle.from, startTime);
+            
+            EV << "[RSU] Vehicle " << vehicle.id << " (index: " << vehicle.index 
+               << ") starting at road " << vehicle.from << " at time " << startTime << std::endl;
+        } catch (const std::exception& e) {
+            EV << "[RSU] Error recording vehicle start: " << e.what() << std::endl;
+        }
     }
-    EV << "[RSU] Generating optimal destinations for " << sourceRoads.size() << " vehicles" << endl;
-    int destsToGenerate = sourceRoads.size();
+
+    EV << "[RSU] Generating optimal destinations for " << vehicles.size() << " vehicles" << std::endl;
+    int destsToGenerate = vehicles.size();
     auto destinations = taskGenerator->getPotentialDestinationEdges(destsToGenerate, sourceRoads);
-    vector<Destination> destObjects;
+
+    // Create Destination objects from the edge IDs
+    std::vector<Destination> destObjects;
+
+    // First create destination objects without time windows
     for (const auto& edgeId : destinations) {
-        destObjects.emplace_back(edgeId, TimeWindow(0, 0));
+        destObjects.emplace_back(edgeId, TimeWindow(0, 0)); // Placeholder time windows
     }
+
+    // Calculate travel times and set time windows based on that
     const Graph& graph = graphProcessor->getGraph();
     
-    for (int i = 0; i < destObjects.size() && i < sourceRoads.size(); ++i) {
+    for (size_t i = 0; i < destObjects.size() && i < sourceRoads.size(); ++i) {
+        // Bắt đầu đo thời gian thuật toán
+        auto startAlgorithm = std::chrono::high_resolution_clock::now();
+        
+        // Calculate path
         auto path = graphProcessor->findEdgeShortestPath(sourceRoads[i], destObjects[i].nodeId);
         
-        // calculate total distance
+        // Kết thúc đo thời gian thuật toán
+        auto endAlgorithm = std::chrono::high_resolution_clock::now();
+        double algorithmTime = std::chrono::duration<double>(endAlgorithm - startAlgorithm).count();
+        
+        // Calculate total distance
         double totalDistance = 0.0;
         for (const auto& edgeId : path) {
             bool edgeFound = false;
@@ -1024,40 +1316,71 @@ void RSUControlApp::generateAndAssignDestinations(const vector<VehicleInfo>& veh
                 if (edgeFound) break;
             }
             if (!edgeFound) {
-                totalDistance += 0;
+                totalDistance += 100.0;
             }
         }
+
+        // Calculate estimated travel time with an average speed
         double averageSpeed = 13.89; // m/s
         double estimatedTime = totalDistance / averageSpeed;
-        // set time window = 3t/2 - 5t/2 minTime
+        if (estimatedTime <= 0) {
+            estimatedTime = 1.0; // Set a minimum travel time
+        }
+
+        // Set time window to 1.5-2.5 times the minimum travel time
         double earliness = 1.5 * estimatedTime;
         double tardiness = 2.5 * estimatedTime;
+
+        // Update the time window for this destination
         destObjects[i].timeWindow.earliness = earliness;
         destObjects[i].timeWindow.tardiness = tardiness;
+        
+        // Ghi nhận thời gian thuật toán
+        if (i < vehicles.size()) {
+            try {
+                recordAlgorithmTime(vehicles[i].index, algorithmTime);
+            } catch (const std::exception& e) {
+                EV << "[RSU] Error recording algorithm time: " << e.what() << std::endl;
+            }
+        }
+    }
+
+    if (destObjects.size() < vehicles.size()) {
+        EV << "[RSU] WARNING: Not enough destinations generated (" << destObjects.size()
+           << " for " << vehicles.size() << " vehicles)" << std::endl;
     }
 
     EV << "[RSU] Generated " << destObjects.size() << " destinations with time windows:" << std::endl;
-    for (int i = 0; i < destObjects.size(); ++i) {
+    for (size_t i = 0; i < destObjects.size(); ++i) {
         const auto& dest = destObjects[i];
-        EV << "  - Destination for Vehicle " << i << " (Source: " << (i < sourceRoads.size() ? sourceRoads[i] : "N/A") << "): Edge " << dest.nodeId
+        EV << "  - Destination for Vehicle " << vehicles[i].id << " (index: " << vehicles[i].index
+           << ", Source: " << (i < sourceRoads.size() ? sourceRoads[i] : "N/A") << "): Edge " << dest.nodeId
            << " (Time window: " << dest.timeWindow.earliness
            << " - " << dest.timeWindow.tardiness << ")" << std::endl;
     }
+
+    // Print the effective Cost Matrix based on assignments
     EV << "\n[RSU] Effective Cost Matrix (Path Lengths for Assigned Routes):" << std::endl;
-    EV << "       ";
-    for(int j=0; j < destObjects.size(); ++j) {
-        string destHeader = "D_" + destObjects[j].nodeId.substr(0, 4);
+    EV << "       "; // Header space for vehicle column
+    for(size_t j=0; j < destObjects.size(); ++j) {
+        std::string destHeader = "D_" + destObjects[j].nodeId.substr(0, 4);
         EV << destHeader << "\t";
     }
-    EV << endl;
+    EV << std::endl;
 
-    for (int i = 0; i < sourceRoads.size(); ++i) {
-        string rowStr = "V_" + vehicles[i].id.substr(0,4) + "(E:" + sourceRoads[i].substr(0,4) + ")\t";
-        for (int j = 0; j < destObjects.size(); ++j) {
+    for (size_t i = 0; i < sourceRoads.size(); ++i) {
+        std::string rowStr = "V_" + vehicles[i].id.substr(0,4) + "(E:" + sourceRoads[i].substr(0,4) + ")\t";
+        for (size_t j = 0; j < destObjects.size(); ++j) {
+            // Find the path length for this specific source vehicle to this specific destination edge
+            // This might not be the globally optimal if the number of dests < vehicles
+            // but it shows the cost for the assignment made if vehicle i got dest j
             double pathLength = -1.0;
-            if (i < destObjects.size() && sourceRoads[i] == vehicles[i].from ) {
+            if (i < destObjects.size() && sourceRoads[i] == vehicles[i].from ) { // Ensure we are matching correctly
+                 // Dùng findEdgeShortestPath để có kết quả chính xác và nhất quán với hiển thị đường đi
                  auto path = graphProcessor->findEdgeShortestPath(sourceRoads[i], destObjects[j].nodeId);
                  pathLength = 0.0;
+
+                 // Tính độ dài đường đi bằng cách cộng chiều dài mỗi edge
                  if (!path.empty()) {
                     const Graph& graph = graphProcessor->getGraph();
                     for (const auto& edgeId : path) {
@@ -1073,16 +1396,16 @@ void RSUControlApp::generateAndAssignDestinations(const vector<VehicleInfo>& veh
                             if (edgeFound) break;
                         }
                         if (!edgeFound) {
-                            pathLength += 0;
+                            pathLength += 100.0; // Default length
                         }
                     }
                  } else {
-                    pathLength = -1.0;
+                    pathLength = -1.0; // No path found
                  }
             }
 
             if (pathLength > 0 && pathLength < 9999999.0) {
-                rowStr += to_string(static_cast<double>(pathLength)) + "\t";
+                rowStr += std::to_string(static_cast<double>(pathLength)) + "\t";
             } else {
                 rowStr += "INF\t";
             }
@@ -1092,18 +1415,30 @@ void RSUControlApp::generateAndAssignDestinations(const vector<VehicleInfo>& veh
     
     EV << "\n[RSU] Computing routes for each vehicle to its assigned destination:" << std::endl;
     
-//    const Graph& graph = graphProcessor->getGraph();
-    int processedVehicles = min(static_cast<int>(vehicles.size()), static_cast<int>(destObjects.size()));
+    int processedVehicles = std::min(static_cast<int>(vehicles.size()), static_cast<int>(destObjects.size()));
 
     for (int i = 0; i < processedVehicles; ++i) {
-        const string& sourceRoad = sourceRoads[i];
-        const string& targetRoad = destObjects[i].nodeId;
+        const std::string& sourceRoad = sourceRoads[i];
+        const std::string& targetRoad = destObjects[i].nodeId;
+        
+        // Bắt đầu đo thời gian thuật toán
+        auto startAlgorithm = std::chrono::high_resolution_clock::now();
         
         auto path = graphProcessor->findEdgeShortestPath(sourceRoad, targetRoad);
         
-        EV << "  - Vehicle " << vehicles[i].id << " route:" << std::endl;
+        // Kết thúc đo thời gian thuật toán
+        auto endAlgorithm = std::chrono::high_resolution_clock::now();
+        double algorithmTime = std::chrono::duration<double>(endAlgorithm - startAlgorithm).count();
+        
+        EV << "  - Vehicle " << vehicles[i].id << " (index: " << vehicles[i].index << ") route:" << std::endl;
         EV << "    From: Road " << sourceRoad << std::endl;
         EV << "    To: Road " << targetRoad << std::endl;
+
+        if (path.empty()) {
+            EV << "    WARNING: No path found!" << std::endl;
+            continue;
+        }
+
         double totalDistance = 0.0;
         for (const auto& edgeId : path) {
             bool edgeFound = false;
@@ -1118,13 +1453,16 @@ void RSUControlApp::generateAndAssignDestinations(const vector<VehicleInfo>& veh
                 if (edgeFound) break;
             }
             if (!edgeFound) {
-               totalDistance += 0;
+                totalDistance += 100.0;
             }
         }
-
         
         double averageSpeed = 13.89;
         double estimatedTime = totalDistance / averageSpeed;
+        if (estimatedTime <= 0) {
+            estimatedTime = 1.0;
+        }
+
         EV << "    Path length: " << totalDistance << " m" << std::endl;
         EV << "    Estimated travel time: " << estimatedTime << " s" << std::endl;
         EV << "    Time window: " << destObjects[i].timeWindow.earliness
@@ -1132,33 +1470,94 @@ void RSUControlApp::generateAndAssignDestinations(const vector<VehicleInfo>& veh
            << " (approx: " << (destObjects[i].timeWindow.earliness / estimatedTime)
            << "x - " << (destObjects[i].timeWindow.tardiness / estimatedTime) << "x of minimal travel time)" << std::endl;
         
-        if (path.size() <= 30) {
+        if (path.size() <= 20) {
             EV << "    Path: ";
             for (size_t j = 0; j < path.size(); j++) {
                 EV << path[j];
                 if (j < path.size() - 1) {
-                        EV << " -> ";
-                    }
+                    EV << " -> ";
                 }
+            }
             EV << std::endl;
         } else {
             EV << "    Path: " << path[0] << " -> ... -> " << path[path.size()-1]
                << " (" << path.size() << " segments)" << std::endl;
         }
-    }
-
-    for (int i = 0; i < processedVehicles; i++) {
-        LAddress::L2Type vehicleId = i;
-        vehicleDataMap[vehicleId].assignedDestination = destObjects[i];
         
-        const string& sourceRoad = sourceRoads[i];
-        const string& targetRoad = destObjects[i].nodeId;
-        auto path = graphProcessor->findEdgeShortestPath(sourceRoad, targetRoad);
-        vehicleDataMap[vehicleId].assignedPath = path;
+        // Ghi nhận thông tin đích và khung thời gian cho xe
+        try {
+            recordVehicleDestination(vehicles[i].index, targetRoad, 
+                                    destObjects[i].timeWindow.earliness, 
+                                    destObjects[i].timeWindow.tardiness,
+                                    path, totalDistance);
+            
+            // Ghi nhận thời gian thuật toán
+            recordAlgorithmTime(vehicles[i].index, algorithmTime);
+        } catch (const std::exception& e) {
+            EV << "[RSU] Error recording vehicle destination: " << e.what() << std::endl;
+        }
     }
 
-    EV << "\n[RSU] Assignment completed for " << processedVehicles << " vehicles" << endl;
-    EV << "==============================================================\n" << endl;
+    for (size_t i = 0; i < processedVehicles; i++) {
+        // Get the vehicle's index from VehicleInfo
+        int vehicleIndex = vehicles[i].index;
+        
+        // Get the corresponding simulation ID from the mapping
+        auto it = vehicleDataMap.find(vehicleIndex);
+        if (it == vehicleDataMap.end() || it->second.simulationId == -1) {
+            EV << "[RSU] WARNING: Vehicle with index " << vehicleIndex << " not found in vehicleDataMap" << std::endl;
+            continue;
+        }
+        
+        int simulationId = it->second.simulationId;
+        
+        // Store destination and path data in vehicleDataMap
+        if (i < destObjects.size()) {
+            vehicleDataMap[vehicleIndex].assignedDestination = destObjects[i];
+            
+            // Store the assigned path
+            const std::string& sourceRoad = sourceRoads[i];
+            const std::string& targetRoad = destObjects[i].nodeId;
+            auto path = graphProcessor->findEdgeShortestPath(sourceRoad, targetRoad);
+            vehicleDataMap[vehicleIndex].assignedPath = path;
+            
+            // Lưu khung thời gian cho xe
+            vehicleDataMap[vehicleIndex].earliestArrival = destObjects[i].timeWindow.earliness;
+            vehicleDataMap[vehicleIndex].latestArrival = destObjects[i].timeWindow.tardiness;
+            
+            // Tính độ dài đường đi
+            double pathLength = 0.0;
+            for (const auto& edgeId : path) {
+                pathLength += getEdgeLength(edgeId);
+            }
+            vehicleDataMap[vehicleIndex].pathLength = pathLength;
+            
+            // Tính thời gian di chuyển ước tính
+            double averageSpeed = 13.89; // m/s
+            vehicleDataMap[vehicleIndex].estimatedTravelTime = pathLength / averageSpeed;
+            
+            // Lưu thời gian bắt đầu của xe (từ dữ liệu SUMO)
+            vehicleDataMap[vehicleIndex].startTime = vehicles[i].depart;
+            
+            EV << "[RSU] Vehicle with index " << vehicleIndex << " mapped to simulation ID " 
+               << simulationId << " with destination " << targetRoad << std::endl;
+        }
+    }
+
+    EV << "\n[RSU] Assignment completed for " << processedVehicles << " vehicles" << std::endl;
+
+    // Print a summary of vehicle data map contents
+    std::cout << "Vehicle data map after assignment:" << std::endl;
+    for (const auto& pair : vehicleDataMap) {
+        std::cout << "  Vehicle ID: " << pair.first
+                  << ", simulation ID: " << pair.second.simulationId
+                  << ", destination: " << pair.second.assignedDestination.nodeId
+                  << ", path size: " << pair.second.assignedPath.size() 
+                  << ", time window: [" << pair.second.earliestArrival 
+                  << ", " << pair.second.latestArrival << "]" << std::endl;
+    }
+
+    EV << "==============================================================\n" << std::endl;
 }
 
 double RSUControlApp::getEdgeLength(const std::string& edgeId) const {
@@ -1173,4 +1572,102 @@ double RSUControlApp::getEdgeLength(const std::string& edgeId) const {
         }
     }
     return 0;
+}
+
+// Add new methods for logging
+
+void RSUControlApp::recordVehicleStart(int vehicleId, const std::string& startRoad, double startTime) {
+    // Convertir l'index interne en ID de simulation en utilisant le mapping existant
+    int simulationId = -1;
+    
+    // Utiliser le mapping existant de RSUControlApp
+    auto it = vehicleDataMap.find(vehicleId);
+    if (it != vehicleDataMap.end() && it->second.simulationId != -1) {
+        simulationId = it->second.simulationId;
+    } else {
+        // Véhicule non trouvé dans le mapping, utiliser l'ID original comme fallback
+        simulationId = vehicleId;
+        std::cout << "WARNING: Vehicle " << vehicleId << " not found in pre-defined mapping, using original ID" << std::endl;
+    }
+    
+    // Enregistrer avec l'ID de simulation
+    SimulationLogger::getInstance().recordVehicleStart(simulationId, startRoad, startTime);
+    
+    // Log
+    EV << "[RSU] Vehicle " << vehicleId << " (sim ID: " << simulationId << ") started at time " << startTime 
+       << " from road " << startRoad << std::endl;
+}
+
+void RSUControlApp::recordVehicleDestination(int vehicleId, const std::string& targetRoad, 
+                                            double earliestArrival, double latestArrival, 
+                                            const std::vector<std::string>& path, double pathLength) {
+    // Convertir l'index interne en ID de simulation en utilisant le mapping existant
+    int simulationId = -1;
+    
+    // Utiliser le mapping existant de RSUControlApp
+    auto it = vehicleDataMap.find(vehicleId);
+    if (it != vehicleDataMap.end() && it->second.simulationId != -1) {
+        simulationId = it->second.simulationId;
+    } else {
+        // Véhicule non trouvé dans le mapping, utiliser l'ID original comme fallback
+        simulationId = vehicleId;
+        std::cout << "WARNING: Vehicle " << vehicleId << " not found in pre-defined mapping, using original ID" << std::endl;
+    }
+    
+    // Enregistrer avec l'ID de simulation
+    SimulationLogger::getInstance().updateVehicleDestination(
+        simulationId, targetRoad, earliestArrival, latestArrival, path, pathLength);
+    
+    // Log
+    EV << "[RSU] Vehicle " << vehicleId << " (sim ID: " << simulationId << ") assigned destination " << targetRoad
+       << " with time window [" << earliestArrival << ", " << latestArrival << "]"
+       << " and path length " << pathLength << std::endl;
+}
+
+void RSUControlApp::recordAlgorithmTime(int vehicleId, double algorithmTime) {
+    // Convertir l'index interne en ID de simulation en utilisant le mapping existant
+    int simulationId = -1;
+    
+    // Utiliser le mapping existant de RSUControlApp
+    auto it = vehicleDataMap.find(vehicleId);
+    if (it != vehicleDataMap.end() && it->second.simulationId != -1) {
+        simulationId = it->second.simulationId;
+    } else {
+        // Véhicule non trouvé dans le mapping, utiliser l'ID original comme fallback
+        simulationId = vehicleId;
+        std::cout << "WARNING: Vehicle " << vehicleId << " not found in pre-defined mapping, using original ID" << std::endl;
+    }
+    
+    // Enregistrer avec l'ID de simulation
+    SimulationLogger::getInstance().recordAlgorithmTime(simulationId, algorithmTime);
+    
+    // Log
+    EV << "[RSU] Vehicle " << vehicleId << " (sim ID: " << simulationId << ") routing algorithm took " 
+       << algorithmTime << " seconds" << std::endl;
+}
+
+void RSUControlApp::processVehicleDepartureNotification(const std::string& data) {
+    std::istringstream iss(data);
+    std::string action;
+    int vehicleId;
+    iss >> action >> vehicleId;
+    
+    EV << "[RSU] Received notification: Vehicle " << vehicleId 
+       << " " << action << " at time " << simTime() << std::endl;
+}
+
+void RSUControlApp::processVehicleArrivalNotification(const std::string& data) {
+    std::istringstream iss(data);
+    std::string action;
+    int vehicleId;
+    double arrivalTime;
+    iss >> action >> vehicleId >> arrivalTime;
+    
+    if (action == "ARRIVAL") {
+        // Record vehicle arrival to SimulationLogger
+        SimulationLogger::getInstance().recordVehicleEnd(vehicleId, arrivalTime);
+        
+        EV << "[RSU] Vehicle " << vehicleId << " arrived at destination at time " 
+           << arrivalTime << std::endl;
+    }
 }

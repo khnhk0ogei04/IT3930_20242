@@ -31,6 +31,7 @@ OBJS = \
     $O/veins/NetworkSourceManager.o \
     $O/veins/Node.o \
     $O/veins/RSUControlApp.o \
+    $O/veins/SimulationLogger.o \
     $O/veins/TaskGenerator.o \
     $O/veins/tinyxml2.o \
     $O/veins/VehicleControlApp.o \

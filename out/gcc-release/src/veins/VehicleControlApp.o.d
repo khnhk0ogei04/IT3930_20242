@@ -53,6 +53,7 @@
  D:/veins/src/veins/modules/world/traci/trafficLight/TraCITrafficLightProgram.h \
  D:/veins/src/veins/modules/application/traci/TraCIDemo11p.h \
  veins/GraphProcessor.h veins/Graph.h veins/Node.h veins/Edge.h \
+ veins/TaskGenerator.h veins/SimulationLogger.h \
  D:/veins/src/veins/modules/application/traci/TraCIDemo11pMessage_m.h
 
 veins/VehicleControlApp.h:
@@ -170,5 +171,9 @@ veins/Graph.h:
 veins/Node.h:
 
 veins/Edge.h:
+
+veins/TaskGenerator.h:
+
+veins/SimulationLogger.h:
 
 D:/veins/src/veins/modules/application/traci/TraCIDemo11pMessage_m.h:

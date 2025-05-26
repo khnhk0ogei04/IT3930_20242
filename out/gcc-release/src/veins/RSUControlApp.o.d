@@ -54,6 +54,7 @@
  D:/veins/src/veins/modules/world/traci/trafficLight/TraCITrafficLightProgram.h \
  veins/XMLProcessor.h veins/Graph.h veins/Node.h veins/Edge.h \
  veins/tinyxml2.h veins/GraphProcessor.h veins/TaskGenerator.h \
+ veins/SimulationLogger.h \
  D:/veins/src/veins/modules/application/traci/TraCIDemo11pMessage_m.h
 
 veins/RSUControlApp.h:
@@ -177,5 +178,7 @@ veins/tinyxml2.h:
 veins/GraphProcessor.h:
 
 veins/TaskGenerator.h:
+
+veins/SimulationLogger.h:
 
 D:/veins/src/veins/modules/application/traci/TraCIDemo11pMessage_m.h:

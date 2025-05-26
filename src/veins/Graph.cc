@@ -15,9 +15,6 @@ void Graph::addNode(string id, double x, double y) {
 }
 
 void Graph::addEdge(string from, string to, double length, string id) {
-    if (from.empty() || to.empty()) {
-        return;
-    }
     Edge edge(id, from, to, length, "");
     addEdge(edge);
 }
@@ -40,11 +37,11 @@ void Graph::addEdge(const Edge& edge) {
     edgeCount++;
 }
 
-int Graph::getNodeCount() const {
+size_t Graph::getNodeCount() const {
     return nodes.size();
 }
 
-int Graph::getEdgeCount() const {
+size_t Graph::getEdgeCount() const {
     return edgeCount;
 }
 

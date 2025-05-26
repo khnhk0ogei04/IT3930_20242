@@ -244,12 +244,14 @@ bool XMLProcessor::loadRouteFile(const string& filePath) {
         return false;
     }
     tinyxml2::XMLElement* routesElement = doc.FirstChildElement("routes");
+    int index = 0; // Sequential index for each vehicle
     for (tinyxml2::XMLElement* tripElem = routesElement->FirstChildElement("trip");
          tripElem != nullptr;
          tripElem = tripElem->NextSiblingElement("trip")) {
 
          VehicleInfo vehicle;
          vehicle.id = tripElem->Attribute("id");
+         vehicle.index = index++; // Assign sequential index
 
          const char* departAttr = tripElem->Attribute("depart");
          if (departAttr) {

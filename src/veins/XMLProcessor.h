@@ -17,6 +17,7 @@ struct VehicleInfo {
     string from;
     string to;
     string via;
+    int index;  // Sequential index (position in the file)
 };
 
 class XMLProcessor {

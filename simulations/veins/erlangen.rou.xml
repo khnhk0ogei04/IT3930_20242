@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!-- generated on 2025-05-21 18:05:03 by Eclipse SUMO netedit Version 1.22.0
+<!-- generated on 2025-05-27 05:17:11 by Eclipse SUMO netedit Version 1.22.0
 -->
 
 <routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/routes_file.xsd">
@@ -164,4 +164,10 @@
     <person id="p_3" depart="3.00" color="magenta">
         <personTrip from="-854" to="873"/>
     </person>
+    <personFlow id="pf_12" begin="15.00" end="3600.00" personsPerHour="279.94">
+        <personTrip from="1925" to="865"/>
+    </personFlow>
+    <personFlow id="pf_11" begin="30.00" end="3600.00" personsPerHour="349.85">
+        <personTrip from="-58" to="162"/>
+    </personFlow>
 </routes>

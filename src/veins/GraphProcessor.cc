@@ -29,6 +29,47 @@ double GraphProcessor::getShortestPathLength(string sourceId, string targetId) c
     return -1.0;
 }
 
+double GraphProcessor::getEdgeLength(string sourceEdgeId, string targetEdgeId) const {
+    // If the edges are the same, return 0
+    if (sourceEdgeId == targetEdgeId) {
+        return 0.0;
+    }
+    
+    // Look for direct edge in the graph
+    for (const auto& nodePair : roadNetwork.getAdjList()) {
+        for (const auto& edge : nodePair.second) {
+            if (edge.getId() == sourceEdgeId) {
+                // Found the source edge, now look for the target edge
+                string sourceNodeTo = edge.getTo();
+                
+                // Check if the target edge starts from where the source edge ends
+                for (const auto& nextNodePair : roadNetwork.getAdjList()) {
+                    if (nextNodePair.first == sourceNodeTo) {
+                        for (const auto& nextEdge : nextNodePair.second) {
+                            if (nextEdge.getId() == targetEdgeId) {
+                                // Found direct connection
+                                return edge.getLength();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    // If no direct connection, look for the individual edge lengths
+    for (const auto& nodePair : roadNetwork.getAdjList()) {
+        for (const auto& edge : nodePair.second) {
+            if (edge.getId() == sourceEdgeId) {
+                return edge.getLength();
+            }
+        }
+    }
+    
+    // If edge not found, return a default value
+    return 100.0;
+}
+
 vector<vector<string>> GraphProcessor::findKShortestPaths(string sourceId, string targetId, int k) const {
     vector<vector<string>> result;
     auto shortestPath = findShortestPath(sourceId, targetId);
@@ -330,8 +371,6 @@ std::map<std::string, std::pair<double, std::string>> GraphProcessor::dijkstra(s
     // Map to store the distance and previous node for each node (node_id -> {distance, previous_node})
     std::map<std::string, std::pair<double, std::string>> result;
 
-    std::cout << "DEBUG: Running Dijkstra from source node: " << sourceId << std::endl;
-
     // Check if source node exists in the graph
     bool sourceExists = false;
     for (const auto& nodePair : roadNetwork.getNodes()) {
@@ -343,13 +382,7 @@ std::map<std::string, std::pair<double, std::string>> GraphProcessor::dijkstra(s
 
     auto adjIt = roadNetwork.getAdjList().find(sourceId);
     bool sourceInAdj = (adjIt != roadNetwork.getAdjList().end());
-
-    std::cout << "DEBUG: Source node " << sourceId << " exists in nodes map: "
-              << (sourceExists ? "Yes" : "No") << ", in adjacency list: "
-              << (sourceInAdj ? "Yes" : "No") << std::endl;
-
     if (!sourceExists && !sourceInAdj) {
-        std::cout << "DEBUG: Source node doesn't exist in the graph!" << std::endl;
         return result;
     }
 
@@ -357,14 +390,6 @@ std::map<std::string, std::pair<double, std::string>> GraphProcessor::dijkstra(s
     int outgoingEdges = 0;
     if (sourceInAdj) {
         outgoingEdges = adjIt->second.size();
-        std::cout << "DEBUG: Source has " << outgoingEdges << " outgoing edges" << std::endl;
-        int count = 0;
-        for (const auto& edge : adjIt->second) {
-            if (count++ < 5) {
-                std::cout << "DEBUG:   Edge to " << edge.getTo() << " (ID: "
-                          << edge.getId() << ", length: " << edge.getLength() << ")" << std::endl;
-            }
-        }
     }
 
     // Priority queue for Dijkstra's algorithm
@@ -427,9 +452,6 @@ std::map<std::string, std::pair<double, std::string>> GraphProcessor::dijkstra(s
             }
         }
     }
-
-    std::cout << "DEBUG: Processed " << nodesProcessed << " nodes out of "
-              << roadNetwork.getNodes().size() << " total nodes" << std::endl;
 
     // Report on number of reachable nodes
     int reachableCount = 0;
@@ -673,13 +695,9 @@ int GraphProcessor::findBestLaneForEdge(string edgeId) const {
 // Implementation for findEdgeShortestPath
 vector<string> GraphProcessor::findEdgeShortestPath(string sourceEdgeId, string targetEdgeId) const {
     vector<string> result;
-    
-    std::cout << "\nDEBUG: Finding path from edge " << sourceEdgeId << " to edge " << targetEdgeId << std::endl;
-
     // Special case: source and target are the same edge
     if (sourceEdgeId == targetEdgeId) {
         result.push_back(sourceEdgeId);
-        std::cout << "DEBUG: Source and target are the same edge, returning direct path" << std::endl;
         return result;
     }
 
@@ -697,9 +715,6 @@ vector<string> GraphProcessor::findEdgeShortestPath(string sourceEdgeId, string 
                 sourceToNode = edge.getTo();
                 sourceEdgeLength = edge.getLength();
                 sourceFound = true;
-                std::cout << "DEBUG: Found source edge " << sourceEdgeId
-                         << " (from=" << sourceFromNode << ", to=" << sourceToNode
-                         << ", length=" << sourceEdgeLength << ")" << std::endl;
                 break;
             }
         }
@@ -715,9 +730,6 @@ vector<string> GraphProcessor::findEdgeShortestPath(string sourceEdgeId, string 
                 targetToNode = edge.getTo();
                 targetEdgeLength = edge.getLength();
                 targetFound = true;
-                std::cout << "DEBUG: Found target edge " << targetEdgeId
-                         << " (from=" << targetFromNode << ", to=" << targetToNode
-                         << ", length=" << targetEdgeLength << ")" << std::endl;
                 break;
             }
         }
@@ -725,19 +737,11 @@ vector<string> GraphProcessor::findEdgeShortestPath(string sourceEdgeId, string 
     }
 
     if (!sourceFound || !targetFound) {
-        std::cout << "DEBUG: One or both edges not found in the graph" << std::endl;
-        if (!sourceFound) std::cout << "DEBUG: Source edge " << sourceEdgeId << " not found" << std::endl;
-        if (!targetFound) std::cout << "DEBUG: Target edge " << targetEdgeId << " not found" << std::endl;
         return result;
     }
 
-    // Print some graph information
-    std::cout << "DEBUG: Graph has " << roadNetwork.getNodeCount() << " nodes and "
-              << roadNetwork.getEdgeCount() << " edges" << std::endl;
-
     // Check direct connection between source and target
     if (sourceToNode == targetFromNode) {
-        std::cout << "DEBUG: Direct connection exists (source.to == target.from)" << std::endl;
         result.push_back(sourceEdgeId);
         result.push_back(targetEdgeId);
         return result;
@@ -755,44 +759,24 @@ vector<string> GraphProcessor::findEdgeShortestPath(string sourceEdgeId, string 
     for (const auto& nodePair : nodePairs) {
         const std::string& startNode = nodePair.first;
         const std::string& endNode = nodePair.second;
-
-        std::cout << "DEBUG: Trying to find path from node " << startNode << " to node " << endNode << std::endl;
-
         // Find path between nodes
         std::vector<std::string> nodePath = findShortestPath(startNode, endNode);
 
         if (!nodePath.empty()) {
-            // Build the complete path
-            std::cout << "DEBUG: Found path with " << nodePath.size() << " segments" << std::endl;
 
             // The path we want is: sourceEdge -> connecting edges -> targetEdge
             result.push_back(sourceEdgeId);
             result.insert(result.end(), nodePath.begin(), nodePath.end());
             result.push_back(targetEdgeId);
 
-            std::cout << "DEBUG: Complete path: ";
-            for (const auto& edgeId : result) {
-                std::cout << edgeId << " -> ";
-            }
-            std::cout << "end" << std::endl;
-
             return result;
         }
     }
-
-    // No path found between any combination of nodes
-    std::cout << "DEBUG: No path found between any combination of edge nodes" << std::endl;
-
-    // Try as a last resort if the edges themselves are directly connected as nodes
-    std::cout << "DEBUG: Trying to find path treating edges as nodes..." << std::endl;
     std::vector<std::string> directPath = findShortestPath(sourceEdgeId, targetEdgeId);
     if (!directPath.empty()) {
-        std::cout << "DEBUG: Found direct path treating edges as nodes" << std::endl;
         result = directPath;
         return result;
     }
-
-    std::cout << "DEBUG: Failed to find any path between the edges" << std::endl;
     return result;
 }
 
@@ -803,12 +787,10 @@ double GraphProcessor::getEdgeShortestPathLength(string sourceEdgeId, string tar
         for (const auto& nodePair : roadNetwork.getAdjList()) {
             for (const auto& edge : nodePair.second) {
                 if (edge.getId() == sourceEdgeId) {
-                    std::cout << "DEBUG: Same edge " << sourceEdgeId << " has length " << edge.getLength() << std::endl;
                     return edge.getLength();
                 }
             }
         }
-        std::cout << "DEBUG: Same edge " << sourceEdgeId << " not found in graph, using default length 100.0" << std::endl;
         return 100.0; // Default length if edge not found
     }
 
@@ -816,12 +798,7 @@ double GraphProcessor::getEdgeShortestPathLength(string sourceEdgeId, string tar
     string sourceFromNode = "", sourceToNode = "";
     string targetFromNode = "", targetToNode = "";
     double sourceLength = 0.0, targetLength = 0.0;
-
-    // Find source edge
     bool sourceFound = false;
-    std::cout << "\n--DEBUG: Finding path length from edge " << sourceEdgeId << " to edge " << targetEdgeId << std::endl;
-    std::cout << "  DEBUG: Looking for source edge " << sourceEdgeId << " in graph..." << std::endl;
-
     for (const auto& nodePair : roadNetwork.getAdjList()) {
         for (const auto& edge : nodePair.second) {
             if (edge.getId() == sourceEdgeId) {
@@ -829,9 +806,6 @@ double GraphProcessor::getEdgeShortestPathLength(string sourceEdgeId, string tar
                 sourceToNode = edge.getTo();
                 sourceLength = edge.getLength();
                 sourceFound = true;
-                std::cout << "  DEBUG: Found source edge " << sourceEdgeId
-                         << " (from=" << sourceFromNode << ", to=" << sourceToNode
-                         << ", length=" << sourceLength << ")" << std::endl;
                 break;
             }
         }
@@ -840,7 +814,6 @@ double GraphProcessor::getEdgeShortestPathLength(string sourceEdgeId, string tar
 
     // Find target edge
     bool targetFound = false;
-    std::cout << "  DEBUG: Looking for target edge " << targetEdgeId << " in graph..." << std::endl;
 
     for (const auto& nodePair : roadNetwork.getAdjList()) {
         for (const auto& edge : nodePair.second) {
@@ -849,9 +822,6 @@ double GraphProcessor::getEdgeShortestPathLength(string sourceEdgeId, string tar
                 targetToNode = edge.getTo();
                 targetLength = edge.getLength();
                 targetFound = true;
-                std::cout << "  DEBUG: Found target edge " << targetEdgeId
-                         << " (from=" << targetFromNode << ", to=" << targetToNode
-                         << ", length=" << targetLength << ")" << std::endl;
                 break;
             }
         }
@@ -860,17 +830,12 @@ double GraphProcessor::getEdgeShortestPathLength(string sourceEdgeId, string tar
 
     // If either edge not found, return -1
     if (!sourceFound || !targetFound) {
-        std::cout << "  DEBUG: Failed to find edges in graph" << std::endl;
-        if (!sourceFound) std::cout << "  DEBUG: Source edge " << sourceEdgeId << " not found" << std::endl;
-        if (!targetFound) std::cout << "  DEBUG: Target edge " << targetEdgeId << " not found" << std::endl;
         return -1.0;
     }
 
     // Direct connection (end of source connects to start of target)
     if (sourceToNode == targetFromNode) {
         double totalLen = sourceLength + targetLength;
-        std::cout << "  DEBUG: Direct connection found! Total length = "
-                 << sourceLength << " + " << targetLength << " = " << totalLen << std::endl;
         return totalLen;
     }
 
@@ -884,12 +849,8 @@ double GraphProcessor::getEdgeShortestPathLength(string sourceEdgeId, string tar
         {sourceToNode, targetToNode},       // Source end to target end
         {sourceFromNode, targetToNode}      // Source start to target end
     };
-
-    std::cout << "  DEBUG: Testing all combinations of nodes:" << std::endl;
     for (const auto& pair : nodePairs) {
         double pathLength = getShortestPathLength(pair.first, pair.second);
-        std::cout << "  DEBUG:   Path from " << pair.first << " to " << pair.second
-                 << ": Length = " << (pathLength > 0 ? std::to_string(pathLength) : "INF") << std::endl;
         if (pathLength > 0 && pathLength < shortestLength) {
             shortestLength = pathLength;
         }
@@ -899,9 +860,6 @@ double GraphProcessor::getEdgeShortestPathLength(string sourceEdgeId, string tar
     if (shortestLength < std::numeric_limits<double>::max()) {
         // Add the lengths of source and target edges to the path
         double totalLength = sourceLength + shortestLength + targetLength;
-        std::cout << "  DEBUG: Complete path found with length = "
-                 << sourceLength << " + " << shortestLength << " + " << targetLength
-                 << " = " << totalLength << std::endl;
         return totalLength;
     }
 
@@ -958,12 +916,9 @@ vector<int> GraphProcessor::getOptimalVehicleAssignment(
 
                 // Cost = path length between edges
                 costMatrix[i][j] = pathLength;
-                std::cout << "DEBUG: Path cost from " << sourceEdgeId << " to "
-                          << destEdgeId << " = " << pathLength << " (path length)" << std::endl;
             } else {
                 // No path exists between these edges
                 costMatrix[i][j] = NO_PATH_PENALTY;
-                std::cout << "DEBUG: No path from " << sourceEdgeId << " to " << destEdgeId << std::endl;
             }
         }
 
@@ -979,7 +934,6 @@ vector<int> GraphProcessor::getOptimalVehicleAssignment(
             costMatrix[i][j] = NO_PATH_PENALTY;
         }
     }
-    std::cout << "\nINFO: Cost Matrix for Hungarian Algorithm:" << std::endl;
     std::string header = "       ";
     for (int j = 0; j < numDestinations; ++j) {
         header += "D_" + destEdges[j].substr(0, std::min((size_t)4, destEdges[j].length())) + "\t";

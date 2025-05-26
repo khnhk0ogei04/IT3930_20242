@@ -31,6 +31,7 @@ public:
     const Graph& getGraph() const { return roadNetwork; }
     vector<string> findEdgeShortestPath(string sourceEdgeId, string targetEdgeId) const;
     double getEdgeShortestPathLength(string sourceEdgeId, string targetEdgeId) const;
+    double getEdgeLength(string sourceEdgeId, string targetEdgeId) const;
     struct LanePath {
         string edgeId;
         int laneIndex;
