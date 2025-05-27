@@ -36,23 +36,49 @@ void SimulationLogger::recordVehicleStart(int vehicleId, const std::string& star
               << " from road " << startRoad << std::endl;
 }
 
-void SimulationLogger::updateVehicleDestination(int vehicleId, const std::string& targetRoad,
-                                             double earliestArrival, double latestArrival,
-                                             const std::vector<std::string>& path, double pathLength) {
+void SimulationLogger::updateVehicleDestination(int vehicleId, const std::string& destination, 
+                                              double earliestArrival, double latestArrival,
+                                              const std::vector<std::string>& path,
+                                              double pathLength,
+                                              double estimatedTravelTime) {
     std::lock_guard<std::mutex> lock(mutex);
     
-    // Cập nhật thông tin xe
-    VehicleStats& stats = vehicleStats[vehicleId];
-    stats.targetRoad = targetRoad;
-    stats.earliestArrival = earliestArrival;
-    stats.latestArrival = latestArrival;
-    stats.path = path;
-    stats.pathLength = pathLength;
-    
-    // Log
-    std::cout << "Vehicle " << vehicleId << " assigned destination: " << targetRoad
-              << ", time window: [" << earliestArrival << ", " << latestArrival << "]"
-              << ", path length: " << pathLength << std::endl;
+    // Tìm xe trong danh sách theo ID
+    auto it = vehicleStats.find(vehicleId);
+    if (it != vehicleStats.end()) {
+        it->second.targetRoad = destination;
+        it->second.earliestArrival = earliestArrival;
+        it->second.latestArrival = latestArrival;
+        it->second.path = path;
+        it->second.pathLength = pathLength;
+        it->second.estimatedTravelTime = estimatedTravelTime;
+        
+        // In thông tin đích và khung thời gian
+        std::cout << "DESTINATION_ASSIGNED: vehicleId=" << vehicleId
+                  << ", destination=" << destination
+                  << ", timeWindow=[" << earliestArrival << ", " << latestArrival << "]"
+                  << ", pathLength=" << pathLength
+                  << ", estimatedTravelTime=" << estimatedTravelTime << std::endl;
+    } else {
+        // Nếu xe chưa tồn tại, tạo bản ghi mới
+        VehicleStats stats;
+        stats.vehicleId = vehicleId;
+        stats.targetRoad = destination;
+        stats.earliestArrival = earliestArrival;
+        stats.latestArrival = latestArrival;
+        stats.path = path;
+        stats.pathLength = pathLength;
+        stats.estimatedTravelTime = estimatedTravelTime;
+        
+        vehicleStats[vehicleId] = stats;
+        
+        // In thông tin đích và khung thời gian
+        std::cout << "DESTINATION_CREATED: vehicleId=" << vehicleId
+                  << ", destination=" << destination
+                  << ", timeWindow=[" << earliestArrival << ", " << latestArrival << "]"
+                  << ", pathLength=" << pathLength
+                  << ", estimatedTravelTime=" << estimatedTravelTime << std::endl;
+    }
 }
 
 void SimulationLogger::recordAlgorithmTime(int vehicleId, double algorithmTime) {

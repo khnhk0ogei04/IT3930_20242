@@ -124,10 +124,10 @@ private:
     std::vector<std::string> findShortestPath(const std::string& sourceId, const std::string& targetId);
     double getShortestPathLength(const std::string& sourceId, const std::string& targetId);
 
-    // Test methods
-    void testPathFinding();
-    void runPathFindingTests();
-    void testPathBetween(const std::string& source, const std::string& target, const std::string& testName);
+//    // Test methods
+//    void testPathFinding();
+//    void runPathFindingTests();
+//    void testPathBetween(const std::string& source, const std::string& target, const std::string& testName);
 
     // Vehicle lifecycle management methods
     void cleanupMessages();

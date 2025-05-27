@@ -1,8 +1,7 @@
 #ifndef EDGE_H
 #define EDGE_H
 
-#include<string>
-#include<vector>
+#include<bits/stdc++.h>
 using namespace std;
 
 struct Lane{
@@ -47,16 +46,7 @@ public:
     vector<Lane> getLanes() const {
         return lanes;
     }
-
-    double getMaxSpeed() const {
-        double maxSpeed = 0.0;
-        for (Lane lane : lanes) {
-            if (lane.speed > maxSpeed) {
-                maxSpeed = lane.speed;
-            }
-        }
-        return maxSpeed;
-    }
+    double getMaxSpeed() const;
 
     // Setter:
     void setId(string newId){

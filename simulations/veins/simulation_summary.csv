@@ -1,2 +1,2 @@
 MapName,RoutingAlgorithm,Version,TotalVehicles,LateVehicles,TotalTravelTime,AvgTravelTime,TotalTimeWindowDeviation,AvgTimeWindowDeviation,TotalAlgorithmTime,AvgAlgorithmTime,Timestamp
-erlangen,ShortestPath,2.0,33,16,4485,135.909,141.107,4.27596,0.0080048,0.00024257,2025-05-27 05:19:19
+erlangen,ShortestPath,2.0,33,14,2545,77.1212,204.231,6.18881,0.0052615,0.000159439,2025-05-27 17:50:31

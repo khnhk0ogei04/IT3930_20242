@@ -508,6 +508,8 @@ std::vector<std::string> GraphProcessor::reconstructPath(
 
 bool GraphProcessor::hungarianAlgorithm(const vector<vector<double>>& costMatrix) const {
     int n = costMatrix.size();
+    
+    // Check if each source can reach at least one destination
     for (int i = 0; i < n; ++i) {
         bool canReachAnyTarget = false;
         for (int j = 0; j < n; ++j) {
@@ -516,8 +518,12 @@ bool GraphProcessor::hungarianAlgorithm(const vector<vector<double>>& costMatrix
                 break;
             }
         }
-        return false;
+        if (!canReachAnyTarget) {
+            return false;  // This source can't reach any destination
+        }
     }
+    
+    // Check if each destination can be reached by at least one source
     for (int j = 0; j < n; ++j) {
         bool canBeReachedByAnySource = false;
         for (int i = 0; i < n; ++i) {
@@ -527,10 +533,11 @@ bool GraphProcessor::hungarianAlgorithm(const vector<vector<double>>& costMatrix
             }
         }
         if (!canBeReachedByAnySource) {
-            return false;
+            return false;  // This destination can't be reached by any source
         }
     }
-    return true;
+    
+    return true;  // A valid assignment exists
 }
 
 vector<GraphProcessor::LanePath> GraphProcessor::findLaneShortestPath(string sourceLaneId, string targetLaneId) const {
@@ -879,10 +886,13 @@ vector<int> GraphProcessor::getOptimalVehicleAssignment(
     if (numVehicles == 0 || numDestinations == 0) {
         return std::vector<int>();
     }
+    
     int n = std::max(numVehicles, numDestinations);
     vector<std::vector<double>> costMatrix(n, std::vector<double>(n, 0));
     const double NO_PATH_PENALTY = 9999999.0;
     const double SAME_EDGE_PENALTY = 5000.0;
+    
+    // Build the cost matrix
     for (int i = 0; i < numVehicles; ++i) {
         const string& sourceEdgeId = sourceEdges[i];
 
@@ -896,7 +906,7 @@ vector<int> GraphProcessor::getOptimalVehicleAssignment(
             double pathLength = 0.0;
 
             if (!path.empty()) {
-                // calculate the length of the path
+                // Calculate the length of the path
                 for (const auto& edgeId : path) {
                     bool edgeFound = false;
                     for (const auto& nodePair : roadNetwork.getAdjList()) {
@@ -934,6 +944,8 @@ vector<int> GraphProcessor::getOptimalVehicleAssignment(
             costMatrix[i][j] = NO_PATH_PENALTY;
         }
     }
+    
+    // Print original cost matrix for debugging
     std::string header = "       ";
     for (int j = 0; j < numDestinations; ++j) {
         header += "D_" + destEdges[j].substr(0, std::min((size_t)4, destEdges[j].length())) + "\t";
@@ -951,8 +963,18 @@ vector<int> GraphProcessor::getOptimalVehicleAssignment(
         }
         cout << rowStr << endl;
     }
+    
+    // Create a copy of the original cost matrix for reference
+    auto originalCostMatrix = costMatrix;
+    
+    // Hungarian Algorithm Implementation
+    
+    // Step 1: Subtract the smallest element in each row from all elements in that row
     for (int i = 0; i < n; ++i) {
-        double minVal = *std::min_element(costMatrix[i].begin(), costMatrix[i].end());
+        double minVal = NO_PATH_PENALTY;
+        for (int j = 0; j < n; ++j) {
+            minVal = std::min(minVal, costMatrix[i][j]);
+        }
         if (minVal < NO_PATH_PENALTY) {
             for (int j = 0; j < n; ++j) {
                 if (costMatrix[i][j] < NO_PATH_PENALTY) {
@@ -961,6 +983,8 @@ vector<int> GraphProcessor::getOptimalVehicleAssignment(
             }
         }
     }
+    
+    // Step 2: Subtract the smallest element in each column from all elements in that column
     for (int j = 0; j < n; ++j) {
         double minVal = NO_PATH_PENALTY;
         for (int i = 0; i < n; ++i) {
@@ -974,6 +998,7 @@ vector<int> GraphProcessor::getOptimalVehicleAssignment(
             }
         }
     }
+    
     cout << "\nINFO: Reduced Cost Matrix:" << std::endl;
     for (int i = 0; i < numVehicles; ++i) {
         std::string rowStr = "V_" + std::to_string(i) + "\t";
@@ -986,67 +1011,77 @@ vector<int> GraphProcessor::getOptimalVehicleAssignment(
         }
         cout << rowStr << std::endl;
     }
-    vector<int> assignment(numVehicles, -1);
-    vector<bool> destAssigned(numDestinations, false);
-    int assignmentsMade = 0;
-    for (int i = 0; i < numVehicles && assignmentsMade < std::min(numVehicles, numDestinations); ++i) {
+    
+    // Initialize vectors for the assignment
+    std::vector<int> assignment(n, -1);
+
+    // Simple greedy approach (faster than the full Hungarian algorithm)
+    // This is a reasonable approximation for most cases
+    std::vector<bool> colAssigned(n, false);
+    
+    // First pass: assign using zeros
+    for (int i = 0; i < numVehicles; ++i) {
         for (int j = 0; j < numDestinations; ++j) {
-            if (costMatrix[i][j] == 0 && !destAssigned[j] && assignment[i] == -1) {
+            if (costMatrix[i][j] == 0 && !colAssigned[j]) {
                 assignment[i] = j;
-                destAssigned[j] = true;
-                assignmentsMade++;
+                colAssigned[j] = true;
                 break;
             }
         }
     }
+    
+    // Second pass: assign remaining using minimum costs
     for (int i = 0; i < numVehicles; ++i) {
         if (assignment[i] == -1) {
             double minCost = NO_PATH_PENALTY;
-            int bestDest = -1;
+            int minJ = -1;
+            
             for (int j = 0; j < numDestinations; ++j) {
-                if (!destAssigned[j] && costMatrix[i][j] < minCost) {
+                if (!colAssigned[j] && costMatrix[i][j] < minCost) {
                     minCost = costMatrix[i][j];
-                    bestDest = j;
+                    minJ = j;
                 }
             }
-            if (bestDest != -1) {
-                assignment[i] = bestDest;
-                destAssigned[bestDest] = true;
-                assignmentsMade++;
+            
+            if (minJ != -1) {
+                assignment[i] = minJ;
+                colAssigned[minJ] = true;
             }
         }
     }
-
-    cout << "\nINFO: Assignment Results:" << std::endl;
+    
+    // Extract the result for the actual vehicles and destinations
+    vector<int> result(numVehicles, -1);
     for (int i = 0; i < numVehicles; ++i) {
-        if (assignment[i] != -1) {
-            int j = assignment[i];
+        if (assignment[i] >= 0 && assignment[i] < numDestinations) {
+            result[i] = assignment[i];
+        }
+    }
+    
+    cout << "\nINFO: Assignment Results:" << std::endl;
+    double totalCost = 0;
+    int assignedCount = 0;
+    
+    for (int i = 0; i < numVehicles; ++i) {
+        if (result[i] != -1) {
+            int j = result[i];
+            double cost = originalCostMatrix[i][j];
+            cout << "Vehicle " << i << " (Edge " << sourceEdges[i] << ") assigned to destination " 
+                 << j << " (Edge " << destEdges[j] << ") with cost " 
+                 << cost << std::endl;
             
-            // recalculating path
-            double pathCost = 0;
-            auto path = findEdgeShortestPath(sourceEdges[i], destEdges[j]);
-            if (!path.empty()) {
-                for (const auto& edgeId : path) {
-                    bool edgeFound = false;
-                    for (const auto& nodePair : roadNetwork.getAdjList()) {
-                        for (const auto& edge : nodePair.second) {
-                            if (edge.getId() == edgeId) {
-                                pathCost += edge.getLength();
-                                edgeFound = true;
-                                break;
-                            }
-                        }
-                        if (edgeFound) break;
-                    }
-                }
-            } else {
-                pathCost = NO_PATH_PENALTY;
+            if (cost < NO_PATH_PENALTY) {
+                totalCost += cost;
+                assignedCount++;
             }
         } else {
             cout << "Vehicle " << i << " (Edge " << sourceEdges[i] << ") could not be assigned" << std::endl;
         }
     }
-    cout << "Total assignments made: " << assignmentsMade << "/" << numVehicles << std::endl;
-    return assignment;
+    
+    cout << "Total cost: " << totalCost << " (across " << assignedCount << " assignments)" << std::endl;
+    cout << "Total assignments made: " << assignedCount << "/" << numVehicles << std::endl;
+    
+    return result;
 }
 } // namespace veins

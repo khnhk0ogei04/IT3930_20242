@@ -14,19 +14,12 @@ Register_Class(VehicleControlApp);
 void VehicleControlApp::initialize(int stage) {
     TraCIDemo11p::initialize(stage);
     if (stage == 0) {
-        // Initialize messages
         statusUpdateMsg = new cMessage("statusUpdate");
         requestRoadInfoMsg = new cMessage("requestRoadInfo");
         cleanupTimer = new cMessage("vehicleCleanup");
-
-        // Get mobility interface to access SUMO vehicle data first
         mobility = TraCIMobilityAccess().get(getParentModule());
         traciVehicle = mobility->getVehicleCommandInterface();
-        
-        // USE THE ACTUAL MODULE INDEX - this is the key to getting unique IDs
         int moduleIndex = getParentModule()->getIndex();
-
-        // Hard-code the simulation ID mapping exactly as in RSUControlApp
         std::map<int, int> idMapping = {
             {0, 16},   // Module index 0 maps to simulation ID 16
             {1, 22},   // Module index 1 maps to simulation ID 22
@@ -62,33 +55,13 @@ void VehicleControlApp::initialize(int stage) {
             {31, 202},
             {32, 208},
         };
-
-        // Use the module index for internal ID
         myInternalId = moduleIndex;
-
-        // Look up this vehicle's simulation ID from the mapping
         auto it = idMapping.find(myInternalId);
         if (it != idMapping.end()) {
             mySimulationId = it->second;
-        } else {
-            // Fallback if no mapping exists
-            mySimulationId = myInternalId + 1000; // Different base to avoid conflicts
         }
-
         // Get the actual SUMO ID of this vehicle for debugging
         std::string sumoId = mobility->getExternalId();
-        
-        // Print to standard output for debugging - MAKE THIS VERY VISIBLE
-        std::cout << "\n*********************** IMPORTANT ID INFO ***********************" << std::endl;
-        std::cout << "Vehicle '" << sumoId 
-                  << "' assigned internal ID " << myInternalId
-                  << " and simulation ID " << mySimulationId << std::endl;
-        std::cout << "Parent module: " << getParentModule()->getFullName()
-                  << ", index: " << getParentModule()->getIndex() << std::endl;
-        std::cout << "MAC Address: " << getParentModule()->getId()
-                  << ", Full Path: " << getParentModule()->getFullPath() << std::endl;
-        std::cout << "******************************************************************\n" << std::endl;
-
         // Log the details to help with debugging
         EV << "\n[VEHICLE] ********************************************" << std::endl;
         EV << "[VEHICLE] Initialized with internal ID: " << myInternalId
@@ -128,11 +101,8 @@ void VehicleControlApp::initialize(int stage) {
         EV << "\n[VEHICLE] Requesting road network data from RSU..." << std::endl;
         EV << "[VEHICLE] Road information will be printed once received." << std::endl;
     } else if (stage == 1) {
-        // Schedule initial messages
         scheduleAt(simTime() + uniform(1.0, 2.0), statusUpdateMsg);
         scheduleAt(simTime() + uniform(3.0, 5.0), requestRoadInfoMsg);
-
-        // Schedule regular vehicle status check (every 0.1 seconds for precision)
         scheduleAt(simTime() + 0.1, cleanupTimer);
 
         EV << "[VEHICLE] Vehicle " << myId << " initialized" << std::endl;
@@ -213,28 +183,16 @@ void VehicleControlApp::onWSM(BaseFrame1609_4* wsm) {
             EV << "[VEHICLE] Message targets simulation ID: " << targetVehId 
                << ", my internal ID: " << myInternalId 
                << ", my simulation ID: " << mySimulationId << std::endl;
-            std::cout << "\n>>>>>>> ROUTE MESSAGE HANDLING <<<<<<<<<" << std::endl;
-            std::cout << "Message targets simulation ID: " << targetVehId
-                      << ", my internal ID: " << myInternalId
-                      << ", my simulation ID: " << mySimulationId << std::endl;
-            std::cout << "WSM Recipient Address: " << recipientAddress << std::endl;
-            std::cout << "Module index: " << getParentModule()->getIndex() << std::endl;
-            std::cout << "Parent: " << getParentModule()->getFullPath() << std::endl;
-            std::cout << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" << std::endl;
-
             // IMPORTANT: Check if this broadcast message is meant for me based on simulation ID
             bool messageIsForMe = (mySimulationId == targetVehId);
             
             if (!messageIsForMe) {
                 EV << "[VEHICLE] Received CHANGE_ROUTE for simulation ID " << targetVehId 
                    << ", but my simulation ID is " << mySimulationId << ". Ignoring." << std::endl;
-                std::cout << "Ignoring message meant for different vehicle (ID mismatch)" << std::endl;
                 return;
             }
             
             EV << "[VEHICLE] This message is for me! Processing..." << std::endl;
-            std::cout << "This message is for me! Processing..." << std::endl;
-            
             // Extract the route path
             std::string routePath = routeInfo.substr(colonPos + 1);
             
@@ -258,25 +216,13 @@ void VehicleControlApp::onWSM(BaseFrame1609_4* wsm) {
             std::cout << "Planned route: ";
             for (const auto& edgeId : plannedRoute) {
                 EV << edgeId << " ";
-                std::cout << edgeId << " ";
             }
             EV << std::endl;
-            std::cout << std::endl;
-
-            EV << "[VEHICLE] Proposed new route: ";
-            std::cout << "Proposed new route: ";
-            for (const auto& edgeId : routeEdges) {
-                EV << edgeId << " ";
-                std::cout << edgeId << " ";
-            }
-            EV << std::endl;
-            std::cout << std::endl;
 
             // First try to set the complete route if available
             if (routeEdges.size() > 1) {
                 try {
                     EV << "[VEHICLE] Attempting to use complete route with " << routeEdges.size() << " edges" << std::endl;
-                    std::cout << "Attempting to use complete route with " << routeEdges.size() << " edges" << std::endl;
 
                     // Validate route connectivity by checking if consecutive edges are connected
                     bool routeIsValid = true;
@@ -288,8 +234,6 @@ void VehicleControlApp::onWSM(BaseFrame1609_4* wsm) {
                         // Print debug info about the edges we're checking
                         EV << "[VEHICLE] Checking connectivity between edges: " << routeEdges[i]
                            << " and " << routeEdges[i+1] << std::endl;
-                        std::cout << "Checking connectivity between edges: " << routeEdges[i]
-                                  << " and " << routeEdges[i+1] << std::endl;
                     }
 
                     // Only try to set route if we believe it's valid
@@ -324,35 +268,24 @@ void VehicleControlApp::onWSM(BaseFrame1609_4* wsm) {
 
                         if (routeChanged || containsProposedEdges) {
                             EV << "[VEHICLE] Route changed successfully to: ";
-                            std::cout << "Route changed successfully to: ";
                             for (const auto& edgeId : newPlannedRoute) {
                                 EV << edgeId << " ";
-                                std::cout << edgeId << " ";
                             }
                             EV << std::endl;
-                            std::cout << std::endl;
-
                             // Highlight the change by modifying vehicle appearance
                             traciVehicle->setColor(TraCIColor(255, 0, 0, 255)); // Red color
 
                             return; // Success, no need for fallback
                         } else {
                             EV << "[VEHICLE] Route change didn't take effect, falling back to destination-only method" << std::endl;
-                            std::cout << "Route change didn't take effect, falling back to destination-only method" << std::endl;
-                            // Continue to fallback method
                         }
                     } else {
                         EV << "[VEHICLE] Route connectivity validation failed, falling back to destination-only method" << std::endl;
-                        std::cout << "Route connectivity validation failed, falling back to destination-only method" << std::endl;
-                        // Continue to fallback method
                     }
                 }
                 catch (const std::exception& e) {
                     EV << "[VEHICLE] ERROR changing complete route: " << e.what() << std::endl;
-                    std::cout << "ERROR changing complete route: " << e.what() << std::endl;
                     EV << "[VEHICLE] Falling back to destination-only method" << std::endl;
-                    std::cout << "Falling back to destination-only method" << std::endl;
-                    // Continue to fallback method below
                 }
             }
 
@@ -367,8 +300,6 @@ void VehicleControlApp::onWSM(BaseFrame1609_4* wsm) {
                 }
 
                 EV << "[VEHICLE] Using SUMO's routing to find path to destination edge: " << destinationEdge << std::endl;
-                std::cout << "Using SUMO's routing to find path to destination edge: " << destinationEdge << std::endl;
-
                 // Store the original route
                 std::list<std::string> originalRoute = traciVehicle->getPlannedRoadIds();
 
@@ -385,30 +316,19 @@ void VehicleControlApp::onWSM(BaseFrame1609_4* wsm) {
                 std::cout << "SUMO calculated route: ";
                 for (const auto& edgeId : newPlannedRoute) {
                     EV << edgeId << " ";
-                    std::cout << edgeId << " ";
                 }
                 EV << std::endl;
-                std::cout << std::endl;
                 
                 if (routeChanged) {
                     EV << "[VEHICLE] Route changed successfully to destination " << destinationEdge << std::endl;
-                    std::cout << "Route changed successfully to destination " << destinationEdge << std::endl;
-
-                    // Highlight the route change with a vehicle color change
-                    traciVehicle->setColor(TraCIColor(0, 0, 255, 255)); // Blue for destination-only changes
-
-                    // Slightly reduce speed to make the change more visible
+                    traciVehicle->setColor(TraCIColor(0, 0, 255, 255));
                     double currentSpeed = traciVehicle->getSpeed();
-                    if (currentSpeed > 5.0) {
-                        traciVehicle->setSpeed(currentSpeed * 0.8);
-                        EV << "[VEHICLE] Reduced speed to " << (currentSpeed * 0.8) << " to make route change visible" << std::endl;
-                        std::cout << "Reduced speed to " << (currentSpeed * 0.8) << " to make route change visible" << std::endl;
+                    if (currentSpeed > 10.00) {
+                        traciVehicle->setSpeed(currentSpeed * 0.6);
+                        EV << "[VEHICLE] Reduced speed to " << (currentSpeed * 0.6);
                     }
                 } else {
                     EV << "[VEHICLE] Warning: Route didn't change, destination may already be included or SUMO rejected the change" << std::endl;
-                    std::cout << "Warning: Route didn't change, destination may already be included or SUMO rejected the change" << std::endl;
-
-                    // Check if destination is already in the route
                     bool destInRoute = false;
                     for (const auto& edge : originalRoute) {
                         if (edge == destinationEdge) {
@@ -774,30 +694,6 @@ void VehicleControlApp::processAllRoadsResponse(const std::string& data) {
     } else {
         EV << "Not enough roads to perform path finding tests" << std::endl;
     }
-    
-    EV << "===========================================" << std::endl;
-
-    // Also run the pre-defined test function for consistency
-    runPathFindingTests();
-
-    // Run TaskGenerator test immediately
-    EV << "\n[VEHICLE] ==== TESTING TASK GENERATOR ====\n" << std::endl;
-    EV << "[VEHICLE] Requesting 3 random destinations..." << std::endl;
-    requestDestinations(3);
-
-    // Now also test k shortest paths using specific nodes instead of random roads
-    // Choose nodes that we know exist in the network
-    std::string source = "1024";  // Use specific node IDs that exist in the network
-    std::string target = "1985";  // Use specific node IDs that exist in the network
-    EV << "[VEHICLE] Requesting 2 shortest paths from " << source << " to " << target << std::endl;
-    requestKPaths(source, target, 2);
-
-    // Test valid assignment with specific nodes
-    std::vector<std::string> sources = {"1024", "213", "337"};
-    std::vector<std::string> targets = {"1985", "853", "205"};
-
-    EV << "[VEHICLE] Testing valid assignment between specific sources and targets" << std::endl;
-    requestValidAssignment(sources, targets);
 }
 
 void VehicleControlApp::processAccessibleRoadsResponse(const std::string& data) {
@@ -910,14 +806,11 @@ void VehicleControlApp::processDestinationsResponse(const std::string& data) {
 
         int destCount = std::stoi(countStr);
         destinations.clear();
-
-        // Split destinations (separated by semicolons)
         std::vector<std::string> destStrings;
         std::istringstream iss(destsStr);
         std::string destString;
 
         while (std::getline(iss, destString, ';')) {
-            // Parse each destination
             std::vector<std::string> parts = parseRoadList(destString);
 
             if (parts.size() >= 3) {
@@ -926,32 +819,65 @@ void VehicleControlApp::processDestinationsResponse(const std::string& data) {
                 double tardiness = std::stod(parts[2]);
 
                 destinations.emplace_back(nodeId, TimeWindow(earliness, tardiness));
-                
-                // Lưu thông tin đích và khung thời gian
-                if (destinations.size() == 1) { // Chỉ lấy đích đầu tiên
+                if (destinations.size() == 1) {
                     targetRoad = nodeId;
                     earliestArrival = earliness;
                     latestArrival = tardiness;
-                    
-                    // Tìm đường đi ngắn nhất từ điểm bắt đầu đến đích
                     std::vector<std::string> path;
                     double algorithmTime = 0.0;
-                    
-                    // Bắt đầu đo thời gian thuật toán
                     auto startAlgorithm = std::chrono::high_resolution_clock::now();
                     
                     if (graphProcessor) {
                         path = graphProcessor->findShortestPath(startingRoad, targetRoad);
                         pathLength = graphProcessor->getShortestPathLength(startingRoad, targetRoad);
+                        
+                        // Calculate travel time based on segment speeds instead of fixed speed
+                        double estimatedTravelTime = 0.0;
+                        
+                        // Get the road network graph
+                        const Graph& graph = graphProcessor->getGraph();
+                        
+                        // Calculate time for each segment of the path
+                        for (size_t j = 0; j < path.size(); j++) {
+                            const std::string& edgeId = path[j];
+                            double edgeLength = 0.0;
+                            double edgeSpeed = 13.89; // Default speed if not found
+                            bool edgeFound = false;
+                            
+                            // Find this edge in the graph to get its properties
+                            for (const auto& nodePair : graph.getAdjList()) {
+                                for (const auto& edge : nodePair.second) {
+                                    if (edge.getId() == edgeId) {
+                                        edgeLength = edge.getLength();
+                                        
+                                        // Use the Edge's getMaxSpeed method instead of manually checking lanes
+                                        edgeSpeed = edge.getMaxSpeed();
+                                        
+                                        // Calculate time to traverse this segment
+                                        double segmentTime = edgeLength / edgeSpeed;
+                                        estimatedTravelTime += segmentTime;
+                                        
+                                        edgeFound = true;
+                                        break;
+                                    }
+                                }
+                                if (edgeFound) break;
+                            }
+                            
+                            if (!edgeFound) {
+                                // Use default values if edge not found
+                                estimatedTravelTime += 100.0 / 13.89;
+                            }
+                        }
+                        
+                        // Use calculated travel time when updating vehicle destination
+                        SimulationLogger::getInstance().updateVehicleDestination(
+                            mySimulationId, targetRoad, earliestArrival, latestArrival, path, pathLength, estimatedTravelTime);
                     }
                     
                     // Kết thúc đo thời gian thuật toán
                     auto endAlgorithm = std::chrono::high_resolution_clock::now();
                     algorithmTime = std::chrono::duration<double>(endAlgorithm - startAlgorithm).count();
-                    
-                    // Ghi nhận thông tin đích vào logger
-                    SimulationLogger::getInstance().updateVehicleDestination(
-                        mySimulationId, targetRoad, earliestArrival, latestArrival, path, pathLength);
                     
                     // Ghi nhận thời gian thuật toán
                     SimulationLogger::getInstance().recordAlgorithmTime(mySimulationId, algorithmTime);
@@ -1384,114 +1310,6 @@ void VehicleControlApp::buildLocalRoadNetwork() {
     }
 }
 
-void VehicleControlApp::runPathFindingTests() {
-    // Test multiple path finding scenarios
-    if (allRoads.size() < 2) {
-        EV << "[VEHICLE] Not enough roads for path finding tests" << std::endl;
-        return;
-    }
-    
-    // Test 1: Path between first and last road
-    std::string source1 = allRoads.front();
-    std::string target1 = allRoads.back();
-    testPathBetween(source1, target1, "First to Last");
-
-    // Test 2: Path between first road and middle road
-    std::string source2 = allRoads.front();
-    std::string target2 = allRoads[allRoads.size() / 2];
-    testPathBetween(source2, target2, "First to Middle");
-
-    // Test 3: Path between last road and middle road
-    std::string source3 = allRoads.back();
-    std::string target3 = allRoads[allRoads.size() / 2];
-    testPathBetween(source3, target3, "Last to Middle");
-
-    EV << "============================================================" << std::endl;
-}
-
-void VehicleControlApp::testPathBetween(const std::string& source, const std::string& target, const std::string& testName) {
-    EV << "\n--- Test: " << testName << " ---" << std::endl;
-    EV << "Finding path from " << source << " to " << target << std::endl;
-
-    // First try with our local GraphProcessor
-    std::vector<std::string> path = findShortestPath(source, target);
-    double pathLength = getShortestPathLength(source, target);
-    
-    if (!path.empty() && pathLength > 0) {
-        EV << "SUCCESS: Path found with length " << pathLength << std::endl;
-        // In đường đi trên cùng một dòng với mũi tên phân tách
-        EV << "Path: ";
-        for (size_t i = 0; i < path.size(); i++) {
-            EV << path[i];
-            if (i < path.size() - 1) {
-                EV << " -> ";
-            }
-        }
-        EV << std::endl;
-    } else {
-        EV << "FAILED: No path found between " << source << " and " << target << std::endl;
-
-        // Check if the nodes exist in our graph
-        bool sourceExists = false;
-        bool targetExists = false;
-        
-        for (const auto& road : allRoads) {
-            if (road == source) sourceExists = true;
-            if (road == target) targetExists = true;
-        }
-        
-        EV << "Source exists in graph: " << (sourceExists ? "Yes" : "No") << std::endl;
-        EV << "Target exists in graph: " << (targetExists ? "Yes" : "No") << std::endl;
-
-        // Request from RSU as fallback
-        EV << "Requesting path from RSU..." << std::endl;
-        requestShortestPath(source, target);
-    }
-}
-
-void VehicleControlApp::testPathFinding() {
-    EV << "\n[VEHICLE] Manual path finding test triggered" << std::endl;
-
-    // Run a more focused path finding test
-    if (allRoads.size() < 2) {
-        EV << "[VEHICLE] Not enough roads for path finding tests" << std::endl;
-        return;
-    }
-
-    // Select specific source and target roads from available roads
-    std::string source = allRoads[0];
-    std::string target = allRoads[allRoads.size() / 2];
-    
-    EV << "[VEHICLE] Finding path from " << source << " to " << target << std::endl;
-
-    // Use local graph processor to find path
-    std::vector<std::string> path = findShortestPath(source, target);
-    double pathLength = getShortestPathLength(source, target);
-    
-    if (!path.empty() && pathLength > 0) {
-        EV << "[VEHICLE] SUCCESS: Path found with length " << pathLength << std::endl;
-
-        // Print path segments on a single line with arrow separators
-        EV << "[VEHICLE] Path: ";
-        for (size_t i = 0; i < path.size(); i++) {
-            EV << path[i];
-            if (i < path.size() - 1) {
-                EV << " -> ";
-            }
-        }
-        EV << std::endl;
-    } else {
-        EV << "[VEHICLE] NO PATH found between " << source << " and " << target << std::endl;
-        EV << "[VEHICLE] Requesting path from RSU as fallback..." << std::endl;
-        requestShortestPath(source, target);
-    }
-
-    // Also test k-paths functionality
-    int k = 2;
-    EV << "\n[VEHICLE] Finding " << k << " alternative paths from " << source << " to " << target << std::endl;
-    requestKPaths(source, target, k);
-}
-
 std::vector<std::string> VehicleControlApp::findShortestPath(const std::string& sourceId, const std::string& targetId) {
     if (!graphProcessor) {
         EV << "[VEHICLE] GraphProcessor not initialized" << std::endl;
@@ -1510,126 +1328,148 @@ std::vector<std::string> VehicleControlApp::findShortestPath(const std::string& 
 }
 
 double VehicleControlApp::getShortestPathLength(const std::string& sourceId, const std::string& targetId) {
-    if (!graphProcessor) {
-        EV << "[VEHICLE] GraphProcessor not initialized" << std::endl;
-        return -1.0;
-    }
-
-    // Use the GraphProcessor to get the shortest path length
     double length = graphProcessor->getShortestPathLength(sourceId, targetId);
-
     return length;
 }
 
-// Ajouter cette nouvelle méthode pour vérifier et ajuster la vitesse
 void VehicleControlApp::checkAndAdjustSpeed() {
     if (!mobility || !traciVehicle) {
         return;
     }
     
-    // Obtenir la vitesse actuelle du véhicule
+    // Get current vehicle speed
     double currentSpeed = traciVehicle->getSpeed();
     
-    // Obtenir l'ID de la route actuelle
+    // Get current road and lane IDs
     std::string roadId = traciVehicle->getRoadId();
+    std::string laneId = traciVehicle->getLaneId();
+    
     if (roadId.empty()) {
-        return; // Le véhicule n'est pas sur une route valide
+        return; // Vehicle not on a valid road
     }
     
-    // Si nous sommes sur une nouvelle route, demander ses attributs
+    // If we're on a new road, request its attributes
     if (roadId != currentRoadId) {
         requestRoadAttributes(roadId);
         currentRoadId = roadId;
-        return; // Attendre que nous recevions les attributs
+        return; // Wait until we receive the attributes
     }
     
-    // Obtenir les attributs de la route (y compris la vitesse maximale)
-    double maxSpeed = -1.0;
+    // Default max speed (50 km/h in m/s)
+    double maxSpeed = 13.89;
     
-    // Vérifier si nous avons déjà les attributs de la route
-    // D'abord vérifier l'attribut spécifique lane0_speed (pour la première voie)
-    if (currentRoadAttributes.find("lane0_speed") != currentRoadAttributes.end()) {
-        try {
-            maxSpeed = std::stod(currentRoadAttributes["lane0_speed"]);
-        } catch (...) {
-            // Erreur de conversion, essayer d'autres attributs
-            maxSpeed = -1.0;
-        }
-    }
+    // Try to extract lane index from laneId (format: "edgeId_index")
+    size_t underscorePos = laneId.find_last_of('_');
+    int laneIndex = -1;
     
-    // Si nous n'avons pas trouvé la vitesse dans lane0_speed, essayer maxSpeed
-    if (maxSpeed < 0 && currentRoadAttributes.find("maxSpeed") != currentRoadAttributes.end()) {
+    if (underscorePos != std::string::npos) {
         try {
-            maxSpeed = std::stod(currentRoadAttributes["maxSpeed"]);
-        } catch (...) {
-            // Erreur de conversion, utiliser une valeur par défaut
-            maxSpeed = -1.0;
-        }
-    }
-    
-    // Si nous n'avons pas encore les attributs ou la vitesse max, essayer de les obtenir de l'interface TraCI
-    if (maxSpeed < 0) {
-        try {
-            // Obtenir la voie actuelle et sa vitesse maximale
-            std::string laneId = traciVehicle->getLaneId();
-            if (!laneId.empty()) {
-                // Utiliser TraCI pour obtenir la vitesse maximale de la voie
-                maxSpeed = mobility->getCommandInterface()->lane(laneId).getMaxSpeed();
+            laneIndex = std::stoi(laneId.substr(underscorePos + 1));
+            
+            // First try: look for a direct lane-specific speed attribute
+            std::string laneSpeedKey = "lane" + std::to_string(laneIndex) + "_speed";
+            auto laneSpeedIt = currentRoadAttributes.find(laneSpeedKey);
+            
+            if (laneSpeedIt != currentRoadAttributes.end()) {
+                try {
+                    maxSpeed = std::stod(laneSpeedIt->second);
+                    EV << "[VEHICLE] Found lane-specific speed: " << maxSpeed 
+                       << " m/s for lane " << laneId << " from attribute '" << laneSpeedKey << "'" << std::endl;
+                } catch (...) {
+                    EV << "[VEHICLE] Error converting lane speed: " << laneSpeedIt->second << std::endl;
+                }
+            }
+            // Second try: look for direct lane attributes in format "-edgeId_index_speed"
+            else {
+                // Direct lane speed attribute might be named differently based on how attributes were parsed
+                std::string altLaneSpeedKey = laneId + "_speed";
+                auto altLaneSpeedIt = currentRoadAttributes.find(altLaneSpeedKey);
+                
+                if (altLaneSpeedIt != currentRoadAttributes.end()) {
+                    try {
+                        maxSpeed = std::stod(altLaneSpeedIt->second);
+                        EV << "[VEHICLE] Found lane-specific speed: " << maxSpeed 
+                           << " m/s for lane " << laneId << " from attribute '" << altLaneSpeedKey << "'" << std::endl;
+                    } catch (...) {
+                        EV << "[VEHICLE] Error converting lane speed: " << altLaneSpeedIt->second << std::endl;
+                    }
+                }
+                // Third try: check if we have the speed directly in the road attributes as parsed from XML
+                // This would be the case if the processor stored the raw lane attributes
+                else {
+                    for (const auto& attr : currentRoadAttributes) {
+                        // Look for attributes containing this lane ID and "speed="
+                        if (attr.first.find(laneId) != std::string::npos || 
+                            attr.second.find(laneId) != std::string::npos) {
+                            size_t speedPos = attr.second.find("speed=");
+                            if (speedPos != std::string::npos) {
+                                size_t valueStart = speedPos + 6; // "speed=" is 6 chars
+                                size_t valueEnd = attr.second.find('"', valueStart);
+                                if (valueEnd != std::string::npos) {
+                                    try {
+                                        std::string speedStr = attr.second.substr(valueStart, valueEnd - valueStart);
+                                        maxSpeed = std::stod(speedStr);
+                                        EV << "[VEHICLE] Found lane speed in XML attributes: " << maxSpeed 
+                                           << " m/s for lane " << laneId << std::endl;
+                                        break;
+                                    } catch (...) {
+                                        EV << "Not found speed for this road.";
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         } catch (...) {
-            // En cas d'erreur, utiliser une valeur par défaut
-            maxSpeed = 13.89; // 50 km/h en m/s
+            EV << "[VEHICLE] Error parsing lane index from laneId: " << laneId << std::endl;
         }
     }
     
-    // Si maxSpeed est toujours négatif, utiliser une valeur par défaut
-    if (maxSpeed <= 0) {
-        maxSpeed = 13.89; // 50 km/h en m/s
+    // If we still haven't found the speed, use TraCI as fallback
+    if (maxSpeed == 13.89) {
+        try {
+            if (!laneId.empty()) {
+                maxSpeed = mobility->getCommandInterface()->lane(laneId).getMaxSpeed();
+                EV << "[VEHICLE] Got speed limit via TraCI: " << maxSpeed << " m/s for lane " << laneId << std::endl;
+            }
+        } catch (...) {
+            EV << "[VEHICLE] Failed to get speed via TraCI, using default value" << std::endl;
+        }
     }
     
-    // Ajouter une marge de tolérance (par exemple, 10% au-dessus de la limite)
-    double speedLimit = maxSpeed * 1.1;
-    
-    // Variable statique pour éviter de réduire la vitesse trop souvent
+    // Static variable to avoid reducing speed too often
     static simtime_t lastSpeedReduction = 0;
     
-    double newSpeed = -1.0; // Valeur par défaut indiquant qu'aucun changement n'est nécessaire
-    
-    // Vérifier si la vitesse est exactement 13.67 m/s
-    if (currentSpeed > 13.89 && (simTime() - lastSpeedReduction > 10.0)) {
-        // Ajuster la vitesse à exactement 6 m/s
-        newSpeed = 6.0;
-        EV << "[VEHICLE] Vitesse exactement à 13.67 m/s détectée sur route " << roadId
-           << ". Réduction à 6 m/s" << std::endl;
-    }
-    
-         // Appliquer la nouvelle vitesse si nécessaire
-    if (newSpeed > 0) {
-        // Appliquer la nouvelle vitesse
+    // Check if current speed exceeds max speed
+    if (currentSpeed > maxSpeed && (simTime() - lastSpeedReduction > 10.0)) {
+        // Set speed to 90% of max speed to ensure we stay under the limit
+        double newSpeed = maxSpeed * 0.9;
+        
+        // Apply new speed
         traciVehicle->setSpeed(newSpeed);
         
-        // Mettre à jour le temps de la dernière réduction
+        // Update last reduction time
         lastSpeedReduction = simTime();
         
-        // Message différent selon le cas (vitesse exacte de 13.67 ou dépassement de limite)
-        if (std::abs(currentSpeed - 13.67) < 0.01) {
-            std::cout << "Vehicle " << mySimulationId << " reached exactly 13.67 m/s on road " << roadId
-                      << ". Setting speed to exactly 6.0 m/s as requested." << std::endl;
-        } else {
-            std::cout << "Vehicle " << mySimulationId << " exceeded speed limit on road " << roadId
-                      << " (" << currentSpeed << " > " << maxSpeed << " m/s). "
-                      << "Reducing speed to " << newSpeed << " m/s" << std::endl;
-        }
-                  
-        // Changer la couleur du véhicule pour indiquer visuellement le dépassement de vitesse
+        // Log speed adjustment
+        EV << "[VEHICLE] Excessive speed detected on lane " << laneId 
+           << ": current=" << currentSpeed << " m/s, max=" << maxSpeed 
+           << " m/s. Reduced to " << newSpeed << " m/s" << std::endl;
+        
+        std::cout << "Vehicle " << mySimulationId << " exceeded speed limit on lane " << laneId 
+                  << " (" << currentSpeed << " > " << maxSpeed << " m/s). "
+                  << "Speed reduced to " << newSpeed << " m/s." << std::endl;
+        
+        // Change vehicle color to indicate speeding
         try {
-            // Rouge pour indiquer un dépassement de vitesse
+            // Red for speeding
             traciVehicle->setColor(TraCIColor(255, 0, 0, 255));
             
-            // Programmer le retour à la couleur normale après quelques secondes
+            // Schedule return to normal color after a few seconds
             scheduleAt(simTime() + 3.0, new cMessage("resetColor"));
         } catch (...) {
-            // Ignorer les erreurs liées au changement de couleur
+            // Ignore color change errors
         }
     }
 }

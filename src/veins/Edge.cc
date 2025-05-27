@@ -29,3 +29,16 @@ Edge::Edge(string id, string from, string to, vector<Lane> lanes, double length,
         this->length = maxLength;
     }
 }
+
+double Edge::getMaxSpeed() const {
+    if (!lanes.empty()) {
+        double maxSpeed = 0.0;
+        for (Lane lane : lanes) {
+            if (lane.speed > maxSpeed) {
+                maxSpeed = lane.speed;
+            }
+        }
+        return maxSpeed;
+    }
+    return 13.89;
+}

@@ -1,14 +1,6 @@
 #include "RSUControlApp.h"
 #include "veins/modules/application/traci/TraCIDemo11pMessage_m.h"
-#include <sstream>
-#include <iostream>
-#include <cstring>
-#include <algorithm> // Add include for std::min
-#include <fstream>   // Add include for ofstream
-#include <iomanip>   // Add include for setprecision
-#include <chrono>    // Add include for time measurement
-#include <cctype>    // Add include for std::isdigit
-
+#include<bits/stdc++.h>
 // Platform-specific includes for getting working directory
 #ifdef _WIN32
 #include <direct.h>
@@ -108,10 +100,6 @@ void RSUControlApp::initialize(int stage) {
                 EV << "[RSU] Successfully initialized GraphProcessor" << std::endl;
                 taskGenerator.reset(new TaskGenerator(*graphProcessor));
                 EV << "[RSU] Successfully initialized TaskGenerator" << std::endl;
-                printRoadNetworkInfo();
-                printNodeInfo();
-                testTaskGenerator();
-
                 // Load and print vehicle information from route file
                 EV << "[RSU] Attempting to load route information" << std::endl;
                 if (xmlProcessor->loadRouteFile("./erlangen.rou.xml")) {
@@ -655,33 +643,20 @@ void RSUControlApp::sendRerouteToAllVehicles() {
         else {
             EV << "[RSU] No path found for vehicle " << vehicleId << " to destination "
                << vehicleData.assignedDestination.nodeId << std::endl;
-            std::cout << "No path found for vehicle " << vehicleId << " to destination "
-                      << vehicleData.assignedDestination.nodeId << std::endl;
         }
     }
 
     EV << "[RSU] Rerouted " << vehiclesRerouted << " vehicles out of "
        << vehicleDataMap.size() << " total vehicles" << std::endl;
-    std::cout << "Rerouted " << vehiclesRerouted << " vehicles out of "
-              << vehicleDataMap.size() << " total vehicles" << std::endl;
-
     EV << "\n[RSU] ===== REROUTING COMPLETE =====\n" << std::endl;
 }
 
 void RSUControlApp::sendRerouteMessage(LAddress::L2Type vehicleId, const std::vector<std::string>& edgePath) {
-    // Get the correct simulation ID for this vehicle
     int simId = vehicleDataMap[vehicleId].simulationId;
     if (simId == -1) {
-        // If no mapping exists, use the original ID (shouldn't happen with pre-mapping)
         simId = vehicleId;
         EV << "[RSU] WARNING: No simulation ID mapping for vehicle " << vehicleId << std::endl;
-        std::cout << "RSU WARNING: No simulation ID mapping for vehicle " << vehicleId << std::endl;
     }
-
-    // Verification debug output
-    std::cout << "DEBUG: Vehicle internal ID: " << vehicleId << ", using simulation ID: " << simId << std::endl;
-
-    // Build the CHANGE_ROUTE message with the complete path
     std::ostringstream routeStr;
     routeStr << "CHANGE_ROUTE:" << simId << ":";
 
@@ -792,144 +767,13 @@ double RSUControlApp::getShortestPathLength(const string& sourceId, const string
     return graphProcessor->getShortestPathLength(sourceId, targetId);
 }
 
-// Implement method to print road information
-void RSUControlApp::printRoadNetworkInfo() const {
-    if (!xmlProcessor || !xmlProcessor->isNetworkLoaded()) {
-        EV << "[RSU] No road network loaded" << endl;
-        return;
-    }
-    
-    const vector<string> allRoads = getAllRoads();
-    EV << "\n[RSU] ========== ROAD NETWORK INFORMATION ==========\n" << std::endl;
-    EV << "[RSU] Total number of roads: " << allRoads.size() << std::endl;
-    
-    int maxRoadsToShow = min(static_cast<int>(allRoads.size()), 20);
-    for (int i = 0; i < maxRoadsToShow; i++) {
-        const string& roadId = allRoads[i];
-        EV << "[RSU] Road ID: " << roadId << endl;
-        
-        const Graph& graph = xmlProcessor->getGraph();
-        for (const auto& nodePair : graph.getAdjList()) {
-            for (const auto& edge : nodePair.second) {
-                if (edge.getId() == roadId) {
-                    EV << "  From: " << edge.getFrom() << " To: " << edge.getTo() << std::endl;
-                    EV << "  Length: " << edge.getLength() << std::endl;
-                    const auto& lanes = edge.getLanes();
-                    EV << "  Lanes: " << lanes.size() << std::endl;
-                    for (const auto& lane : lanes) {
-                        EV << "    Lane ID: " << lane.id << " Index: " << lane.index 
-                                  << " Speed: " << lane.speed << " Length: " << lane.length << std::endl;
-                    }
-                    break;
-                }
-            }
-        }
-    }
-    
-    if (allRoads.size() > maxRoadsToShow) {
-        EV << "[RSU] ... and " << (allRoads.size() - maxRoadsToShow) << " more roads" << endl;
-    }
-    
-    EV << "\n[RSU] ========== SHORTEST PATH TESTS ==========\n" << std::endl;
-    if (!graphProcessor) {
-        EV << "[RSU] GraphProcessor not initialized, cannot perform path finding tests" << endl;
-        return;
-    }
-    if (allRoads.size() >= 2) {
-        string sourceRoad = "42";
-        string targetRoad = "1945";
-        
-        EV << "[RSU] Path Test: Finding path from " << sourceRoad << " to " << targetRoad << endl;
-        vector<string> path = findShortestPath(sourceRoad, targetRoad);
-        double pathLength = getShortestPathLength(sourceRoad, targetRoad);
-        
-        if (!path.empty() && pathLength > 0) {
-            EV << "[RSU] SUCCESS: Path found with length " << pathLength << " units" << endl;
-            EV << "[RSU] Path segments (" << path.size() << "): ";
-            for (size_t i = 0; i < path.size(); i++) {
-                EV << path[i];
-                if (i < path.size() - 1) {
-                    EV << " -> ";
-                }
-            }
-            EV << endl;
-        } else {
-            EV << "[RSU] No path found between " << sourceRoad << " and " << targetRoad << endl;
-
-            const Graph& graph = xmlProcessor->getGraph();
-            const auto& nodes = graph.getNodes();
-            if (nodes.size() >= 2) {
-                auto it = nodes.begin();
-                string sourceNode = it->first;
-                advance(it, nodes.size() - 1);
-                string targetNode = it->first;
-                
-                EV << "[RSU] Trying path between nodes instead: " << sourceNode << " to " << targetNode << endl;
-                path = findShortestPath(sourceNode, targetNode);
-                pathLength = getShortestPathLength(sourceNode, targetNode);
-                
-                if (!path.empty() && pathLength > 0) {
-                    EV << "[RSU] SUCCESS: Node path found with length " << pathLength << " units" << endl;
-                    EV << "[RSU] Path segments (" << path.size() << "): ";
-                    for (size_t i = 0; i < path.size(); i++) {
-                        EV << path[i];
-                        if (i < path.size() - 1) {
-                            EV << " -> ";
-                        }
-                    }
-                    EV << endl;
-                } else {
-                    EV << "[RSU] NO PATH found between nodes " << sourceNode << " and " << targetNode << std::endl;
-                }
-            }
-        }
-    } else {
-        EV << "[RSU] Not enough roads to perform path finding tests" << std::endl;
-    }
-
-    EV << "\n[RSU] Graph Check: " << endl;
-    const Graph& graph = xmlProcessor->getGraph();
-    EV << "  - Node count: " << graph.getNodeCount() << endl;
-    EV << "  - Edge count: " << graph.getEdgeCount() << endl;
-    EV << "\n[RSU] ==========================================\n" << endl;
-}
-
-void RSUControlApp::printNodeInfo() const {
-    if (!xmlProcessor || !xmlProcessor->isNetworkLoaded()) {
-        EV << "[RSU] No road network loaded" << endl;
-        return;
-    }
-
-    const Graph& graph = xmlProcessor->getGraph();
-    const auto& nodes = graph.getNodes();
-    
-    EV << "\n[RSU] ========== NODE INFORMATION ==========\n" << endl;
-    EV << "[RSU] Total number of nodes: " << nodes.size() << endl;
-
-    int count = 0;
-    for (const auto& nodePair : nodes) {
-        if (count >= 20) break;
-
-        const Node& node = nodePair.second;
-        EV << "[RSU] Node ID: " << node.getId()
-           << " X: " << node.getX()
-           << " Y: " << node.getY() << endl;
-        count++;
-    }
-
-    if (nodes.size() > 20) {
-        EV << "[RSU] ... and " << (nodes.size() - 20) << " more nodes" << endl;
-    }
-
-    EV << "\n[RSU] =======================================\n" << endl;
-}
 
 void RSUControlApp::testTaskGenerator() {
     if (!taskGenerator) {
         EV << "[RSU] ERROR: Cannot test TaskGenerator - not initialized" << endl;
         return;
     }
-    
+
     EV << "\n[RSU] ========== TASK GENERATOR TEST ==========\n" << endl;
 
     // Test 1: Generate random destinations
@@ -942,89 +786,10 @@ void RSUControlApp::testTaskGenerator() {
            << dest.timeWindow.earliness << " - " << dest.timeWindow.tardiness << ")" << std::endl;
     }
 
-    // Test 2: Find k shortest paths
-    if (graphProcessor) {
-        const auto& roads = getAllRoads();
-        if (roads.size() >= 10) {
-            std::string sourceId = "830";
-            std::string targetId = "1914";
-
-            EV << "\n[RSU] Test 2: Finding 16 shortest paths from " << sourceId << " to " << targetId << std::endl;
-
-            auto paths = taskGenerator->findKPaths(sourceId, targetId, 16);
-
-            EV << "[RSU] Found " << paths.size() << " paths:" << std::endl;
-            for (size_t i = 0; i < paths.size(); i++) {
-                const auto& path = paths[i];
-                double pathLength = 0.0;
-                for (const auto& edgeId : path) {
-                    const Graph& graph = xmlProcessor->getGraph();
-                    for (const auto& nodePair : graph.getAdjList()) {
-                        for (const auto& edge : nodePair.second) {
-                            if (edge.getId() == edgeId) {
-                                pathLength += edge.getLength();
-                                break;
-                            }
-                        }
-                    }
-                }
-
-                EV << "  - Path " << (i+1) << " (segments: " << path.size() << ", length: " << pathLength << "): ";
-                for (size_t j = 0; j < path.size(); j++) {
-                    EV << path[j];
-                    if (j < path.size() - 1) {
-                        EV << " -> ";
-                    }
-                }
-                EV << std::endl;
-            }
-        } else {
-            EV << "\n[RSU] Test 2: Not enough roads for path finding test" << std::endl;
-        }
-    }
-    
-    // Test 3: Check valid assignment
-    //    EV << "\n[RSU] Test 3: Testing valid assignment" << std::endl;
-    //
-    //    std::vector<std::string> sources = {"1024", "213", "337"};
-    //    std::vector<std::string> targets = {"1985", "853", "205"};
-    //
-    //    bool validAssignment = taskGenerator->existsValidAssignment(sources, targets);
-
-    //    EV << "[RSU] Valid assignment exists: " << (validAssignment ? "YES" : "NO") << std::endl;
-
     EV << "\n[RSU] Test 3: Tìm đường đi giữa các edge" << std::endl;
     findEdgePathAndPrint("-184", "1939");
 
     EV << "\n[RSU] =========================================\n" << std::endl;
-}
-
-void RSUControlApp::findLanePathAndPrint(std::string sourceLaneId, std::string targetLaneId) const {
-    if (!graphProcessor) {
-        return;
-    }
-
-    EV << "[RSU] Tìm đường đi ngắn nhất từ làn " << sourceLaneId << " đến làn " << targetLaneId << std::endl;
-
-    auto lanePath = graphProcessor->findLaneShortestPath(sourceLaneId, targetLaneId);
-
-    if (lanePath.empty()) {
-        EV << "[RSU] Không tìm thấy đường đi giữa hai làn đường" << std::endl;
-        return;
-    }
-
-    double totalCost = 0.0;
-    for (const auto& segment : lanePath) {
-        totalCost += segment.cost;
-    }
-
-    EV << "[RSU] Đã tìm thấy đường đi với " << lanePath.size() << " phân đoạn, tổng chi phí: " << totalCost << std::endl;
-
-    for (size_t i = 0; i < lanePath.size(); i++) {
-        const auto& segment = lanePath[i];
-        EV << "  - Edge: " << segment.edgeId << ", Lane: " << segment.laneIndex
-           << ", Chi phí: " << segment.cost << std::endl;
-    }
 }
 
 void RSUControlApp::findEdgePathAndPrint(std::string sourceEdgeId, std::string targetEdgeId) const {
@@ -1290,185 +1055,177 @@ void RSUControlApp::generateAndAssignDestinations(const std::vector<VehicleInfo>
     // Calculate travel times and set time windows based on that
     const Graph& graph = graphProcessor->getGraph();
     
-    for (size_t i = 0; i < destObjects.size() && i < sourceRoads.size(); ++i) {
+    // Create vectors for the Hungarian algorithm
+    std::vector<std::string> destEdges;
+    for (const auto& dest : destObjects) {
+        destEdges.push_back(dest.nodeId);
+    }
+
+    // Prepare cost matrix for analysis and total distance calculation
+    int numVehicles = sourceRoads.size();
+    int numDestinations = destEdges.size();
+    int n = std::max(numVehicles, numDestinations);
+    std::vector<std::vector<double>> costMatrix(n, std::vector<double>(n, 0));
+    const double NO_PATH_PENALTY = 9999999.0;
+
+    // Build the cost matrix
+    for (int i = 0; i < numVehicles; ++i) {
+        const std::string& sourceEdgeId = sourceRoads[i];
+        for (int j = 0; j < numDestinations; ++j) {
+            const std::string& destEdgeId = destEdges[j];
+            
+            // Skip if source and destination are the same
+            if (sourceEdgeId == destEdgeId) {
+                costMatrix[i][j] = 5000.0; // Penalty for same edge
+                continue;
+            }
+            
+            auto path = graphProcessor->findEdgeShortestPath(sourceEdgeId, destEdgeId);
+            double pathLength = 0.0;
+
+            if (!path.empty()) {
+                // Calculate the length of the path
+                for (const auto& edgeId : path) {
+                    bool edgeFound = false;
+                    for (const auto& nodePair : graph.getAdjList()) {
+                        for (const auto& edge : nodePair.second) {
+                            if (edge.getId() == edgeId) {
+                                pathLength += edge.getLength();
+                                edgeFound = true;
+                                break;
+                            }
+                        }
+                        if (edgeFound) break;
+                    }
+                    if (!edgeFound) {
+                        pathLength += 100.0; // Default length
+                    }
+                }
+                costMatrix[i][j] = pathLength;
+            } else {
+                costMatrix[i][j] = NO_PATH_PENALTY;
+            }
+        }
+    }
+    
+    // Get optimal assignment using the Hungarian algorithm
+    EV << "[RSU] Computing optimal vehicle-destination assignment using Hungarian algorithm" << std::endl;
+    std::vector<int> assignment = graphProcessor->getOptimalVehicleAssignment(sourceRoads, destEdges);
+    
+    // Print the assignment result
+    EV << "[RSU] Assignment results:" << std::endl;
+    for (int i = 0; i < assignment.size(); i++) {
+        int destIndex = assignment[i];
+        if (destIndex != -1 && destIndex < destObjects.size()) {
+            EV << "  Vehicle " << i << " (road: " << sourceRoads[i] 
+               << ") assigned to destination " << destObjects[destIndex].nodeId << std::endl;
+        } else {
+            EV << "  Vehicle " << i << " (road: " << sourceRoads[i]
+               << ") could not be assigned a destination" << std::endl;
+        }
+    }
+
+    // Calculate and print total distance
+    double totalDistance = 0.0;
+    int assignedCount = 0;
+    
+    EV << "\n[RSU] ====== DISTANCE ANALYSIS OF HUNGARIAN ASSIGNMENT ======" << std::endl;
+    std::cout << "\n====== DISTANCE ANALYSIS OF HUNGARIAN ASSIGNMENT ======" << std::endl;
+    
+    for (int i = 0; i < assignment.size(); i++) {
+        int destIndex = assignment[i];
+        if (destIndex != -1 && destIndex < numDestinations) {
+            double distance = costMatrix[i][destIndex];
+            if (distance < NO_PATH_PENALTY) {
+                totalDistance += distance;
+                assignedCount++;
+                
+                EV << "  Vehicle " << i << " (from " << sourceRoads[i] << ") to destination " 
+                   << destEdges[destIndex] << ": " << distance << " meters" << std::endl;
+                std::cout << "  Vehicle " << i << " (from " << sourceRoads[i] << ") to destination " 
+                         << destEdges[destIndex] << ": " << distance << " meters" << std::endl;
+            }
+        }
+    }
+    
+    EV << "\n[RSU] Total distance for all vehicles: " << totalDistance << " meters" << std::endl;
+    EV << "[RSU] Average distance per vehicle: " << (assignedCount > 0 ? totalDistance / assignedCount : 0) 
+       << " meters" << std::endl;
+    std::cout << "\nTotal distance for all vehicles: " << totalDistance << " meters" << std::endl;
+    std::cout << "Average distance per vehicle: " << (assignedCount > 0 ? totalDistance / assignedCount : 0) 
+             << " meters" << std::endl;
+    std::cout << "Assigned vehicles: " << assignedCount << " out of " << numVehicles << std::endl;
+    std::cout << "=====================================================" << std::endl;
+
+    // Calculate paths and time windows based on the assignment
+    for (size_t i = 0; i < assignment.size() && i < vehicles.size(); ++i) {
+        int destIndex = assignment[i];
+        if (destIndex == -1 || destIndex >= destObjects.size()) {
+            continue;  // Skip unassigned vehicles
+        }
+        
+        const std::string& sourceRoad = sourceRoads[i];
+        const std::string& targetRoad = destObjects[destIndex].nodeId;
+        
         // Bắt đầu đo thời gian thuật toán
         auto startAlgorithm = std::chrono::high_resolution_clock::now();
         
         // Calculate path
-        auto path = graphProcessor->findEdgeShortestPath(sourceRoads[i], destObjects[i].nodeId);
-        
-        // Kết thúc đo thời gian thuật toán
-        auto endAlgorithm = std::chrono::high_resolution_clock::now();
-        double algorithmTime = std::chrono::duration<double>(endAlgorithm - startAlgorithm).count();
-        
-        // Calculate total distance
-        double totalDistance = 0.0;
-        for (const auto& edgeId : path) {
-            bool edgeFound = false;
-            for (const auto& nodePair : graph.getAdjList()) {
-                for (const auto& edge : nodePair.second) {
-                    if (edge.getId() == edgeId) {
-                        totalDistance += edge.getLength();
-                        edgeFound = true;
-                        break;
-                    }
-                }
-                if (edgeFound) break;
-            }
-            if (!edgeFound) {
-                totalDistance += 100.0;
-            }
-        }
-
-        // Calculate estimated travel time with an average speed
-        double averageSpeed = 13.89; // m/s
-        double estimatedTime = totalDistance / averageSpeed;
-        if (estimatedTime <= 0) {
-            estimatedTime = 1.0; // Set a minimum travel time
-        }
-
-        // Set time window to 1.5-2.5 times the minimum travel time
-        double earliness = 1.5 * estimatedTime;
-        double tardiness = 2.5 * estimatedTime;
-
-        // Update the time window for this destination
-        destObjects[i].timeWindow.earliness = earliness;
-        destObjects[i].timeWindow.tardiness = tardiness;
-        
-        // Ghi nhận thời gian thuật toán
-        if (i < vehicles.size()) {
-            try {
-                recordAlgorithmTime(vehicles[i].index, algorithmTime);
-            } catch (const std::exception& e) {
-                EV << "[RSU] Error recording algorithm time: " << e.what() << std::endl;
-            }
-        }
-    }
-
-    if (destObjects.size() < vehicles.size()) {
-        EV << "[RSU] WARNING: Not enough destinations generated (" << destObjects.size()
-           << " for " << vehicles.size() << " vehicles)" << std::endl;
-    }
-
-    EV << "[RSU] Generated " << destObjects.size() << " destinations with time windows:" << std::endl;
-    for (size_t i = 0; i < destObjects.size(); ++i) {
-        const auto& dest = destObjects[i];
-        EV << "  - Destination for Vehicle " << vehicles[i].id << " (index: " << vehicles[i].index
-           << ", Source: " << (i < sourceRoads.size() ? sourceRoads[i] : "N/A") << "): Edge " << dest.nodeId
-           << " (Time window: " << dest.timeWindow.earliness
-           << " - " << dest.timeWindow.tardiness << ")" << std::endl;
-    }
-
-    // Print the effective Cost Matrix based on assignments
-    EV << "\n[RSU] Effective Cost Matrix (Path Lengths for Assigned Routes):" << std::endl;
-    EV << "       "; // Header space for vehicle column
-    for(size_t j=0; j < destObjects.size(); ++j) {
-        std::string destHeader = "D_" + destObjects[j].nodeId.substr(0, 4);
-        EV << destHeader << "\t";
-    }
-    EV << std::endl;
-
-    for (size_t i = 0; i < sourceRoads.size(); ++i) {
-        std::string rowStr = "V_" + vehicles[i].id.substr(0,4) + "(E:" + sourceRoads[i].substr(0,4) + ")\t";
-        for (size_t j = 0; j < destObjects.size(); ++j) {
-            // Find the path length for this specific source vehicle to this specific destination edge
-            // This might not be the globally optimal if the number of dests < vehicles
-            // but it shows the cost for the assignment made if vehicle i got dest j
-            double pathLength = -1.0;
-            if (i < destObjects.size() && sourceRoads[i] == vehicles[i].from ) { // Ensure we are matching correctly
-                 // Dùng findEdgeShortestPath để có kết quả chính xác và nhất quán với hiển thị đường đi
-                 auto path = graphProcessor->findEdgeShortestPath(sourceRoads[i], destObjects[j].nodeId);
-                 pathLength = 0.0;
-
-                 // Tính độ dài đường đi bằng cách cộng chiều dài mỗi edge
-                 if (!path.empty()) {
-                    const Graph& graph = graphProcessor->getGraph();
-                    for (const auto& edgeId : path) {
-                        bool edgeFound = false;
-                        for (const auto& nodePair : graph.getAdjList()) {
-                            for (const auto& edge : nodePair.second) {
-                                if (edge.getId() == edgeId) {
-                                    pathLength += edge.getLength();
-                                    edgeFound = true;
-                                    break;
-                                }
-                            }
-                            if (edgeFound) break;
-                        }
-                        if (!edgeFound) {
-                            pathLength += 100.0; // Default length
-                        }
-                    }
-                 } else {
-                    pathLength = -1.0; // No path found
-                 }
-            }
-
-            if (pathLength > 0 && pathLength < 9999999.0) {
-                rowStr += std::to_string(static_cast<double>(pathLength)) + "\t";
-            } else {
-                rowStr += "INF\t";
-            }
-        }
-        EV << rowStr << std::endl;
-    }
-    
-    EV << "\n[RSU] Computing routes for each vehicle to its assigned destination:" << std::endl;
-    
-    int processedVehicles = std::min(static_cast<int>(vehicles.size()), static_cast<int>(destObjects.size()));
-
-    for (int i = 0; i < processedVehicles; ++i) {
-        const std::string& sourceRoad = sourceRoads[i];
-        const std::string& targetRoad = destObjects[i].nodeId;
-        
-        // Bắt đầu đo thời gian thuật toán
-        auto startAlgorithm = std::chrono::high_resolution_clock::now();
-        
         auto path = graphProcessor->findEdgeShortestPath(sourceRoad, targetRoad);
         
         // Kết thúc đo thời gian thuật toán
         auto endAlgorithm = std::chrono::high_resolution_clock::now();
         double algorithmTime = std::chrono::duration<double>(endAlgorithm - startAlgorithm).count();
         
-        EV << "  - Vehicle " << vehicles[i].id << " (index: " << vehicles[i].index << ") route:" << std::endl;
-        EV << "    From: Road " << sourceRoad << std::endl;
-        EV << "    To: Road " << targetRoad << std::endl;
-
-        if (path.empty()) {
-            EV << "    WARNING: No path found!" << std::endl;
-            continue;
-        }
-
+        // Calculate total distance and travel time based on segment speeds
         double totalDistance = 0.0;
+        double estimatedTime = 0.0;
+        
         for (const auto& edgeId : path) {
             bool edgeFound = false;
+            double edgeLength = 0.0;
+            double edgeSpeed = 13.89; // Default speed if not found
+            
             for (const auto& nodePair : graph.getAdjList()) {
                 for (const auto& edge : nodePair.second) {
                     if (edge.getId() == edgeId) {
-                        totalDistance += edge.getLength();
+                        edgeLength = edge.getLength();
+                        
+                        // Use the Edge's getMaxSpeed method
+                        edgeSpeed = edge.getMaxSpeed();
+                        
+                        totalDistance += edgeLength;
+                        // Calculate time to traverse this segment and add to total
+                        double segmentTime = edgeLength / edgeSpeed;
+                        estimatedTime += segmentTime;
+                        
                         edgeFound = true;
                         break;
                     }
                 }
                 if (edgeFound) break;
             }
+            
             if (!edgeFound) {
                 totalDistance += 100.0;
+                estimatedTime += 100.0 / 13.89; // Default values
             }
         }
         
-        double averageSpeed = 13.89;
-        double estimatedTime = totalDistance / averageSpeed;
-        if (estimatedTime <= 0) {
-            estimatedTime = 1.0;
-        }
-
+        // Set time window based on estimated travel time
+        double earliness = 1.3 * estimatedTime;
+        double tardiness = 1.7 * estimatedTime;
+        destObjects[destIndex].timeWindow.earliness = earliness;
+        destObjects[destIndex].timeWindow.tardiness = tardiness;
+        
+        EV << "[RSU] Vehicle " << vehicles[i].id << " (index: " << vehicles[i].index << ") route:" << std::endl;
+        EV << "    From: Road " << sourceRoad << std::endl;
+        EV << "    To: Road " << targetRoad << std::endl;
         EV << "    Path length: " << totalDistance << " m" << std::endl;
         EV << "    Estimated travel time: " << estimatedTime << " s" << std::endl;
-        EV << "    Time window: " << destObjects[i].timeWindow.earliness
-           << " - " << destObjects[i].timeWindow.tardiness
-           << " (approx: " << (destObjects[i].timeWindow.earliness / estimatedTime)
-           << "x - " << (destObjects[i].timeWindow.tardiness / estimatedTime) << "x of minimal travel time)" << std::endl;
+        EV << "    Time window: " << earliness << " - " << tardiness 
+           << " (approx: " << (earliness / estimatedTime) << "x - " 
+           << (tardiness / estimatedTime) << "x of minimal travel time)" << std::endl;
         
         if (path.size() <= 20) {
             EV << "    Path: ";
@@ -1487,18 +1244,24 @@ void RSUControlApp::generateAndAssignDestinations(const std::vector<VehicleInfo>
         // Ghi nhận thông tin đích và khung thời gian cho xe
         try {
             recordVehicleDestination(vehicles[i].index, targetRoad, 
-                                    destObjects[i].timeWindow.earliness, 
-                                    destObjects[i].timeWindow.tardiness,
+                                    earliness, tardiness,
                                     path, totalDistance);
-            
-            // Ghi nhận thời gian thuật toán
-            recordAlgorithmTime(vehicles[i].index, algorithmTime);
         } catch (const std::exception& e) {
             EV << "[RSU] Error recording vehicle destination: " << e.what() << std::endl;
         }
+        
+        // Record algorithm time
+        if (i < vehicles.size()) {
+            try {
+                recordAlgorithmTime(vehicles[i].index, algorithmTime);
+            } catch (const std::exception& e) {
+                EV << "[RSU] Error recording algorithm time: " << e.what() << std::endl;
+            }
+        }
     }
-
-    for (size_t i = 0; i < processedVehicles; i++) {
+    
+    // Update vehicleDataMap with assignment information
+    for (size_t i = 0; i < vehicles.size(); i++) {
         // Get the vehicle's index from VehicleInfo
         int vehicleIndex = vehicles[i].index;
         
@@ -1512,39 +1275,59 @@ void RSUControlApp::generateAndAssignDestinations(const std::vector<VehicleInfo>
         int simulationId = it->second.simulationId;
         
         // Store destination and path data in vehicleDataMap
-        if (i < destObjects.size()) {
-            vehicleDataMap[vehicleIndex].assignedDestination = destObjects[i];
+        int destIndex = (i < assignment.size()) ? assignment[i] : -1;
+        if (destIndex != -1 && destIndex < destObjects.size()) {
+            vehicleDataMap[vehicleIndex].assignedDestination = destObjects[destIndex];
             
             // Store the assigned path
             const std::string& sourceRoad = sourceRoads[i];
-            const std::string& targetRoad = destObjects[i].nodeId;
+            const std::string& targetRoad = destObjects[destIndex].nodeId;
             auto path = graphProcessor->findEdgeShortestPath(sourceRoad, targetRoad);
             vehicleDataMap[vehicleIndex].assignedPath = path;
             
             // Lưu khung thời gian cho xe
-            vehicleDataMap[vehicleIndex].earliestArrival = destObjects[i].timeWindow.earliness;
-            vehicleDataMap[vehicleIndex].latestArrival = destObjects[i].timeWindow.tardiness;
+            vehicleDataMap[vehicleIndex].earliestArrival = destObjects[destIndex].timeWindow.earliness;
+            vehicleDataMap[vehicleIndex].latestArrival = destObjects[destIndex].timeWindow.tardiness;
             
-            // Tính độ dài đường đi
+            // Calculate path length and estimated travel time
             double pathLength = 0.0;
+            double estimatedTravelTime = 0.0;
             for (const auto& edgeId : path) {
-                pathLength += getEdgeLength(edgeId);
+                // Find edge in graph
+                for (const auto& nodePair : graph.getAdjList()) {
+                    for (const auto& edge : nodePair.second) {
+                        if (edge.getId() == edgeId) {
+                            double edgeLength = edge.getLength();
+                            pathLength += edgeLength;
+                            
+                            // Use edge's getMaxSpeed method
+                            double edgeSpeed = edge.getMaxSpeed();
+                            estimatedTravelTime += edgeLength / edgeSpeed;
+                            
+                            break;
+                        }
+                    }
+                }
             }
-            vehicleDataMap[vehicleIndex].pathLength = pathLength;
             
-            // Tính thời gian di chuyển ước tính
-            double averageSpeed = 13.89; // m/s
-            vehicleDataMap[vehicleIndex].estimatedTravelTime = pathLength / averageSpeed;
+            vehicleDataMap[vehicleIndex].pathLength = pathLength;
+            vehicleDataMap[vehicleIndex].estimatedTravelTime = estimatedTravelTime;
             
             // Lưu thời gian bắt đầu của xe (từ dữ liệu SUMO)
             vehicleDataMap[vehicleIndex].startTime = vehicles[i].depart;
             
             EV << "[RSU] Vehicle with index " << vehicleIndex << " mapped to simulation ID " 
-               << simulationId << " with destination " << targetRoad << std::endl;
+               << simulationId << " with destination " << targetRoad 
+               << " and time window [" << destObjects[destIndex].timeWindow.earliness 
+               << ", " << destObjects[destIndex].timeWindow.tardiness << "]" << std::endl;
+            
+            std::cout << "Vehicle " << simulationId << " assigned to destination " << targetRoad 
+                     << " with time window [" << destObjects[destIndex].timeWindow.earliness 
+                     << ", " << destObjects[destIndex].timeWindow.tardiness << "]" << std::endl;
         }
     }
 
-    EV << "\n[RSU] Assignment completed for " << processedVehicles << " vehicles" << std::endl;
+    EV << "\n[RSU] Assignment completed for " << vehicles.size() << " vehicles" << std::endl;
 
     // Print a summary of vehicle data map contents
     std::cout << "Vehicle data map after assignment:" << std::endl;
@@ -1671,3 +1454,4 @@ void RSUControlApp::processVehicleArrivalNotification(const std::string& data) {
            << arrivalTime << std::endl;
     }
 }
+

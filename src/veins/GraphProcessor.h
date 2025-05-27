@@ -40,8 +40,8 @@ public:
     vector<LanePath> findLaneShortestPath(string sourceLaneId, string targetLaneId) const;
 
     vector<int> getOptimalVehicleAssignment(
-        const vector<string>& sourceNodes,
-        const vector<string>& destNodes) const;
+        const vector<string>& sourceEdges,
+        const vector<string>& destEdges) const;
 
 private:
     const Graph& roadNetwork;

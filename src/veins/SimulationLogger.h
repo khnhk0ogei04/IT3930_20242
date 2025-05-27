@@ -38,11 +38,12 @@ public:
         std::vector<std::string> path;  // Đường đi của xe
         double pathLength;              // Độ dài đường đi
         double algorithmTime;           // Thời gian để giải thuật tìm ra đường đi
+        double estimatedTravelTime;      // Thời gian đi dự kiến
 
         VehicleStats() : 
             vehicleId(-1), startTime(0), endTime(0), travelTime(0),
             earliestArrival(0), latestArrival(0), timeWindowDeviation(0),
-            arrivedOnTime(true), pathLength(0), algorithmTime(0) {}
+            arrivedOnTime(true), pathLength(0), algorithmTime(0), estimatedTravelTime(0) {}
     };
 
     // Cấu trúc lưu trữ thông tin tổng hợp về mô phỏng
@@ -66,9 +67,11 @@ public:
     void recordVehicleStart(int vehicleId, const std::string& startRoad, double startTime);
     
     // Cập nhật thông tin đích và khung thời gian cho xe
-    void updateVehicleDestination(int vehicleId, const std::string& targetRoad, 
-                                double earliestArrival, double latestArrival,
-                                const std::vector<std::string>& path, double pathLength);
+    void updateVehicleDestination(int vehicleId, const std::string& destination, 
+                                 double earliestArrival, double latestArrival,
+                                 const std::vector<std::string>& path,
+                                 double pathLength,
+                                 double estimatedTravelTime = 0.0);
     
     // Ghi nhận thời gian giải thuật tìm đường cho xe
     void recordAlgorithmTime(int vehicleId, double algorithmTime);
