@@ -1,6 +1,7 @@
 #include "RSUControlApp.h"
 #include "veins/modules/application/traci/TraCIDemo11pMessage_m.h"
 #include<bits/stdc++.h>
+#include <ctime>    // Add include for std::time
 // Platform-specific includes for getting working directory
 #ifdef _WIN32
 #include <direct.h>
@@ -21,10 +22,7 @@ void RSUControlApp::initialize(int stage) {
     if (stage == 0) {
         vehicleDataMap.clear();
         simulationIdToAddressMap.clear();
-
-        // Create a fixed mapping between RSU internal IDs and simulation IDs from TreeView
-        // This is the mapping from the TreeView: node[0] = Car id=14, node[1] = Car id=20, etc.
-        std::map<int, int> vehicleIdMapping = {
+        map<int, int> vehicleIdMapping = {
             {0, 16},
             {1, 22},
             {2, 28},
@@ -59,33 +57,22 @@ void RSUControlApp::initialize(int stage) {
             {31, 202},
             {32, 208},
         };
-
-        // Pre-populate the vehicle data map with correct simulation IDs
         for (const auto& mapping : vehicleIdMapping) {
             int internalId = mapping.first;
             int simulationId = mapping.second;
-
-            // Create an entry for this vehicle in our data structure
             vehicleDataMap[internalId].simulationId = simulationId;
-            
             EV << "[RSU] Pre-mapped internal vehicle " << internalId
                << " to simulation ID " << simulationId << std::endl;
-            std::cout << "RSU: Pre-mapped internal vehicle " << internalId
-                      << " to simulation ID " << simulationId << std::endl;
         }
-        
-        // Set simulation information for logging
         mapName = "erlangen";
         routingAlgorithm = "ShortestPath";
         implementationVersion = "2.0";
-        
-        // Initialize SimulationLogger
         SimulationLogger::getInstance().setSimulationInfo(mapName, routingAlgorithm, implementationVersion);
         
         statusCheckMsg = new cMessage("checkStatus");
         rerouteMsg = new cMessage("rerouteVehicles");
         scheduleAt(simTime() + 1.0, statusCheckMsg);
-        scheduleAt(simTime() + 1.5, rerouteMsg); // Schedule rerouting at t=1.5s
+        scheduleAt(simTime() + 1.5, rerouteMsg);
         networkFilePath = par("netFile").stdstringValue();
         EV << "[RSU] Network file path parameter: " << networkFilePath << endl;
         
@@ -100,13 +87,12 @@ void RSUControlApp::initialize(int stage) {
                 EV << "[RSU] Successfully initialized GraphProcessor" << std::endl;
                 taskGenerator.reset(new TaskGenerator(*graphProcessor));
                 EV << "[RSU] Successfully initialized TaskGenerator" << std::endl;
-                // Load and print vehicle information from route file
                 EV << "[RSU] Attempting to load route information" << std::endl;
                 if (xmlProcessor->loadRouteFile("./erlangen.rou.xml")) {
-                    std::vector<VehicleInfo> vehicles = xmlProcessor->getVehicles();
+                    vector<VehicleInfo> vehicles = xmlProcessor->getVehicles();
                     printVehicleRouteInfo(vehicles);
                 } else {
-                    EV << "[RSU] Failed to load route file" << std::endl;
+                    EV << "[RSU] Failed to load route file" << endl;
                 }
             }
         }
@@ -117,29 +103,21 @@ void RSUControlApp::onWSM(BaseFrame1609_4* wsm) {
     auto* enc = wsm->getEncapsulatedPacket();
     auto* msg = dynamic_cast<TraCIDemo11pMessage*>(enc);
     if (!msg) return;
-
     LAddress::L2Type senderId = msg->getSenderAddress();
-    std::string data = msg->getDemoData();
+    string data = msg->getDemoData();
     vehicleDataMap[senderId].lastMessageTime = simTime();
-    
-    // Check if this is a status message containing the simulation ID
     if (data.find("STATUS:") == 0) {
-        // Extract simulation ID if present (new format uses simId= instead of id=)
         size_t idPos = data.find("simId=");
-        if (idPos != std::string::npos) {
+        if (idPos != string::npos) {
             size_t idEnd = data.find(';', idPos);
-            if (idEnd != std::string::npos) {
-                std::string idStr = data.substr(idPos + 6, idEnd - idPos - 6); // +6 for "simId="
+            if (idEnd != string::npos) {
+                string idStr = data.substr(idPos + 6, idEnd - idPos - 6);
                 try {
                     int simId = std::stoi(idStr);
                     updateVehicleIdMapping(senderId, simId);
-
-                    // Debug output
                     EV << "[RSU] Updated vehicle ID mapping from STATUS message: Address " << senderId 
                        << " -> Simulation ID " << simId << std::endl;
-                    std::cout << "RSU: Updated vehicle ID mapping from STATUS: Address " << senderId
-                              << " -> Simulation ID " << simId << std::endl;
-                } catch (const std::exception& e) {
+                } catch (const exception& e) {
                     EV << "[RSU] Failed to parse simulation ID: " << e.what() << std::endl;
                 }
             }
@@ -749,48 +727,14 @@ vector<string> RSUControlApp::getAllNodes() const {
     return result;
 }
 
-// Implement the method to find the shortest path
 vector<string> RSUControlApp::findShortestPath(const string& sourceId, const string& targetId) const {
-    if (!graphProcessor) {
-        return vector<string>();
-    }
-    
     return graphProcessor->findShortestPath(sourceId, targetId);
 }
 
-// Implement the method to get the length of the shortest path
 double RSUControlApp::getShortestPathLength(const string& sourceId, const string& targetId) const {
-    if (!graphProcessor) {
-        return -1.0;
-    }
-    
     return graphProcessor->getShortestPathLength(sourceId, targetId);
 }
 
-
-void RSUControlApp::testTaskGenerator() {
-    if (!taskGenerator) {
-        EV << "[RSU] ERROR: Cannot test TaskGenerator - not initialized" << endl;
-        return;
-    }
-
-    EV << "\n[RSU] ========== TASK GENERATOR TEST ==========\n" << endl;
-
-    // Test 1: Generate random destinations
-    EV << "[RSU] Test 1: Generating 3 random destinations" << std::endl;
-    auto destinations = taskGenerator->generateDestinations(3);
-
-    EV << "[RSU] Generated " << destinations.size() << " destinations:" << std::endl;
-    for (const auto& dest : destinations) {
-        EV << "  - Node " << dest.nodeId << " (time window: "
-           << dest.timeWindow.earliness << " - " << dest.timeWindow.tardiness << ")" << std::endl;
-    }
-
-    EV << "\n[RSU] Test 3: Tìm đường đi giữa các edge" << std::endl;
-    findEdgePathAndPrint("-184", "1939");
-
-    EV << "\n[RSU] =========================================\n" << std::endl;
-}
 
 void RSUControlApp::findEdgePathAndPrint(std::string sourceEdgeId, std::string targetEdgeId) const {
     if (!graphProcessor) {
@@ -954,30 +898,6 @@ void RSUControlApp::findEdgePathAndPrint(std::string sourceEdgeId, std::string t
 }
 
 void RSUControlApp::printVehicleRouteInfo(const std::vector<VehicleInfo>& vehicles) {
-    EV << "\n=============== VEHICLE ROUTE INFORMATION ===============" << std::endl;
-    EV << "Loaded " << vehicles.size() << " vehicles from route file:" << std::endl;
-    
-    int maxVehiclesToDisplay = std::min(static_cast<size_t>(20), vehicles.size());
-    for (int i = 0; i < maxVehiclesToDisplay; i++) {
-        EV << "  - Vehicle ID: " << vehicles[i].id 
-           << ", Depart: " << vehicles[i].depart 
-           << ", From: " << vehicles[i].from 
-           << ", To: " << vehicles[i].to;
-        
-        if (!vehicles[i].via.empty()) {
-            EV << ", Via: " << vehicles[i].via;
-        }
-        
-        EV << std::endl;
-    }
-    
-    if (vehicles.size() > maxVehiclesToDisplay) {
-        EV << "  ... and " << (vehicles.size() - maxVehiclesToDisplay) << " more vehicles" << std::endl;
-    }
-    
-    EV << "=========================================================" << std::endl;
-
-    // Generate destinations for vehicles
     EV << "[RSU] Generating random destinations for vehicles..." << std::endl;
     generateAndAssignDestinations(vehicles);
 }
@@ -1042,7 +962,9 @@ void RSUControlApp::generateAndAssignDestinations(const std::vector<VehicleInfo>
 
     EV << "[RSU] Generating optimal destinations for " << vehicles.size() << " vehicles" << std::endl;
     int destsToGenerate = vehicles.size();
-    auto destinations = taskGenerator->getPotentialDestinationEdges(destsToGenerate, sourceRoads);
+    // Add a unique seed based on current simulation time to ensure different random destinations each run
+    unsigned seedValue = static_cast<unsigned>(simTime().raw() + std::time(nullptr)) % UINT_MAX;
+    auto destinations = taskGenerator->getPotentialDestinationEdges(destsToGenerate, sourceRoads, seedValue);
 
     // Create Destination objects from the edge IDs
     std::vector<Destination> destObjects;
@@ -1067,19 +989,10 @@ void RSUControlApp::generateAndAssignDestinations(const std::vector<VehicleInfo>
     int n = std::max(numVehicles, numDestinations);
     std::vector<std::vector<double>> costMatrix(n, std::vector<double>(n, 0));
     const double NO_PATH_PENALTY = 9999999.0;
-
-    // Build the cost matrix
     for (int i = 0; i < numVehicles; ++i) {
         const std::string& sourceEdgeId = sourceRoads[i];
         for (int j = 0; j < numDestinations; ++j) {
             const std::string& destEdgeId = destEdges[j];
-            
-            // Skip if source and destination are the same
-            if (sourceEdgeId == destEdgeId) {
-                costMatrix[i][j] = 5000.0; // Penalty for same edge
-                continue;
-            }
-            
             auto path = graphProcessor->findEdgeShortestPath(sourceEdgeId, destEdgeId);
             double pathLength = 0.0;
 
@@ -1096,9 +1009,6 @@ void RSUControlApp::generateAndAssignDestinations(const std::vector<VehicleInfo>
                             }
                         }
                         if (edgeFound) break;
-                    }
-                    if (!edgeFound) {
-                        pathLength += 100.0; // Default length
                     }
                 }
                 costMatrix[i][j] = pathLength;
@@ -1384,47 +1294,22 @@ void RSUControlApp::recordVehicleStart(int vehicleId, const std::string& startRo
 void RSUControlApp::recordVehicleDestination(int vehicleId, const std::string& targetRoad, 
                                             double earliestArrival, double latestArrival, 
                                             const std::vector<std::string>& path, double pathLength) {
-    // Convertir l'index interne en ID de simulation en utilisant le mapping existant
     int simulationId = -1;
-    
-    // Utiliser le mapping existant de RSUControlApp
     auto it = vehicleDataMap.find(vehicleId);
     if (it != vehicleDataMap.end() && it->second.simulationId != -1) {
         simulationId = it->second.simulationId;
-    } else {
-        // Véhicule non trouvé dans le mapping, utiliser l'ID original comme fallback
-        simulationId = vehicleId;
-        std::cout << "WARNING: Vehicle " << vehicleId << " not found in pre-defined mapping, using original ID" << std::endl;
     }
-    
-    // Enregistrer avec l'ID de simulation
     SimulationLogger::getInstance().updateVehicleDestination(
         simulationId, targetRoad, earliestArrival, latestArrival, path, pathLength);
-    
-    // Log
-    EV << "[RSU] Vehicle " << vehicleId << " (sim ID: " << simulationId << ") assigned destination " << targetRoad
-       << " with time window [" << earliestArrival << ", " << latestArrival << "]"
-       << " and path length " << pathLength << std::endl;
 }
 
 void RSUControlApp::recordAlgorithmTime(int vehicleId, double algorithmTime) {
-    // Convertir l'index interne en ID de simulation en utilisant le mapping existant
     int simulationId = -1;
-    
-    // Utiliser le mapping existant de RSUControlApp
     auto it = vehicleDataMap.find(vehicleId);
     if (it != vehicleDataMap.end() && it->second.simulationId != -1) {
         simulationId = it->second.simulationId;
-    } else {
-        // Véhicule non trouvé dans le mapping, utiliser l'ID original comme fallback
-        simulationId = vehicleId;
-        std::cout << "WARNING: Vehicle " << vehicleId << " not found in pre-defined mapping, using original ID" << std::endl;
     }
-    
-    // Enregistrer avec l'ID de simulation
     SimulationLogger::getInstance().recordAlgorithmTime(simulationId, algorithmTime);
-    
-    // Log
     EV << "[RSU] Vehicle " << vehicleId << " (sim ID: " << simulationId << ") routing algorithm took " 
        << algorithmTime << " seconds" << std::endl;
 }

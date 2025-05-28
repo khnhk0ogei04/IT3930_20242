@@ -109,75 +109,79 @@ std::vector<std::string> TaskGenerator::getPotentialDestinationEdges(int n, cons
 
     std::cout << "DEBUG: Found " << allPossibleEdges.size() << " unique edges in the graph" << std::endl;
 
-    // Filter out source edges and keep only edges that are likely reachable
-    std::vector<std::string> filteredEdges;
-    std::set<std::string> sourceEdgeSet(currentSourceEdges.begin(), currentSourceEdges.end());
-
-    // For each edge in the graph
-    for (const auto& edgeId : allPossibleEdges) {
-        // Skip if this is a source edge
-        if (sourceEdgeSet.find(edgeId) != sourceEdgeSet.end()) {
+    // Create a set of excluded edges (source edges and their opposite directions)
+    std::set<std::string> excludedEdges;
+    for (const auto& srcEdge : currentSourceEdges) {
+        excludedEdges.insert(srcEdge);
+        
+        // Check if this is a directed edge (has a minus sign version)
+        if (srcEdge[0] != '-') {
+            // Add the opposite direction to excluded list
+            excludedEdges.insert("-" + srcEdge);
+        } else {
+            // If it already has a minus sign, add the version without it
+            excludedEdges.insert(srcEdge.substr(1));
+        }
+    }
+    
+    // Vector to store valid destination candidates
+    std::vector<std::string> validDestinations;
+    
+    // Shuffle the possible edges to randomize selection order
+    std::vector<std::string> shuffledEdges = allPossibleEdges;
+    std::shuffle(shuffledEdges.begin(), shuffledEdges.end(), rng);
+    
+    // For each possible edge, check if it's a valid destination
+    for (const auto& destEdge : shuffledEdges) {
+        // Skip if this is a source edge or its opposite direction
+        if (excludedEdges.find(destEdge) != excludedEdges.end()) {
             continue;
         }
         
-        // Find edge information to check if it's likely reachable
-        bool edgeFound = false;
-        for (const auto& nodePair : graph.getAdjList()) {
-            for (const auto& edge : nodePair.second) {
-                if (edge.getId() == edgeId) {
-                    edgeFound = true;
-
-                    // Assume the edge is reachable if we found it
-                    filteredEdges.push_back(edgeId);
-
-                    // Try to verify if there might be a path from at least one source
-                    for (const auto& srcEdge : currentSourceEdges) {
-                        // Find source edge info
-                        std::string srcEdgeToNode;
-                        for (const auto& srcNodePair : graph.getAdjList()) {
-                            for (const auto& srcEdgeObj : srcNodePair.second) {
-                                if (srcEdgeObj.getId() == srcEdge) {
-                                    srcEdgeToNode = srcEdgeObj.getTo();
-                                    break;
-                                }
-                            }
-                            if (!srcEdgeToNode.empty()) break;
-                        }
-
-                        // Find target edge info
-                        std::string destEdgeFromNode = nodePair.first;
-
-                        // Check if there might be a path (same node means direct connection)
-                        if (srcEdgeToNode == destEdgeFromNode) {
-                            break;
-                        }
-                    }
-
-                    break;
-                }
-            }
-            if (edgeFound) break;
-        }
-    }
-
-    if (filteredEdges.empty()) {
-        for (const auto& edgeId : allPossibleEdges) {
-            if (sourceEdgeSet.find(edgeId) == sourceEdgeSet.end()) {
-                filteredEdges.push_back(edgeId);
+        bool isValidForAll = true;
+        bool isValidForAny = false;
+        
+        // Check path existence from each source edge
+        for (const auto& srcEdge : currentSourceEdges) {
+            // Use GraphProcessor to check if a path exists
+            auto path = graphProcessor.findEdgeShortestPath(srcEdge, destEdge);
+            if (!path.empty()) {
+                isValidForAny = true;
+                
+                // Optional: If you need all sources to have a path to this destination
+                // keep isValidForAll true, otherwise set to false
+                // For now, we only require at least one source to have a valid path
             }
         }
+        
+        // If the destination is reachable from at least one source, add it
+        if (isValidForAny) {
+            validDestinations.push_back(destEdge);
+        }
+        
+        // If we've found enough valid destinations, stop searching
+        if (validDestinations.size() >= n * 2) { // Get extra for safety
+            break;
+        }
+    }
+    
+    // If we didn't find enough valid destinations, log a warning
+    if (validDestinations.size() < n) {
+        std::cout << "WARNING: Could only find " << validDestinations.size() 
+                  << " valid destinations, requested " << n << std::endl;
+    }
+    
+    // Shuffle again to randomize order
+    std::shuffle(validDestinations.begin(), validDestinations.end(), rng);
+    
+    // Take up to n valid destinations
+    for (int i = 0; i < std::min(static_cast<size_t>(n), validDestinations.size()); ++i) {
+        potentialDestEdges.push_back(validDestinations[i]);
     }
 
-    // Shuffle the filtered edges
-    std::shuffle(filteredEdges.begin(), filteredEdges.end(), rng);
-
-    // Select n destination edges
-    int selectedCount = 0;
-    for (int i = 0; i < filteredEdges.size() && selectedCount < n; ++i) {
-        potentialDestEdges.push_back(filteredEdges[i]);
-        selectedCount++;
-    }
-
+    // Log some information about the destinations
+    std::cout << "INFO: Selected " << potentialDestEdges.size() << " valid destinations" << std::endl;
+    
     return potentialDestEdges;
 }
 

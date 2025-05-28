@@ -502,42 +502,70 @@ std::vector<std::string> GraphProcessor::reconstructPath(
 
     // Reverse the path since we reconstructed it backward
     std::reverse(path.begin(), path.end());
-
     return path;
 }
 
 bool GraphProcessor::hungarianAlgorithm(const vector<vector<double>>& costMatrix) const {
     int n = costMatrix.size();
-    
-    // Check if each source can reach at least one destination
+    vector<vector<double>> matrix = costMatrix;
+    const double NO_PATH_PENALTY = 9999999.0;
     for (int i = 0; i < n; ++i) {
-        bool canReachAnyTarget = false;
+        double minVal = NO_PATH_PENALTY;
         for (int j = 0; j < n; ++j) {
-            if (costMatrix[i][j] != numeric_limits<double>::max()) {
-                canReachAnyTarget = true;
-                break;
+            minVal = std::min(minVal, matrix[i][j]);
+        }
+        if (minVal < NO_PATH_PENALTY && minVal > 0) {
+            for (int j = 0; j < n; ++j) {
+                if (matrix[i][j] < NO_PATH_PENALTY) {
+                    matrix[i][j] -= minVal;
+                }
             }
         }
-        if (!canReachAnyTarget) {
-            return false;  // This source can't reach any destination
-        }
     }
-    
-    // Check if each destination can be reached by at least one source
     for (int j = 0; j < n; ++j) {
-        bool canBeReachedByAnySource = false;
+        double minVal = NO_PATH_PENALTY;
         for (int i = 0; i < n; ++i) {
-            if (costMatrix[i][j] != numeric_limits<double>::max()) {
-                canBeReachedByAnySource = true;
+            minVal = std::min(minVal, matrix[i][j]);
+        }
+        if (minVal < NO_PATH_PENALTY && minVal > 0) {
+            for (int i = 0; i < n; ++i) {
+                if (matrix[i][j] < NO_PATH_PENALTY) {
+                    matrix[i][j] -= minVal;
+                }
+            }
+        }
+    }
+    bool hasZeros = false;
+    for (int i = 0; i < n && !hasZeros; ++i) {
+        for (int j = 0; j < n && !hasZeros; ++j) {
+            if (matrix[i][j] == 0) {
+                hasZeros = true;
+            }
+        }
+    }
+    if (!hasZeros) {
+        return false;
+    }
+    vector<int> rowAssignment(n, -1);
+    vector<bool> colAssigned(n, false);
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < n; ++j) {
+            if (matrix[i][j] == 0 && !colAssigned[j]) {
+                rowAssignment[i] = j;
+                colAssigned[j] = true;
                 break;
             }
         }
-        if (!canBeReachedByAnySource) {
-            return false;  // This destination can't be reached by any source
+    }
+    int assignedCount = 0;
+    for (int i = 0; i < n; ++i) {
+        if (rowAssignment[i] != -1) {
+            assignedCount++;
         }
     }
     
-    return true;  // A valid assignment exists
+    // We need at least min(n, costMatrix[0].size()) assignments for a valid solution
+    return (assignedCount >= std::min(n, (int)costMatrix[0].size()));
 }
 
 vector<GraphProcessor::LanePath> GraphProcessor::findLaneShortestPath(string sourceLaneId, string targetLaneId) const {
@@ -967,7 +995,9 @@ vector<int> GraphProcessor::getOptimalVehicleAssignment(
     // Create a copy of the original cost matrix for reference
     auto originalCostMatrix = costMatrix;
     
-    // Hungarian Algorithm Implementation
+    // ===== HUNGARIAN ALGORITHM IMPLEMENTATION =====
+    // This implementation of the Hungarian algorithm is based on the algorithm description from:
+    // http://www.cse.ust.hk/~golin/COMP572/Notes/Matching.pdf
     
     // Step 1: Subtract the smallest element in each row from all elements in that row
     for (int i = 0; i < n; ++i) {
@@ -1012,49 +1042,191 @@ vector<int> GraphProcessor::getOptimalVehicleAssignment(
         cout << rowStr << std::endl;
     }
     
-    // Initialize vectors for the assignment
+    // Vectors to keep track of which rows and columns are covered
+    std::vector<bool> rowCovered(n, false);
+    std::vector<bool> colCovered(n, false);
+    
+    // Vector to store the final assignment
     std::vector<int> assignment(n, -1);
-
-    // Simple greedy approach (faster than the full Hungarian algorithm)
-    // This is a reasonable approximation for most cases
-    std::vector<bool> colAssigned(n, false);
     
-    // First pass: assign using zeros
-    for (int i = 0; i < numVehicles; ++i) {
-        for (int j = 0; j < numDestinations; ++j) {
-            if (costMatrix[i][j] == 0 && !colAssigned[j]) {
-                assignment[i] = j;
-                colAssigned[j] = true;
-                break;
-            }
-        }
-    }
+    // Step 3: Find a zero in the reduced matrix. If there are no covered zeros in the row
+    // or column, mark the zero. Cover its row and column.
+    int step = 3;
+    // Không cần giới hạn số lần lặp nữa, thuật toán sẽ dừng khi tìm được phương án tối ưu
+    int iterations = 0;
     
-    // Second pass: assign remaining using minimum costs
-    for (int i = 0; i < numVehicles; ++i) {
-        if (assignment[i] == -1) {
-            double minCost = NO_PATH_PENALTY;
-            int minJ = -1;
+    while (step != -1) {
+        iterations++;
+        
+        if (step == 3) {
+            // Reset coverage
+            std::fill(rowCovered.begin(), rowCovered.end(), false);
+            std::fill(colCovered.begin(), colCovered.end(), false);
+            std::fill(assignment.begin(), assignment.end(), -1);
             
-            for (int j = 0; j < numDestinations; ++j) {
-                if (!colAssigned[j] && costMatrix[i][j] < minCost) {
-                    minCost = costMatrix[i][j];
-                    minJ = j;
+            // Greedy initial assignment - find zeros and make assignments
+            for (int i = 0; i < n; ++i) {
+                for (int j = 0; j < n; ++j) {
+                    if (costMatrix[i][j] == 0 && !rowCovered[i] && !colCovered[j]) {
+                        assignment[i] = j;
+                        rowCovered[i] = true;
+                        colCovered[j] = true;
+                    }
                 }
             }
             
-            if (minJ != -1) {
-                assignment[i] = minJ;
-                colAssigned[minJ] = true;
+            // Reset coverage for the next step
+            std::fill(rowCovered.begin(), rowCovered.end(), false);
+            std::fill(colCovered.begin(), colCovered.end(), false);
+            
+            step = 4;
+        }
+        
+        else if (step == 4) {
+            // Cover all columns containing assignments
+            for (int i = 0; i < n; ++i) {
+                if (assignment[i] != -1) {
+                    colCovered[assignment[i]] = true;
+                }
             }
+            
+            // Count covered columns
+            int count = 0;
+            for (int j = 0; j < n; ++j) {
+                if (colCovered[j]) {
+                    count++;
+                }
+            }
+            
+            // If numVehicles columns are covered, we're done - điều kiện dừng chính
+            if (count >= numVehicles) {
+                step = -1; // Finished - đã tìm được phương án tối ưu
+                cout << "INFO: Hungarian algorithm converged after " << iterations << " iterations." << endl;
+            } else {
+                step = 5; // Not done yet
+            }
+        }
+        
+        else if (step == 5) {
+            // Find an uncovered zero
+            int row = -1, col = -1;
+            bool found = false;
+            
+            for (int i = 0; i < n && !found; ++i) {
+                for (int j = 0; j < n && !found; ++j) {
+                    if (costMatrix[i][j] == 0 && !rowCovered[i] && !colCovered[j]) {
+                        row = i;
+                        col = j;
+                        found = true;
+                    }
+                }
+            }
+            
+            if (found) {
+                // Star the found zero
+                assignment[row] = col;
+                
+                // Cover the row and uncover the column
+                rowCovered[row] = true;
+                
+                // Find if there's a starred zero in this column
+                bool starInCol = false;
+                for (int i = 0; i < n; ++i) {
+                    if (i != row && assignment[i] == col) {
+                        starInCol = true;
+                        assignment[i] = -1; // Unstar any previous zero in this column
+                    }
+                }
+                
+                if (!starInCol) {
+                    step = 4; // No starred zero in column, go back to step 4
+                }
+                
+            } else {
+                // No uncovered zero found, go to step 6
+                step = 6;
+            }
+        }
+        
+        else if (step == 6) {
+            // Find the smallest uncovered value
+            double minVal = NO_PATH_PENALTY;
+            for (int i = 0; i < n; ++i) {
+                for (int j = 0; j < n; ++j) {
+                    if (!rowCovered[i] && !colCovered[j] && costMatrix[i][j] < minVal) {
+                        minVal = costMatrix[i][j];
+                    }
+                }
+            }
+            
+            // Nếu không tìm được giá trị để điều chỉnh, thuật toán không thể tiếp tục
+            if (minVal == NO_PATH_PENALTY) {
+                cout << "WARNING: Hungarian algorithm cannot make further progress. Terminating." << endl;
+                step = -1;
+                continue;
+            }
+            
+            // Add minVal to all covered rows
+            for (int i = 0; i < n; ++i) {
+                if (rowCovered[i]) {
+                    for (int j = 0; j < n; ++j) {
+                        if (costMatrix[i][j] < NO_PATH_PENALTY) {
+                            costMatrix[i][j] += minVal;
+                        }
+                    }
+                }
+            }
+            
+            // Subtract minVal from all uncovered columns
+            for (int j = 0; j < n; ++j) {
+                if (!colCovered[j]) {
+                    for (int i = 0; i < n; ++i) {
+                        if (costMatrix[i][j] < NO_PATH_PENALTY) {
+                            costMatrix[i][j] -= minVal;
+                        }
+                    }
+                }
+            }
+            
+            step = 5; // Go back to step 5
         }
     }
     
-    // Extract the result for the actual vehicles and destinations
+    cout << "INFO: Hungarian algorithm completed in " << iterations << " iterations." << endl;
+    
+    // Finalize the assignment - ensure we only return valid assignments for real vehicles
     vector<int> result(numVehicles, -1);
     for (int i = 0; i < numVehicles; ++i) {
         if (assignment[i] >= 0 && assignment[i] < numDestinations) {
             result[i] = assignment[i];
+        }
+    }
+    
+    // Handle any unassigned vehicles using a greedy approach
+    std::vector<bool> destAssigned(numDestinations, false);
+    for (int i = 0; i < numVehicles; ++i) {
+        if (result[i] != -1) {
+            destAssigned[result[i]] = true;
+        }
+    }
+    
+    // Assign any remaining vehicles using minimum cost
+    for (int i = 0; i < numVehicles; ++i) {
+        if (result[i] == -1) {
+            double minCost = NO_PATH_PENALTY;
+            int bestDest = -1;
+            
+            for (int j = 0; j < numDestinations; ++j) {
+                if (!destAssigned[j] && originalCostMatrix[i][j] < minCost) {
+                    minCost = originalCostMatrix[i][j];
+                    bestDest = j;
+                }
+            }
+            
+            if (bestDest != -1) {
+                result[i] = bestDest;
+                destAssigned[bestDest] = true;
+            }
         }
     }
     
