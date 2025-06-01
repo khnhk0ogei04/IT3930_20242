@@ -56,6 +56,11 @@ void RSUControlApp::initialize(int stage) {
             {30, 196},
             {31, 202},
             {32, 208},
+            {33, 214},
+            {34, 220},
+            {35, 226},
+            {36, 232},
+            {37, 238}
         };
         for (const auto& mapping : vehicleIdMapping) {
             int internalId = mapping.first;
@@ -71,7 +76,7 @@ void RSUControlApp::initialize(int stage) {
         
         statusCheckMsg = new cMessage("checkStatus");
         rerouteMsg = new cMessage("rerouteVehicles");
-        scheduleAt(simTime() + 1.0, statusCheckMsg);
+        scheduleAt(simTime() + 0.9, statusCheckMsg);
         scheduleAt(simTime() + 1.5, rerouteMsg);
         networkFilePath = par("netFile").stdstringValue();
         EV << "[RSU] Network file path parameter: " << networkFilePath << endl;
@@ -682,7 +687,7 @@ void RSUControlApp::sendRerouteMessage(LAddress::L2Type vehicleId, const std::ve
 
 void RSUControlApp::finish() {
     // Save all statistics to CSV files
-    SimulationLogger::getInstance().saveToCSV("vehicle_stats.csv", "simulation_summary.csv");
+    SimulationLogger::getInstance().saveToCSV("simulation_results.csv");
     
     // Print summary
     SimulationLogger::getInstance().printSummary();

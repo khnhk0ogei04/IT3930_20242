@@ -69,16 +69,9 @@ private:
     void printNodeInfo() const;
     void printVehicleRouteInfo(const std::vector<VehicleInfo>& vehicles);
     void generateAndAssignDestinations(const std::vector<VehicleInfo>& vehicles);
-    // Edge path finding method
     void findEdgePathAndPrint(std::string sourceEdgeId, std::string targetEdgeId) const;
-
-    // Test methods
     void testTaskGenerator();
-
-    // Helper method to get edge length
     double getEdgeLength(const std::string& edgeId) const;
-    
-    // Vehicle tracking methods
     void recordVehicleStart(int vehicleId, const std::string& startRoad, double startTime);
     void recordVehicleDestination(int vehicleId, const std::string& targetRoad, 
                                   double earliestArrival, double latestArrival,

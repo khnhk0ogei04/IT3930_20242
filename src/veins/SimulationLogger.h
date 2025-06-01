@@ -12,9 +12,6 @@
 
 namespace veins {
 
-/**
- * Lớp ghi log mô phỏng - ghi nhận các thông tin và thống kê về các xe
- */
 class SimulationLogger {
 public:
     // Singleton pattern
@@ -22,23 +19,21 @@ public:
         static SimulationLogger instance;
         return instance;
     }
-
-    // Cấu trúc lưu trữ thông tin về một xe
     struct VehicleStats {
-        int vehicleId;                  // ID của xe
-        std::string startingRoad;       // Đoạn đường bắt đầu
-        std::string targetRoad;         // Đoạn đường đích
-        double startTime;               // Thời điểm xe bắt đầu
-        double endTime;                 // Thời điểm xe kết thúc
-        double travelTime;              // Thời gian đi (endTime - startTime)
-        double earliestArrival;         // Thời gian đến sớm nhất (time window)
-        double latestArrival;           // Thời gian đến trễ nhất (time window)
-        double timeWindowDeviation;     // Độ lệch so với khung thời gian
-        bool arrivedOnTime;             // Xe có đến kịp không
-        std::vector<std::string> path;  // Đường đi của xe
-        double pathLength;              // Độ dài đường đi
-        double algorithmTime;           // Thời gian để giải thuật tìm ra đường đi
-        double estimatedTravelTime;      // Thời gian đi dự kiến
+        int vehicleId;                  // ID of vehicle
+        std::string startingRoad;       // edgeId start
+        std::string targetRoad;         // edgeId target
+        double startTime;
+        double endTime;
+        double travelTime;
+        double earliestArrival;
+        double latestArrival;
+        double timeWindowDeviation;
+        bool arrivedOnTime;
+        std::vector<std::string> path;
+        double pathLength;
+        double algorithmTime;           // time for algorithm
+        double estimatedTravelTime;
 
         VehicleStats() : 
             vehicleId(-1), startTime(0), endTime(0), travelTime(0),
@@ -46,74 +41,49 @@ public:
             arrivedOnTime(true), pathLength(0), algorithmTime(0), estimatedTravelTime(0) {}
     };
 
-    // Cấu trúc lưu trữ thông tin tổng hợp về mô phỏng
     struct SimulationSummary {
-        std::string mapName;                // Tên bản đồ
-        std::string routingAlgorithm;       // Tên giải thuật tìm đường
-        std::string implementationVersion;  // Phiên bản cài đặt
-        int totalVehicles;                  // Tổng số xe
-        int lateVehicles;                   // Số xe đến không kịp
-        double totalTravelTime;             // Tổng thời gian các xe chạy
-        double totalTimeWindowDeviation;    // Tổng độ lệch khung thời gian
-        double totalAlgorithmTime;          // Tổng thời gian giải thuật tìm đường
-        std::string simulationTimestamp;    // Thời điểm mô phỏng
+        std::string mapName;
+        std::string routingAlgorithm;
+        std::string implementationVersion;  // PhiÃªn báº£n cÃ i Ä‘áº·t
+        int totalVehicles;                  // Tá»•ng sá»‘ xe
+        int lateVehicles;                   // Sá»‘ xe Ä‘áº¿n khÃ´ng ká»‹p
+        double totalTravelTime;             // Tá»•ng thá»�i gian cÃ¡c xe cháº¡y
+        double totalTimeWindowDeviation;    // Tá»•ng Ä‘á»™ lá»‡ch khung thá»�i gian
+        double totalAlgorithmTime;          // Tá»•ng thá»�i gian giáº£i thuáº­t tÃ¬m Ä‘Æ°á»�ng
+        double objectiveFunctionValue;      // HÃ m má»¥c tiÃªu = totalTravelTime + totalTimeWindowDeviation
+        std::string simulationTimestamp;
 
         SimulationSummary() : 
             totalVehicles(0), lateVehicles(0), totalTravelTime(0), 
-            totalTimeWindowDeviation(0), totalAlgorithmTime(0) {}
+            totalTimeWindowDeviation(0), totalAlgorithmTime(0), objectiveFunctionValue(0) {}
     };
-
-    // Ghi nhận thông tin về một xe
     void recordVehicleStart(int vehicleId, const std::string& startRoad, double startTime);
-    
-    // Cập nhật thông tin đích và khung thời gian cho xe
     void updateVehicleDestination(int vehicleId, const std::string& destination, 
                                  double earliestArrival, double latestArrival,
                                  const std::vector<std::string>& path,
                                  double pathLength,
                                  double estimatedTravelTime = 0.0);
-    
-    // Ghi nhận thời gian giải thuật tìm đường cho xe
     void recordAlgorithmTime(int vehicleId, double algorithmTime);
-    
-    // Ghi nhận thời điểm xe đến đích
     void recordVehicleEnd(int vehicleId, double endTime);
-    
-    // Ghi nhận các thông tin về mô phỏng
     void setSimulationInfo(const std::string& mapName, const std::string& algorithm, 
                           const std::string& version);
-    
-    // Lưu toàn bộ dữ liệu xuống file CSV
-    void saveToCSV(const std::string& vehicleStatsFilename = "vehicle_stats.csv", 
-                  const std::string& summaryFilename = "simulation_summary.csv");
-    
-    // Kiểm tra xem đã ghi nhận tất cả xe kết thúc chưa
+    void saveToCSV(const std::string& filename = "simulation_results_1.csv");
     bool allVehiclesFinished() const;
-    
-    // In thông tin tóm tắt
     void printSummary() const;
 
 private:
-    SimulationLogger(); // Private constructor for singleton
+    SimulationLogger();
     ~SimulationLogger();
-    
-    // Không cho phép sao chép hoặc gán
     SimulationLogger(const SimulationLogger&) = delete;
     SimulationLogger& operator=(const SimulationLogger&) = delete;
-    
-    // Tính toán các thống kê tổng hợp
     void calculateSummaryStats();
-    
-    // Lấy thời gian hiện tại định dạng string
     std::string getCurrentTimeStamp() const;
-    
-    // Tính độ lệch so với khung thời gian
     double calculateTimeWindowDeviation(double endTime, double earliestArrival, double latestArrival) const;
     
-    std::map<int, VehicleStats> vehicleStats;  // Thông tin về mỗi xe
-    SimulationSummary summary;                 // Thông tin tổng hợp
-    std::mutex mutex;                          // Mutex để bảo vệ truy cập đồng thời
-    bool summaryCalculated;                    // Đã tính tổng hợp chưa
+    std::map<int, VehicleStats> vehicleStats;  // ThÃ´ng tin vá»� má»—i xe
+    SimulationSummary summary;                 // ThÃ´ng tin tá»•ng há»£p
+    std::mutex mutex;                          // Mutex Ä‘á»ƒ báº£o vá»‡ truy cáº­p Ä‘á»“ng thá»�i
+    bool summaryCalculated;                    // Ä�Ã£ tÃ­nh tá»•ng há»£p chÆ°a
 };
 
 } // namespace veins

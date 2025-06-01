@@ -8,7 +8,6 @@
 using namespace veins;
 
 SimulationLogger::SimulationLogger() : summaryCalculated(false) {
-    // Khởi tạo các thông tin mặc định
     summary.mapName = "Unknown";
     summary.routingAlgorithm = "Unknown";
     summary.implementationVersion = "1.0";
@@ -16,7 +15,6 @@ SimulationLogger::SimulationLogger() : summaryCalculated(false) {
 }
 
 SimulationLogger::~SimulationLogger() {
-    // Tự động lưu dữ liệu khi hủy logger
     if (!vehicleStats.empty() && !summaryCalculated) {
         calculateSummaryStats();
     }
@@ -24,16 +22,10 @@ SimulationLogger::~SimulationLogger() {
 
 void SimulationLogger::recordVehicleStart(int vehicleId, const std::string& startRoad, double startTime) {
     std::lock_guard<std::mutex> lock(mutex);
-    
-    // Tạo hoặc cập nhật thông tin xe
     VehicleStats& stats = vehicleStats[vehicleId];
     stats.vehicleId = vehicleId;
     stats.startingRoad = startRoad;
     stats.startTime = startTime;
-    
-    // Log
-    std::cout << "Vehicle " << vehicleId << " started at time " << startTime 
-              << " from road " << startRoad << std::endl;
 }
 
 void SimulationLogger::updateVehicleDestination(int vehicleId, const std::string& destination, 
@@ -42,8 +34,6 @@ void SimulationLogger::updateVehicleDestination(int vehicleId, const std::string
                                               double pathLength,
                                               double estimatedTravelTime) {
     std::lock_guard<std::mutex> lock(mutex);
-    
-    // Tìm xe trong danh sách theo ID
     auto it = vehicleStats.find(vehicleId);
     if (it != vehicleStats.end()) {
         it->second.targetRoad = destination;
@@ -52,15 +42,7 @@ void SimulationLogger::updateVehicleDestination(int vehicleId, const std::string
         it->second.path = path;
         it->second.pathLength = pathLength;
         it->second.estimatedTravelTime = estimatedTravelTime;
-        
-        // In thông tin đích và khung thời gian
-        std::cout << "DESTINATION_ASSIGNED: vehicleId=" << vehicleId
-                  << ", destination=" << destination
-                  << ", timeWindow=[" << earliestArrival << ", " << latestArrival << "]"
-                  << ", pathLength=" << pathLength
-                  << ", estimatedTravelTime=" << estimatedTravelTime << std::endl;
     } else {
-        // Nếu xe chưa tồn tại, tạo bản ghi mới
         VehicleStats stats;
         stats.vehicleId = vehicleId;
         stats.targetRoad = destination;
@@ -71,20 +53,11 @@ void SimulationLogger::updateVehicleDestination(int vehicleId, const std::string
         stats.estimatedTravelTime = estimatedTravelTime;
         
         vehicleStats[vehicleId] = stats;
-        
-        // In thông tin đích và khung thời gian
-        std::cout << "DESTINATION_CREATED: vehicleId=" << vehicleId
-                  << ", destination=" << destination
-                  << ", timeWindow=[" << earliestArrival << ", " << latestArrival << "]"
-                  << ", pathLength=" << pathLength
-                  << ", estimatedTravelTime=" << estimatedTravelTime << std::endl;
     }
 }
 
 void SimulationLogger::recordAlgorithmTime(int vehicleId, double algorithmTime) {
     std::lock_guard<std::mutex> lock(mutex);
-    
-    // Cập nhật thời gian tìm đường
     VehicleStats& stats = vehicleStats[vehicleId];
     stats.algorithmTime = algorithmTime;
     
@@ -100,39 +73,34 @@ void SimulationLogger::recordVehicleEnd(int vehicleId, double endTime) {
     if (it == vehicleStats.end()) {
         std::cout << "SimulationLogger: WARNING - Recording end for unknown vehicle " 
                   << vehicleId << " at time " << endTime << std::endl;
-        // Create new record for this vehicle if it doesn't exist
+        // create new record for this vehicle if it doesn't exist
         vehicleStats[vehicleId] = VehicleStats();
         vehicleStats[vehicleId].vehicleId = vehicleId;
         vehicleStats[vehicleId].endTime = endTime;
     } else {
         it->second.endTime = endTime;
         
-        // If we have a valid start time, calculate the duration
+        // check if valid start time, calculate travel time for vehicle.
         if (it->second.startTime > 0) {
             it->second.travelTime = endTime - it->second.startTime;
         }
-        
-        // Validate time windows (ensure we don't have [0,0])
+
         if (it->second.earliestArrival <= 0 && it->second.latestArrival <= 0) {
-            // If time windows were not set, fetch them from RSU data if possible
-            // For now, just log a warning
             std::cout << "SimulationLogger: WARNING - Vehicle " << vehicleId 
                       << " has invalid time window [0,0], this will cause incorrect statistics" << std::endl;
         }
-        
-        // Calculate if arrival was within time window
         if (it->second.earliestArrival > 0 || it->second.latestArrival > 0) {
             double travelTime = it->second.travelTime;
             
-            // Calculate time window deviation
+            // calculate time window deviation
             it->second.timeWindowDeviation = calculateTimeWindowDeviation(
                 endTime, it->second.earliestArrival, it->second.latestArrival);
-                
+            // evaluate if we arrive on time.
             if (travelTime < it->second.earliestArrival) {
-                // Early arrival
+                // early arrival
                 it->second.arrivedOnTime = false; 
             } else if (travelTime > it->second.latestArrival) {
-                // Late arrival
+                // late arrival
                 it->second.arrivedOnTime = false;
             } else {
                 // On time
@@ -150,8 +118,6 @@ void SimulationLogger::recordVehicleEnd(int vehicleId, double endTime) {
               << ", TIME_WINDOW=[" << vehicleStats[vehicleId].earliestArrival 
               << ", " << vehicleStats[vehicleId].latestArrival << "]" << std::endl;
     std::cout.unsetf(std::ios_base::fixed); // Reset formatting to default
-              
-    // Check if all vehicles have finished, calculate summary
     if (allVehiclesFinished()) {
         calculateSummaryStats();
     }
@@ -164,15 +130,12 @@ void SimulationLogger::setSimulationInfo(const std::string& mapName, const std::
     summary.mapName = mapName;
     summary.routingAlgorithm = algorithm;
     summary.implementationVersion = version;
-    
-    // Log
     std::cout << "Simulation info set: Map=" << mapName 
               << ", Algorithm=" << algorithm
               << ", Version=" << version << std::endl;
 }
 
 bool SimulationLogger::allVehiclesFinished() const {
-    // Kiểm tra xem tất cả xe đã kết thúc chưa
     for (const auto& pair : vehicleStats) {
         if (pair.second.endTime == 0) {
             return false;
@@ -203,16 +166,11 @@ void SimulationLogger::calculateSummaryStats() {
         summary.totalTimeWindowDeviation += stats.timeWindowDeviation;
         summary.totalAlgorithmTime += stats.algorithmTime;
     }
-    
+    summary.objectiveFunctionValue = summary.totalTravelTime + summary.totalTimeWindowDeviation;
     summaryCalculated = true;
 }
 
 void SimulationLogger::printSummary() const {
-    if (!summaryCalculated) {
-        std::cout << "Summary not yet calculated!" << std::endl;
-        return;
-    }
-    
     std::cout << "\n========== SIMULATION SUMMARY ==========\n";
     std::cout << "Map: " << summary.mapName << std::endl;
     std::cout << "Routing Algorithm: " << summary.routingAlgorithm << std::endl;
@@ -234,71 +192,69 @@ void SimulationLogger::printSummary() const {
     std::cout << "Average Algorithm Time: "
               << (summary.totalVehicles > 0 ? (summary.totalAlgorithmTime / summary.totalVehicles) : 0)
               << " seconds/vehicle" << std::endl;
+    std::cout << "Objective Function Value: " << summary.objectiveFunctionValue << std::endl;
     std::cout << "=========================================\n";
 }
 
-void SimulationLogger::saveToCSV(const std::string& vehicleStatsFilename, 
-                               const std::string& summaryFilename) {
+void SimulationLogger::saveToCSV(const std::string& filename) {
     if (!summaryCalculated) {
         calculateSummaryStats();
     }
     
-    // Lưu thông tin từng xe
-    std::ofstream vehicleFile(vehicleStatsFilename);
-    if (vehicleFile.is_open()) {
-        // Header
-        vehicleFile << "VehicleID,StartRoad,TargetRoad,StartTime,EndTime,TravelTime,"
-                   << "EarliestArrival,LatestArrival,TimeWindowDeviation,ArrivedOnTime,"
-                   << "PathLength,AlgorithmTime" << std::endl;
-                   
-        // Dữ liệu xe
+    // Save all information to a single file
+    std::ofstream file(filename);
+    if (file.is_open()) {
+        // Write the summary information first
+        file << "SIMULATION SUMMARY" << std::endl;
+        file << "MapName,RoutingAlgorithm,Version,TotalVehicles,LateVehicles,"
+             << "TotalTravelTime,AvgTravelTime,TotalTimeWindowDeviation,"
+             << "AvgTimeWindowDeviation,TotalAlgorithmTime,AvgAlgorithmTime,"
+             << "ObjectiveFunctionValue,Timestamp" << std::endl;
+             
+        file << summary.mapName << ","
+             << summary.routingAlgorithm << ","
+             << summary.implementationVersion << ","
+             << summary.totalVehicles << ","
+             << summary.lateVehicles << ","
+             << summary.totalTravelTime << ","
+             << (summary.totalVehicles > 0 ? (summary.totalTravelTime / summary.totalVehicles) : 0) << ","
+             << summary.totalTimeWindowDeviation << ","
+             << (summary.totalVehicles > 0 ? (summary.totalTimeWindowDeviation / summary.totalVehicles) : 0) << ","
+             << summary.totalAlgorithmTime << ","
+             << (summary.totalVehicles > 0 ? (summary.totalAlgorithmTime / summary.totalVehicles) : 0) << ","
+             << summary.objectiveFunctionValue << ","
+             << summary.simulationTimestamp << std::endl;
+        
+        // Add a blank line to separate summary from vehicle data
+        file << std::endl;
+        
+        // Write the vehicle statistics
+        file << "VEHICLE STATISTICS" << std::endl;
+        file << "VehicleID,StartRoad,TargetRoad,StartTime,EndTime,TravelTime,"
+             << "EarliestArrival,LatestArrival,TimeWindowDeviation,ArrivedOnTime,"
+             << "PathLength,AlgorithmTime" << std::endl;
+             
+        // Vehicle data
         for (const auto& pair : vehicleStats) {
             const VehicleStats& stats = pair.second;
-            vehicleFile << stats.vehicleId << ","
-                       << stats.startingRoad << ","
-                       << stats.targetRoad << ","
-                       << stats.startTime << ","
-                       << stats.endTime << ","
-                       << stats.travelTime << ","
-                       << stats.earliestArrival << ","
-                       << stats.latestArrival << ","
-                       << stats.timeWindowDeviation << ","
-                       << (stats.arrivedOnTime ? "Yes" : "No") << ","
-                       << stats.pathLength << ","
-                       << stats.algorithmTime << std::endl;
+            file << stats.vehicleId << ","
+                 << stats.startingRoad << ","
+                 << stats.targetRoad << ","
+                 << stats.startTime << ","
+                 << stats.endTime << ","
+                 << stats.travelTime << ","
+                 << stats.earliestArrival << ","
+                 << stats.latestArrival << ","
+                 << stats.timeWindowDeviation << ","
+                 << (stats.arrivedOnTime ? "Yes" : "No") << ","
+                 << stats.pathLength << ","
+                 << stats.algorithmTime << std::endl;
         }
-        vehicleFile.close();
-        std::cout << "Saved vehicle statistics to " << vehicleStatsFilename << std::endl;
+        
+        file.close();
+        std::cout << "Saved simulation results to " << filename << std::endl;
     } else {
-        std::cerr << "Error: Unable to open file " << vehicleStatsFilename << " for writing" << std::endl;
-    }
-    
-    // Lưu thông tin tổng hợp
-    std::ofstream summaryFile(summaryFilename);
-    if (summaryFile.is_open()) {
-        // Header
-        summaryFile << "MapName,RoutingAlgorithm,Version,TotalVehicles,LateVehicles,"
-                   << "TotalTravelTime,AvgTravelTime,TotalTimeWindowDeviation,"
-                   << "AvgTimeWindowDeviation,TotalAlgorithmTime,AvgAlgorithmTime,Timestamp" << std::endl;
-                   
-        // Dữ liệu tổng hợp
-        summaryFile << summary.mapName << ","
-                   << summary.routingAlgorithm << ","
-                   << summary.implementationVersion << ","
-                   << summary.totalVehicles << ","
-                   << summary.lateVehicles << ","
-                   << summary.totalTravelTime << ","
-                   << (summary.totalVehicles > 0 ? (summary.totalTravelTime / summary.totalVehicles) : 0) << ","
-                   << summary.totalTimeWindowDeviation << ","
-                   << (summary.totalVehicles > 0 ? (summary.totalTimeWindowDeviation / summary.totalVehicles) : 0) << ","
-                   << summary.totalAlgorithmTime << ","
-                   << (summary.totalVehicles > 0 ? (summary.totalAlgorithmTime / summary.totalVehicles) : 0) << ","
-                   << summary.simulationTimestamp << std::endl;
-                   
-        summaryFile.close();
-        std::cout << "Saved simulation summary to " << summaryFilename << std::endl;
-    } else {
-        std::cerr << "Error: Unable to open file " << summaryFilename << " for writing" << std::endl;
+        std::cerr << "Error: Unable to open file " << filename << " for writing" << std::endl;
     }
 }
 
@@ -312,15 +268,12 @@ std::string SimulationLogger::getCurrentTimeStamp() const {
 }
 
 double SimulationLogger::calculateTimeWindowDeviation(double endTime, double earliestArrival, double latestArrival) const {
-    // Nếu xe đến sớm hơn thời gian sớm nhất
     if (endTime < earliestArrival) {
         return earliestArrival - endTime;
     }
-    // Nếu xe đến trễ hơn thời gian trễ nhất
     else if (endTime > latestArrival) {
         return endTime - latestArrival;
     }
-    // Xe đến trong khung thời gian
     else {
         return 0.0;
     }

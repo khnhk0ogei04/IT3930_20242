@@ -21,89 +21,81 @@ void VehicleControlApp::initialize(int stage) {
         traciVehicle = mobility->getVehicleCommandInterface();
         int moduleIndex = getParentModule()->getIndex();
         std::map<int, int> idMapping = {
-            {0, 16},   // Module index 0 maps to simulation ID 16
-            {1, 22},   // Module index 1 maps to simulation ID 22
-            {2, 28},   // And so on...
-            {3, 34},
-            {4, 40},
-            {5, 46},
-            {6, 52},
-            {7, 58},
-            {8, 64},
-            {9, 70},
-            {10, 76},
-            {11, 82},
-            {12, 88},
-            {13, 94},
-            {14, 100},
-            {15, 106},
-            {16, 112},
-            {17, 118},
-            {18, 124},
-            {19, 130},
-            {20, 136},
-            {21, 142},
-            {22, 148},
-            {23, 154},
-            {24, 160},
-            {25, 166},
-            {26, 172},
-            {27, 178},
-            {28, 184},
-            {29, 190},
-            {30, 196},
-            {31, 202},
-            {32, 208},
+                {0, 16},
+                {1, 22},
+                {2, 28},
+                {3, 34},
+                {4, 40},
+                {5, 46},
+                {6, 52},
+                {7, 58},
+                {8, 64},
+                {9, 70},
+                {10, 76},
+                {11, 82},
+                {12, 88},
+                {13, 94},
+                {14, 100},
+                {15, 106},
+                {16, 112},
+                {17, 118},
+                {18, 124},
+                {19, 130},
+                {20, 136},
+                {21, 142},
+                {22, 148},
+                {23, 154},
+                {24, 160},
+                {25, 166},
+                {26, 172},
+                {27, 178},
+                {28, 184},
+                {29, 190},
+                {30, 196},
+                {31, 202},
+                {32, 208},
+                {33, 214},
+                {34, 220},
+                {35, 226},
+                {36, 232},
+                {37, 238}
         };
         myInternalId = moduleIndex;
         auto it = idMapping.find(myInternalId);
         if (it != idMapping.end()) {
             mySimulationId = it->second;
         }
-        // Get the actual SUMO ID of this vehicle for debugging
         std::string sumoId = mobility->getExternalId();
-        // Log the details to help with debugging
         EV << "\n[VEHICLE] ********************************************" << std::endl;
         EV << "[VEHICLE] Initialized with internal ID: " << myInternalId
            << ", simulation ID: " << mySimulationId << std::endl;
         EV << "[VEHICLE] Parent module: " << getParentModule()->getFullName()
            << ", index: " << getParentModule()->getIndex() << std::endl;
         EV << "[VEHICLE] ********************************************" << std::endl;
-
-        // Record the exact start time of the vehicle
         startTime = simTime().dbl();
         startingRoad = mobility->getRoadId();
         
-        // Record start time to logger
         SimulationLogger::getInstance().recordVehicleStart(mySimulationId, startingRoad, startTime);
         
-        // Initialize data structures
+        // initialize data structures
         allRoads.clear();
         accessibleRoads.clear();
         incomingRoads.clear();
         currentRoadAttributes.clear();
         currentPath.clear();
         destinations.clear();
-        
-        // Initialize time window and path info
         earliestArrival = 0.0;
         latestArrival = 0.0;
         endTime = 0.0;
         pathLength = 0.0;
-
-        // Initialize the graph processor (will populate with data when we receive roads)
         graphProcessor.reset(new GraphProcessor(roadNetwork));
-
-        // Request all roads from the RSU immediately to get the road network data
         requestAllRoads();
-
-        // Print a message that we're waiting for road data
         EV << "\n[VEHICLE] Requesting road network data from RSU..." << std::endl;
         EV << "[VEHICLE] Road information will be printed once received." << std::endl;
     } else if (stage == 1) {
         scheduleAt(simTime() + uniform(1.0, 2.0), statusUpdateMsg);
         scheduleAt(simTime() + uniform(3.0, 5.0), requestRoadInfoMsg);
-        scheduleAt(simTime() + 0.1, cleanupTimer);
+        scheduleAt(simTime() + 0.3, cleanupTimer);
 
         EV << "[VEHICLE] Vehicle " << myId << " initialized" << std::endl;
     }
@@ -115,7 +107,6 @@ void VehicleControlApp::onWSM(BaseFrame1609_4* wsm) {
 
     std::string data = msg->getDemoData();
     
-    // Enhanced message reception debugging
     LAddress::L2Type senderAddress = msg->getSenderAddress();
     LAddress::L2Type recipientAddress = wsm->getRecipientAddress();
     
@@ -126,11 +117,6 @@ void VehicleControlApp::onWSM(BaseFrame1609_4* wsm) {
     EV << "[VEHICLE] My simulation ID: " << mySimulationId << std::endl;
     EV << "[VEHICLE] Message content: " << data << std::endl;
     EV << "[VEHICLE] =============================" << std::endl;
-
-    std::cout << "\nVEHICLE " << myInternalId << " (sim ID: " << mySimulationId << ") RECEIVED MESSAGE FROM " << senderAddress << std::endl;
-    std::cout << "DESTINATION ADDRESS: " << recipientAddress << std::endl;
-    std::cout << "MESSAGE CONTENT: " << data << std::endl;
-
     EV << "[VEHICLE] Received response: " << data << std::endl;
     
     // Process different response types
@@ -1037,81 +1023,49 @@ void VehicleControlApp::logDepartureIfNeeded() {
         
         EV << "[VEHICLE] Vehicle " << mySimulationId << " reached destination or is being removed at time " 
            << std::fixed << std::setprecision(1) << endTime << std::endl;
-        
-        // Record vehicle end to logger
         SimulationLogger::getInstance().recordVehicleEnd(mySimulationId, endTime);
-        
-        // Mark as logged
         hasLoggedDeparture = true;
-        
-        // Print detailed info with consistent formatting
-        std::cout << std::fixed << std::setprecision(1);
-        std::cout << "\n*********************** VEHICLE ARRIVAL ***********************" << std::endl;
-        std::cout << "Vehicle " << mySimulationId << " arrived at time " << endTime << std::endl;
-        std::cout << "Travel time: " << (endTime - startTime) << " seconds" << std::endl;
-        std::cout << "Time window: [" << earliestArrival << ", " << latestArrival << "]" << std::endl;
-        
         // Check if arrived on time
         bool arrivedOnTime = (endTime <= latestArrival);
         double timeWindowDeviation = 0.0;
         
         if (endTime < earliestArrival) {
             timeWindowDeviation = earliestArrival - endTime;
-            std::cout << "Arrived EARLY by " << timeWindowDeviation << " seconds" << std::endl;
         } else if (endTime > latestArrival) {
             timeWindowDeviation = endTime - latestArrival;
-            std::cout << "Arrived LATE by " << timeWindowDeviation << " seconds" << std::endl;
-        } else {
-            std::cout << "Arrived WITHIN time window" << std::endl;
         }
-        
-        std::cout << "Path length: " << pathLength << " meters" << std::endl;
-        std::cout << "******************************************************************\n" << std::endl;
-        std::cout.unsetf(std::ios_base::fixed); // Reset formatting
     }
 }
 
 void VehicleControlApp::handleEndOfVehicleLifecycle() {
-    // Ghi nhận thời điểm chính xác khi xe sắp bị xóa khỏi mô phỏng
     if (!hasLoggedDeparture) {
         endTime = simTime().dbl();
         
         EV << "[VEHICLE] Vehicle " << mySimulationId << " is being removed from simulation at exact time " 
            << std::fixed << std::setprecision(1) << endTime << std::endl;
-        
         // Log the departure with precision
         std::cout << std::fixed << std::setprecision(1);
         printf("VEHICLE_LIFECYCLE_END: ID=%d, TIME=%.1f, STATUS=REMOVED_FROM_SIMULATION\n",
                mySimulationId, endTime);
-        std::cout.unsetf(std::ios_base::fixed); // Reset formatting
+        std::cout.unsetf(std::ios_base::fixed);
         fflush(stdout);
-        
-        // Record vehicle end to logger
         SimulationLogger::getInstance().recordVehicleEnd(mySimulationId, endTime);
-        
+
         hasLoggedDeparture = true;
     }
 }
 
 void VehicleControlApp::checkVehicleStatus() {
     if (mobility && traciVehicle) {
-        // Get current road ID
-        std::string roadId = traciVehicle->getRoadId();
-        
-        // Check if vehicle has reached destination
+        string roadId = traciVehicle->getRoadId();
         if (!targetRoad.empty() && roadId == targetRoad) {
             EV << "[VEHICLE] Vehicle " << mySimulationId << " has reached destination road " 
                << targetRoad << " at time " << simTime() << std::endl;
-            
-            // Log arrival
             logDepartureIfNeeded();
         }
-        // Check if vehicle is about to be removed
         else if (roadId.empty() || roadId == "") {
             EV << "[VEHICLE] Vehicle " << mySimulationId << " is no longer on a road at time " 
                << simTime() << " (may be removed from simulation)" << std::endl;
-            
-            // Handle end of lifecycle
             handleEndOfVehicleLifecycle();
         }
     }
