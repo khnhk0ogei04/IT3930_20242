@@ -46,6 +46,7 @@ private:
     unique_ptr<TaskGenerator> taskGenerator;    // For generating tasks
 
     string networkFilePath;
+    int numVehicles = 10;   // Default number of vehicles to pre-map
 
     void handleVehicleMessage(const string& message, LAddress::L2Type vehicleId);
     void sendRoadListMessage(LAddress::L2Type vehicleId, const vector<string>& roadList);

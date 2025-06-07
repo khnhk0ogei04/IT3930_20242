@@ -22,9 +22,6 @@ public:
     virtual ~GraphProcessor();
     vector<string> findShortestPath(string sourceId, string targetId) const;
     double getShortestPathLength(string sourceId, string targetId) const;
-
-    vector<vector<string>> findKShortestPaths(
-        string sourceId, string targetId, int k) const;
     bool existsValidAssignment(
         const vector<string>& sources,
         const vector<string>& targets) const;
@@ -32,13 +29,12 @@ public:
     vector<string> findEdgeShortestPath(string sourceEdgeId, string targetEdgeId) const;
     double getEdgeShortestPathLength(string sourceEdgeId, string targetEdgeId) const;
     double getEdgeLength(string sourceEdgeId, string targetEdgeId) const;
-    struct LanePath {
-        string edgeId;
-        int laneIndex;
-        double cost;
-    };
-    vector<LanePath> findLaneShortestPath(string sourceLaneId, string targetLaneId) const;
-
+//    struct LanePath {
+//        string edgeId;
+//        int laneIndex;
+//        double cost;
+//    };
+//    vector<LanePath> findLaneShortestPath(string sourceLaneId, string targetLaneId) const;
     vector<int> getOptimalVehicleAssignment(
         const vector<string>& sourceEdges,
         const vector<string>& destEdges) const;

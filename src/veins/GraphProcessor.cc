@@ -70,275 +70,6 @@ double GraphProcessor::getEdgeLength(string sourceEdgeId, string targetEdgeId) c
     return 100.0;
 }
 
-vector<vector<string>> GraphProcessor::findKShortestPaths(string sourceId, string targetId, int k) const {
-    vector<vector<string>> result;
-    auto shortestPath = findShortestPath(sourceId, targetId);
-    result.push_back(shortestPath);
-    if (k <= 1) return result;
-    vector<pair<vector<string>, double>> potentialPaths;
-    set<vector<string>> addedPaths;
-    addedPaths.insert(shortestPath);
-    auto calculatePathLength = [this](const vector<string>& path) {
-        double length = 0.0;
-        for (const auto& edgeId : path) {
-            for (const auto& nodePair : roadNetwork.getAdjList()) {
-                for (const auto& edge : nodePair.second) {
-                    if (edge.getId() == edgeId) {
-                        length += edge.getLength();
-                        break;
-                    }
-                }
-            }
-        }
-        return length;
-    };
-
-    for (int i = 0; result.size() < k && i < result.size(); ++i) {
-        const auto& path = result[i];
-        string lastNodeId = sourceId;
-        vector<string> rootPath;
-        for (int j = 0; j < path.size(); ++j) {
-            string currentEdgeId = path[j];
-            string currentNodeId = "";
-            for (const auto& nodePair : roadNetwork.getAdjList()) {
-                for (const auto& edge : nodePair.second) {
-                    if (edge.getId() == currentEdgeId) {
-                        currentNodeId = edge.getTo();
-                        break;
-                    }
-                }
-                if (!currentNodeId.empty()) break;
-            }
-            if (currentNodeId.empty()) continue;
-            // the root path up to current deviation point
-            vector<string> spurRootPath = rootPath;
-            // remove the links that were in previous k-shortest paths
-            map<pair<string, string>, double> removedEdges;
-            for (const auto& prevPath : result) {
-                if (j < prevPath.size() && spurRootPath.size() <= prevPath.size() &&
-                    equal(spurRootPath.begin(), spurRootPath.end(), prevPath.begin())) {
-                    if (j < prevPath.size()) {
-                        string edgeToRemove = prevPath[j];
-                        for (const auto& nodePair : roadNetwork.getAdjList()) {
-                            for (const auto& edge : nodePair.second) {
-                                if (edge.getId() == edgeToRemove) {
-                                    removedEdges[{nodePair.first, edge.getTo()}] = edge.getLength();
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            Graph tempGraph = roadNetwork;
-            map<string, double> distances;
-            map<string, string> previous;
-            set<string> visited;
-            for (const auto& nodePair : roadNetwork.getNodes()) {
-                distances[nodePair.first] = numeric_limits<double>::infinity();
-            }
-            distances[lastNodeId] = 0.0;
-            set<pair<double, string>> pq;
-            pq.insert(make_pair(0.0, lastNodeId));
-            while (!pq.empty()) {
-                auto it = pq.begin();
-                double dist = it->first;
-                string current = it->second;
-                pq.erase(it);
-                if (current == targetId) {
-                    break;
-                }
-                if (visited.find(current) != visited.end()) {
-                    continue;
-                }
-                visited.insert(current);
-                auto adjIt = roadNetwork.getAdjList().find(current);
-                if (adjIt != roadNetwork.getAdjList().end()) {
-                    for (const auto& edge : adjIt->second) {
-                        string neighbor = edge.getTo();
-                        if (removedEdges.find({current, neighbor}) != removedEdges.end()) {
-                            continue;
-                        }
-                        bool inRootPath = false;
-                        for (const auto& rootEdgeId : spurRootPath) {
-                            for (const auto& nodePair : roadNetwork.getAdjList()) {
-                                for (const auto& pathEdge : nodePair.second) {
-                                    if (pathEdge.getId() == rootEdgeId &&
-                                        (pathEdge.getTo() == neighbor || nodePair.first == neighbor)) {
-                                        inRootPath = true;
-                                        break;
-                                    }
-                                }
-                                if (inRootPath) break;
-                            }
-                            if (inRootPath) break;
-                        }
-                        if (inRootPath) continue;
-                        double newDist = dist + edge.getLength();
-                        if (newDist < distances[neighbor]) {
-                            distances[neighbor] = newDist;
-                            previous[neighbor] = edge.getId();
-                            pq.insert(make_pair(newDist, neighbor));
-                        }
-                    }
-                }
-            }
-            if (distances[targetId] != numeric_limits<double>::infinity()) {
-                vector<string> spurPath;
-                string current = targetId;
-                while (current != lastNodeId) {
-                    auto prevIt = previous.find(current);
-                    if (prevIt == previous.end()) {
-                        spurPath.clear();
-                        break;
-                    }
-                    string edgeId = prevIt->second;
-                    spurPath.push_back(edgeId);
-                    bool found = false;
-                    for (const auto& nodePair : roadNetwork.getAdjList()) {
-                        for (const auto& edge : nodePair.second) {
-                            if (edge.getId() == edgeId) {
-                                current = nodePair.first;
-                                found = true;
-                                break;
-                            }
-                        }
-                        if (found) break;
-                    }
-
-                    if (!found) {
-                        spurPath.clear();
-                        break;
-                    }
-                }
-                reverse(spurPath.begin(), spurPath.end());
-                vector<string> totalPath = spurRootPath;
-                totalPath.insert(totalPath.end(), spurPath.begin(), spurPath.end());
-                if (addedPaths.find(totalPath) == addedPaths.end()) {
-                    double pathLength = calculatePathLength(totalPath);
-                    potentialPaths.push_back({totalPath, pathLength});
-                }
-            }
-            rootPath.push_back(currentEdgeId);
-            lastNodeId = currentNodeId;
-        }
-
-        sort(potentialPaths.begin(), potentialPaths.end(),
-            [](const pair<vector<string>, double>& a,
-               const pair<vector<string>, double>& b) {
-                return a.second < b.second;
-            });
-        // Add the next best path to the result
-        while (!potentialPaths.empty() && result.size() < k) {
-            auto bestPath = potentialPaths.front();
-            potentialPaths.erase(potentialPaths.begin());
-
-            if (addedPaths.find(bestPath.first) == addedPaths.end()) {
-                addedPaths.insert(bestPath.first);
-                result.push_back(bestPath.first);
-                break;
-            }
-        }
-    }
-    if (result.size() < k) {
-        set<string> shortestPathEdges(shortestPath.begin(), shortestPath.end());
-        for (const auto& edgeToAvoid : shortestPathEdges) {
-            map<string, double> distances;
-            map<string, string> previous;
-            set<string> visited;
-            for (const auto& nodePair : roadNetwork.getNodes()) {
-                distances[nodePair.first] = numeric_limits<double>::infinity();
-            }
-            distances[sourceId] = 0.0;
-            set<pair<double, string>> pq;
-            pq.insert(make_pair(0.0, sourceId));
-            while (!pq.empty()) {
-                auto it = pq.begin();
-                double dist = it->first;
-                string current = it->second;
-                pq.erase(it);
-
-                if (current == targetId) {
-                    break;
-                }
-
-                if (visited.find(current) != visited.end()) {
-                    continue;
-                }
-                visited.insert(current);
-
-                auto adjIt = roadNetwork.getAdjList().find(current);
-                if (adjIt != roadNetwork.getAdjList().end()) {
-                    for (const auto& edge : adjIt->second) {
-                        // Skip the edge we want to avoid
-                        if (edge.getId() == edgeToAvoid) {
-                            continue;
-                        }
-
-                        std::string neighbor = edge.getTo();
-                        double newDist = dist + edge.getLength();
-
-                        if (newDist < distances[neighbor]) {
-                            distances[neighbor] = newDist;
-                            previous[neighbor] = edge.getId();
-                            pq.insert(std::make_pair(newDist, neighbor));
-                        }
-                    }
-                }
-            }
-
-            // Reconstruct the path if we found one
-            if (distances[targetId] != std::numeric_limits<double>::infinity()) {
-                std::vector<std::string> path;
-                std::string current = targetId;
-
-                while (current != sourceId) {
-                    auto prevIt = previous.find(current);
-                    if (prevIt == previous.end()) {
-                        path.clear();
-                        break;
-                    }
-
-                    std::string edgeId = prevIt->second;
-                    path.push_back(edgeId);
-                    bool found = false;
-                    for (const auto& nodePair : roadNetwork.getAdjList()) {
-                        for (const auto& edge : nodePair.second) {
-                            if (edge.getId() == edgeId) {
-                                current = nodePair.first;
-                                found = true;
-                                break;
-                            }
-                        }
-                        if (found) break;
-                    }
-
-                    if (!found) {
-                        path.clear();
-                        break;
-                    }
-                }
-
-                // reverse the path
-                std::reverse(path.begin(), path.end());
-                if (!path.empty()) {
-                    if (addedPaths.find(path) == addedPaths.end()) {
-                        addedPaths.insert(path);
-                        result.push_back(path);
-                        if (result.size() >= k) {
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-    }
-    if (result.size() > k) {
-        result.resize(k);
-    }
-    return result;
-}
-
 bool GraphProcessor::existsValidAssignment(
     const std::vector<std::string>& sources,
     const std::vector<std::string>& targets) const {
@@ -568,118 +299,6 @@ bool GraphProcessor::hungarianAlgorithm(const vector<vector<double>>& costMatrix
     return (assignedCount >= std::min(n, (int)costMatrix[0].size()));
 }
 
-vector<GraphProcessor::LanePath> GraphProcessor::findLaneShortestPath(string sourceLaneId, string targetLaneId) const {
-    vector<LanePath> result;
-    string sourceEdgeId = extractEdgeIdFromLane(sourceLaneId);
-    string targetEdgeId = extractEdgeIdFromLane(targetLaneId);
-    int sourceLaneIndex = extractLaneIndexFromLane(sourceLaneId);
-    int targetLaneIndex = extractLaneIndexFromLane(targetLaneId);
-
-    if (sourceEdgeId.empty() || targetEdgeId.empty() || sourceLaneIndex < 0 || targetLaneIndex < 0) {
-        return result;
-    }
-
-    // find the shortest ;atn
-    vector<string> edgePath = findShortestPath(sourceEdgeId, targetEdgeId);
-
-    if (edgePath.empty() && sourceEdgeId != targetEdgeId) {
-        // No path exists between the edges
-        return result;
-    }
-
-    // Special case: source and target are on the same edge
-    if (sourceEdgeId == targetEdgeId) {
-        // Create a single LanePath segment
-        LanePath segment;
-        segment.edgeId = sourceEdgeId;
-        segment.laneIndex = sourceLaneIndex; // Start with source lane
-
-        // Find the edge in the graph to calculate cost
-        bool found = false;
-        for (const auto& nodePair : roadNetwork.getAdjList()) {
-            for (const auto& edge : nodePair.second) {
-                if (edge.getId() == sourceEdgeId) {
-                    segment.cost = edge.getLength();
-                    found = true;
-                    break;
-                }
-            }
-            if (found) break;
-        }
-
-        result.push_back(segment);
-        return result;
-    }
-    if (!edgePath.empty()) {
-        LanePath sourceSegment;
-        sourceSegment.edgeId = sourceEdgeId;
-        sourceSegment.laneIndex = sourceLaneIndex;
-        bool found = false;
-        for (const auto& nodePair : roadNetwork.getAdjList()) {
-            for (const auto& edge : nodePair.second) {
-                if (edge.getId() == sourceEdgeId) {
-                    sourceSegment.cost = edge.getLength();
-                    found = true;
-                    break;
-                }
-            }
-            if (found) break;
-        }
-
-        result.push_back(sourceSegment);
-    }
-
-    // Add intermediate edges (with best lanes)
-    for (size_t i = 0; i < edgePath.size(); i++) {
-        const string& edgeId = edgePath[i];
-
-        // Skip if this is the source or target edge (we handle those separately)
-        if (edgeId == sourceEdgeId || edgeId == targetEdgeId) {
-            continue;
-        }
-
-        LanePath segment;
-        segment.edgeId = edgeId;
-        segment.laneIndex = findBestLaneForEdge(edgeId);
-        bool found = false;
-        for (const auto& nodePair : roadNetwork.getAdjList()) {
-            for (const auto& edge : nodePair.second) {
-                if (edge.getId() == edgeId) {
-                    // Cost is the length of the edge
-                    segment.cost = edge.getLength();
-                    found = true;
-                    break;
-                }
-            }
-            if (found) break;
-        }
-
-        result.push_back(segment);
-    }
-
-    if (!edgePath.empty() || sourceEdgeId == targetEdgeId) {
-        LanePath targetSegment;
-        targetSegment.edgeId = targetEdgeId;
-        targetSegment.laneIndex = targetLaneIndex;
-        bool found = false;
-        for (const auto& nodePair : roadNetwork.getAdjList()) {
-            for (const auto& edge : nodePair.second) {
-                if (edge.getId() == targetEdgeId) {
-                    // cost: length of edge
-                    targetSegment.cost = edge.getLength();
-                    found = true;
-                    break;
-                }
-            }
-            if (found) break;
-        }
-
-        result.push_back(targetSegment);
-    }
-
-    return result;
-}
-
 string GraphProcessor::extractEdgeIdFromLane(string laneId) const {
     int pos = laneId.find_last_of('_');
     if (pos != string::npos) {
@@ -903,357 +522,153 @@ double GraphProcessor::getEdgeShortestPathLength(string sourceEdgeId, string tar
     return -1.0;
 }
 
-// Implementation of the getOptimalVehicleAssignment method
+// Stable Hungarian Algorithm (fix infinite loop and ensure correct line cover)
+// Author: ChatGPT, for user request (no external class, core logic only)
+// Paste directly into GraphProcessor::getOptimalVehicleAssignment()
+
 vector<int> GraphProcessor::getOptimalVehicleAssignment(
     const vector<std::string>& sourceEdges,
     const vector<std::string>& destEdges) const {
-
     int numVehicles = sourceEdges.size();
     int numDestinations = destEdges.size();
+    if (numVehicles == 0 || numDestinations == 0) return vector<int>();
+    int n = max(numVehicles, numDestinations);
+    vector<vector<double>> C(n, vector<double>(n, 9999999.0));
+    const double NO_PATH_PENALTY = 9999999.0, SAME_EDGE_PENALTY = 5000.0;
 
-    if (numVehicles == 0 || numDestinations == 0) {
-        return std::vector<int>();
-    }
-    
-    int n = std::max(numVehicles, numDestinations);
-    vector<std::vector<double>> costMatrix(n, std::vector<double>(n, 0));
-    const double NO_PATH_PENALTY = 9999999.0;
-    const double SAME_EDGE_PENALTY = 5000.0;
-    
-    // Build the cost matrix
+    // Build cost matrix (unchanged)
     for (int i = 0; i < numVehicles; ++i) {
-        const string& sourceEdgeId = sourceEdges[i];
-
         for (int j = 0; j < numDestinations; ++j) {
-            const std::string& destEdgeId = destEdges[j];
-            if (sourceEdgeId == destEdgeId) {
-                costMatrix[i][j] = SAME_EDGE_PENALTY;
-                continue;
-            }
-            auto path = findEdgeShortestPath(sourceEdgeId, destEdgeId);
-            double pathLength = 0.0;
-
-            if (!path.empty()) {
-                // Calculate the length of the path
-                for (const auto& edgeId : path) {
-                    bool edgeFound = false;
-                    for (const auto& nodePair : roadNetwork.getAdjList()) {
-                        for (const auto& edge : nodePair.second) {
-                            if (edge.getId() == edgeId) {
-                                pathLength += edge.getLength();
-                                edgeFound = true;
-                                break;
+            if (sourceEdges[i] == destEdges[j]) {
+                C[i][j] = SAME_EDGE_PENALTY;
+            } else {
+                auto path = findEdgeShortestPath(sourceEdges[i], destEdges[j]);
+                double pathLength = 0.0;
+                if (!path.empty()) {
+                    for (const auto& edgeId : path) {
+                        for (const auto& nodePair : roadNetwork.getAdjList()) {
+                            for (const auto& edge : nodePair.second) {
+                                if (edge.getId() == edgeId) pathLength += edge.getLength();
                             }
                         }
-                        if (edgeFound) break;
-                    }
-                    if (!edgeFound) {
-                        pathLength += 0.0; // Default length
                     }
                 }
-
-                // Cost = path length between edges
-                costMatrix[i][j] = pathLength;
-            } else {
-                // No path exists between these edges
-                costMatrix[i][j] = NO_PATH_PENALTY;
+                C[i][j] = path.empty() ? NO_PATH_PENALTY : pathLength;
             }
         }
+    }
+    for (int i = 0; i < n; ++i) for (int j = numDestinations; j < n; ++j) C[i][j] = NO_PATH_PENALTY;
+    for (int i = numVehicles; i < n; ++i) for (int j = 0; j < n; ++j) C[i][j] = NO_PATH_PENALTY;
 
-        // Fill remaining elements of the row with NO_PATH_PENALTY (for rectangular matrix)
-        for (int j = numDestinations; j < n; ++j) {
-            costMatrix[i][j] = NO_PATH_PENALTY;
-        }
-    }
-    
-    // Fill remaining rows with NO_PATH_PENALTY (for rectangular matrix)
-    for (int i = numVehicles; i < n; ++i) {
-        for (int j = 0; j < n; ++j) {
-            costMatrix[i][j] = NO_PATH_PENALTY;
-        }
-    }
-    
-    // Print original cost matrix for debugging
-    std::string header = "       ";
-    for (int j = 0; j < numDestinations; ++j) {
-        header += "D_" + destEdges[j].substr(0, std::min((size_t)4, destEdges[j].length())) + "\t";
-    }
-    cout << header << endl;
-
-    for (int i = 0; i < numVehicles; ++i) {
-        string rowStr = "V_" + std::to_string(i) + "(" + sourceEdges[i].substr(0, std::min((size_t)4, sourceEdges[i].length())) + ")\t";
-        for (int j = 0; j < numDestinations; ++j) {
-            if (costMatrix[i][j] >= NO_PATH_PENALTY) {
-                rowStr += "INF\t";
-            } else {
-                rowStr += std::to_string(static_cast<int>(costMatrix[i][j])) + "\t";
-            }
-        }
-        cout << rowStr << endl;
-    }
-    
-    // Create a copy of the original cost matrix for reference
-    auto originalCostMatrix = costMatrix;
-    
-    // ===== HUNGARIAN ALGORITHM IMPLEMENTATION =====
-    // This implementation of the Hungarian algorithm is based on the algorithm description from:
-    // http://www.cse.ust.hk/~golin/COMP572/Notes/Matching.pdf
-    
-    // Step 1: Subtract the smallest element in each row from all elements in that row
+    // Step 1: Row reduction
     for (int i = 0; i < n; ++i) {
-        double minVal = NO_PATH_PENALTY;
-        for (int j = 0; j < n; ++j) {
-            minVal = std::min(minVal, costMatrix[i][j]);
-        }
-        if (minVal < NO_PATH_PENALTY) {
-            for (int j = 0; j < n; ++j) {
-                if (costMatrix[i][j] < NO_PATH_PENALTY) {
-                    costMatrix[i][j] -= minVal;
-                }
-            }
-        }
+        double rowMin = *min_element(C[i].begin(), C[i].end());
+        for (int j = 0; j < n; ++j) C[i][j] -= rowMin;
     }
-    
-    // Step 2: Subtract the smallest element in each column from all elements in that column
+    // Step 2: Column reduction
     for (int j = 0; j < n; ++j) {
-        double minVal = NO_PATH_PENALTY;
-        for (int i = 0; i < n; ++i) {
-            minVal = std::min(minVal, costMatrix[i][j]);
-        }
-        if (minVal < NO_PATH_PENALTY) {
-            for (int i = 0; i < n; ++i) {
-                if (costMatrix[i][j] < NO_PATH_PENALTY) {
-                    costMatrix[i][j] -= minVal;
-                }
+        double colMin = C[0][j];
+        for (int i = 1; i < n; ++i) colMin = min(colMin, C[i][j]);
+        for (int i = 0; i < n; ++i) C[i][j] -= colMin;
+    }
+
+    // Main loop: Hungarian with real minimum line cover by alternating path
+    vector<int> rowAssign(n, -1), colAssign(n, -1);
+    vector<vector<bool>> starred(n, vector<bool>(n, false));
+    // Initial greedy star (maximum matching of zeros)
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < n; ++j) {
+            if (C[i][j] == 0 && rowAssign[i] == -1 && colAssign[j] == -1) {
+                starred[i][j] = true;
+                rowAssign[i] = j;
+                colAssign[j] = i;
             }
         }
     }
-    
-    cout << "\nINFO: Reduced Cost Matrix:" << std::endl;
-    for (int i = 0; i < numVehicles; ++i) {
-        std::string rowStr = "V_" + std::to_string(i) + "\t";
-        for (int j = 0; j < numDestinations; ++j) {
-            if (costMatrix[i][j] >= NO_PATH_PENALTY) {
-                rowStr += "INF\t";
-            } else {
-                rowStr += std::to_string(static_cast<int>(costMatrix[i][j])) + "\t";
-            }
-        }
-        cout << rowStr << std::endl;
-    }
-    
-    // Vectors to keep track of which rows and columns are covered
-    std::vector<bool> rowCovered(n, false);
-    std::vector<bool> colCovered(n, false);
-    
-    // Vector to store the final assignment
-    std::vector<int> assignment(n, -1);
-    
-    // Step 3: Find a zero in the reduced matrix. If there are no covered zeros in the row
-    // or column, mark the zero. Cover its row and column.
-    int step = 3;
-    // Không cần giới hạn số lần lặp nữa, thuật toán sẽ dừng khi tìm được phương án tối ưu
-    int iterations = 0;
-    
-    while (step != -1) {
-        iterations++;
-        
-        if (step == 3) {
-            // Reset coverage
-            std::fill(rowCovered.begin(), rowCovered.end(), false);
-            std::fill(colCovered.begin(), colCovered.end(), false);
-            std::fill(assignment.begin(), assignment.end(), -1);
-            
-            // Greedy initial assignment - find zeros and make assignments
-            for (int i = 0; i < n; ++i) {
-                for (int j = 0; j < n; ++j) {
-                    if (costMatrix[i][j] == 0 && !rowCovered[i] && !colCovered[j]) {
-                        assignment[i] = j;
-                        rowCovered[i] = true;
-                        colCovered[j] = true;
-                    }
-                }
-            }
-            
-            // Reset coverage for the next step
-            std::fill(rowCovered.begin(), rowCovered.end(), false);
-            std::fill(colCovered.begin(), colCovered.end(), false);
-            
-            step = 4;
-        }
-        
-        else if (step == 4) {
-            // Cover all columns containing assignments
-            for (int i = 0; i < n; ++i) {
-                if (assignment[i] != -1) {
-                    colCovered[assignment[i]] = true;
-                }
-            }
-            
-            // Count covered columns
-            int count = 0;
-            for (int j = 0; j < n; ++j) {
-                if (colCovered[j]) {
-                    count++;
-                }
-            }
-            
-            // If numVehicles columns are covered, we're done - điều kiện dừng chính
-            if (count >= numVehicles) {
-                step = -1; // Finished - đã tìm được phương án tối ưu
-                cout << "INFO: Hungarian algorithm converged after " << iterations << " iterations." << endl;
-            } else {
-                step = 5; // Not done yet
-            }
-        }
-        
-        else if (step == 5) {
-            // Find an uncovered zero
-            int row = -1, col = -1;
+
+    while (true) {
+        // 1. Cover all columns with a starred zero
+        vector<bool> rowCover(n, false), colCover(n, false);
+        for (int j = 0; j < n; ++j)
+            if (colAssign[j] != -1) colCover[j] = true;
+
+        // 2. If n columns are covered, optimal assignment found
+        int count = 0;
+        for (int j = 0; j < n; ++j) if (colCover[j]) ++count;
+        if (count == n) break;
+
+        // 3. Find a non-covered zero
+        vector<vector<bool>> prime(n, vector<bool>(n, false));
+        int zrow = -1, zcol = -1;
+        while (true) {
             bool found = false;
-            
             for (int i = 0; i < n && !found; ++i) {
-                for (int j = 0; j < n && !found; ++j) {
-                    if (costMatrix[i][j] == 0 && !rowCovered[i] && !colCovered[j]) {
-                        row = i;
-                        col = j;
-                        found = true;
+                if (rowCover[i]) continue;
+                for (int j = 0; j < n; ++j) {
+                    if (!colCover[j] && C[i][j] == 0) {
+                        zrow = i; zcol = j; found = true; break;
                     }
                 }
             }
-            
-            if (found) {
-                // Star the found zero
-                assignment[row] = col;
-                
-                // Cover the row and uncover the column
-                rowCovered[row] = true;
-                
-                // Find if there's a starred zero in this column
-                bool starInCol = false;
-                for (int i = 0; i < n; ++i) {
-                    if (i != row && assignment[i] == col) {
-                        starInCol = true;
-                        assignment[i] = -1; // Unstar any previous zero in this column
-                    }
+            if (!found) break; // Step 4: adjust matrix
+            prime[zrow][zcol] = true;
+            // If there's no star in this row, go to augmenting path
+            int starCol = -1;
+            for (int j = 0; j < n; ++j) if (starred[zrow][j]) { starCol = j; break; }
+            if (starCol == -1) {
+                // Augmenting path
+                vector<pair<int, int>> path;
+                path.emplace_back(zrow, zcol);
+                while (true) {
+                    // Find star in this col
+                    int rowStar = -1;
+                    for (int i = 0; i < n; ++i) if (starred[i][path.back().second]) { rowStar = i; break; }
+                    if (rowStar == -1) break;
+                    path.emplace_back(rowStar, path.back().second);
+                    // Find prime in this row
+                    int colPrime = -1;
+                    for (int j = 0; j < n; ++j) if (prime[path.back().first][j]) { colPrime = j; break; }
+                    path.emplace_back(path.back().first, colPrime);
                 }
-                
-                if (!starInCol) {
-                    step = 4; // No starred zero in column, go back to step 4
+                // Invert stars/primes along path
+                for (size_t k = 0; k < path.size(); ++k) {
+                    int r = path[k].first, c = path[k].second;
+                    starred[r][c] = !starred[r][c];
                 }
-                
+                // Clear covers/primes
+                fill(rowCover.begin(), rowCover.end(), false);
+                fill(colCover.begin(), colCover.end(), false);
+                for (auto& v : prime) fill(v.begin(), v.end(), false);
+                // Rebuild rowAssign/colAssign
+                fill(rowAssign.begin(), rowAssign.end(), -1);
+                fill(colAssign.begin(), colAssign.end(), -1);
+                for (int i = 0; i < n; ++i) for (int j = 0; j < n; ++j) {
+                    if (starred[i][j]) { rowAssign[i] = j; colAssign[j] = i; }
+                }
+                break;
             } else {
-                // No uncovered zero found, go to step 6
-                step = 6;
+                rowCover[zrow] = true;
+                colCover[starCol] = false;
             }
         }
-        
-        else if (step == 6) {
-            // Find the smallest uncovered value
-            double minVal = NO_PATH_PENALTY;
-            for (int i = 0; i < n; ++i) {
-                for (int j = 0; j < n; ++j) {
-                    if (!rowCovered[i] && !colCovered[j] && costMatrix[i][j] < minVal) {
-                        minVal = costMatrix[i][j];
-                    }
-                }
-            }
-            
-            // Nếu không tìm được giá trị để điều chỉnh, thuật toán không thể tiếp tục
-            if (minVal == NO_PATH_PENALTY) {
-                cout << "WARNING: Hungarian algorithm cannot make further progress. Terminating." << endl;
-                step = -1;
-                continue;
-            }
-            
-            // Add minVal to all covered rows
-            for (int i = 0; i < n; ++i) {
-                if (rowCovered[i]) {
-                    for (int j = 0; j < n; ++j) {
-                        if (costMatrix[i][j] < NO_PATH_PENALTY) {
-                            costMatrix[i][j] += minVal;
-                        }
-                    }
-                }
-            }
-            
-            // Subtract minVal from all uncovered columns
-            for (int j = 0; j < n; ++j) {
-                if (!colCovered[j]) {
-                    for (int i = 0; i < n; ++i) {
-                        if (costMatrix[i][j] < NO_PATH_PENALTY) {
-                            costMatrix[i][j] -= minVal;
-                        }
-                    }
-                }
-            }
-            
-            step = 5; // Go back to step 5
+
+        // Step 4: adjust matrix
+        double delta = NO_PATH_PENALTY;
+        for (int i = 0; i < n; ++i) if (!rowCover[i]) for (int j = 0; j < n; ++j)
+            if (!colCover[j]) delta = min(delta, C[i][j]);
+        for (int i = 0; i < n; ++i) for (int j = 0; j < n; ++j) {
+            if (rowCover[i]) C[i][j] += delta;
+            if (!colCover[j]) C[i][j] -= delta;
         }
     }
-    
-    cout << "INFO: Hungarian algorithm completed in " << iterations << " iterations." << endl;
-    
-    // Finalize the assignment - ensure we only return valid assignments for real vehicles
+    // Extract assignment
     vector<int> result(numVehicles, -1);
     for (int i = 0; i < numVehicles; ++i) {
-        if (assignment[i] >= 0 && assignment[i] < numDestinations) {
-            result[i] = assignment[i];
-        }
+        for (int j = 0; j < numDestinations; ++j)
+            if (starred[i][j]) { result[i] = j; break; }
     }
-    
-    // Handle any unassigned vehicles using a greedy approach
-    std::vector<bool> destAssigned(numDestinations, false);
-    for (int i = 0; i < numVehicles; ++i) {
-        if (result[i] != -1) {
-            destAssigned[result[i]] = true;
-        }
-    }
-    
-    // Assign any remaining vehicles using minimum cost
-    for (int i = 0; i < numVehicles; ++i) {
-        if (result[i] == -1) {
-            double minCost = NO_PATH_PENALTY;
-            int bestDest = -1;
-            
-            for (int j = 0; j < numDestinations; ++j) {
-                if (!destAssigned[j] && originalCostMatrix[i][j] < minCost) {
-                    minCost = originalCostMatrix[i][j];
-                    bestDest = j;
-                }
-            }
-            
-            if (bestDest != -1) {
-                result[i] = bestDest;
-                destAssigned[bestDest] = true;
-            }
-        }
-    }
-    
-    cout << "\nINFO: Assignment Results:" << std::endl;
-    double totalCost = 0;
-    int assignedCount = 0;
-    
-    for (int i = 0; i < numVehicles; ++i) {
-        if (result[i] != -1) {
-            int j = result[i];
-            double cost = originalCostMatrix[i][j];
-            cout << "Vehicle " << i << " (Edge " << sourceEdges[i] << ") assigned to destination " 
-                 << j << " (Edge " << destEdges[j] << ") with cost " 
-                 << cost << std::endl;
-            
-            if (cost < NO_PATH_PENALTY) {
-                totalCost += cost;
-                assignedCount++;
-            }
-        } else {
-            cout << "Vehicle " << i << " (Edge " << sourceEdges[i] << ") could not be assigned" << std::endl;
-        }
-    }
-    
-    cout << "Total cost: " << totalCost << " (across " << assignedCount << " assignments)" << std::endl;
-    cout << "Total assignments made: " << assignedCount << "/" << numVehicles << std::endl;
-    
     return result;
 }
+
+
 } // namespace veins

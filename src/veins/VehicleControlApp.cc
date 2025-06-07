@@ -20,51 +20,11 @@ void VehicleControlApp::initialize(int stage) {
         mobility = TraCIMobilityAccess().get(getParentModule());
         traciVehicle = mobility->getVehicleCommandInterface();
         int moduleIndex = getParentModule()->getIndex();
-        std::map<int, int> idMapping = {
-                {0, 16},
-                {1, 22},
-                {2, 28},
-                {3, 34},
-                {4, 40},
-                {5, 46},
-                {6, 52},
-                {7, 58},
-                {8, 64},
-                {9, 70},
-                {10, 76},
-                {11, 82},
-                {12, 88},
-                {13, 94},
-                {14, 100},
-                {15, 106},
-                {16, 112},
-                {17, 118},
-                {18, 124},
-                {19, 130},
-                {20, 136},
-                {21, 142},
-                {22, 148},
-                {23, 154},
-                {24, 160},
-                {25, 166},
-                {26, 172},
-                {27, 178},
-                {28, 184},
-                {29, 190},
-                {30, 196},
-                {31, 202},
-                {32, 208},
-                {33, 214},
-                {34, 220},
-                {35, 226},
-                {36, 232},
-                {37, 238}
-        };
+        
+        // Use dynamic formula: simulation_id = 16 + 6 * index
         myInternalId = moduleIndex;
-        auto it = idMapping.find(myInternalId);
-        if (it != idMapping.end()) {
-            mySimulationId = it->second;
-        }
+        mySimulationId = 16 + 6 * myInternalId;
+        
         std::string sumoId = mobility->getExternalId();
         EV << "\n[VEHICLE] ********************************************" << std::endl;
         EV << "[VEHICLE] Initialized with internal ID: " << myInternalId
@@ -90,8 +50,6 @@ void VehicleControlApp::initialize(int stage) {
         pathLength = 0.0;
         graphProcessor.reset(new GraphProcessor(roadNetwork));
         requestAllRoads();
-        EV << "\n[VEHICLE] Requesting road network data from RSU..." << std::endl;
-        EV << "[VEHICLE] Road information will be printed once received." << std::endl;
     } else if (stage == 1) {
         scheduleAt(simTime() + uniform(1.0, 2.0), statusUpdateMsg);
         scheduleAt(simTime() + uniform(3.0, 5.0), requestRoadInfoMsg);
@@ -134,9 +92,6 @@ void VehicleControlApp::onWSM(BaseFrame1609_4* wsm) {
     } 
     else if (data.find("SHORTEST_PATH:") == 0) {
         processShortestPathResponse(data.substr(14));  // Skip "SHORTEST_PATH:"
-    } 
-    else if (data.find("K_PATHS:") == 0) {
-        processKPathsResponse(data.substr(8));  // Skip "K_PATHS:"
     } 
     else if (data.find("DESTINATIONS:") == 0) {
         processDestinationsResponse(data.substr(13));  // Skip "DESTINATIONS:"
@@ -534,24 +489,6 @@ void VehicleControlApp::requestShortestPath(const std::string& sourceId, const s
     EV << "[VEHICLE] Requested shortest path from " << sourceId << " to " << targetId << std::endl;
 }
 
-void VehicleControlApp::requestKPaths(const std::string& sourceId, const std::string& targetId, int k) {
-    // Create request message
-    std::ostringstream oss;
-    oss << "FIND_K_PATHS:" << sourceId << "," << targetId << "," << k;
-
-    // Send message
-    auto* req = new TraCIDemo11pMessage();
-    req->setDemoData(oss.str().c_str());
-    req->setSenderAddress(myId);
-    
-    auto* wsm = new BaseFrame1609_4();
-    wsm->encapsulate(req);
-    populateWSM(wsm);
-    sendDown(wsm);
-    
-    EV << "[VEHICLE] Requested " << k << " paths from " << sourceId << " to " << targetId << std::endl;
-}
-
 void VehicleControlApp::requestDestinations(int count) {
     // Create request message
     std::ostringstream oss;
@@ -754,32 +691,6 @@ void VehicleControlApp::processShortestPathResponse(const std::string& data) {
         }
     }
     EV << std::endl;
-}
-
-void VehicleControlApp::processKPathsResponse(const std::string& data) {
-    size_t colonPos = data.find(':');
-    if (colonPos != std::string::npos) {
-        std::string countStr = data.substr(0, colonPos);
-        std::string pathsStr = data.substr(colonPos + 1);
-        
-        int pathCount = std::stoi(countStr);
-        EV << "[VEHICLE] Received " << pathCount << " paths:" << std::endl;
-        
-        // Split paths (separated by semicolons)
-        std::vector<std::string> pathStrings;
-        std::istringstream iss(pathsStr);
-        std::string pathString;
-        
-        while (std::getline(iss, pathString, ';')) {
-            // Parse each path
-            std::vector<std::string> path = parseRoadList(pathString);
-            
-            EV << "  Path with " << path.size() << " segments:" << std::endl;
-            for (const auto& road : path) {
-                EV << "    - " << road << std::endl;
-            }
-        }
-    }
 }
 
 void VehicleControlApp::processDestinationsResponse(const std::string& data) {

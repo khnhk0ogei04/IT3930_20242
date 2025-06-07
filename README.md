@@ -1,2 +1,1 @@
-
-# Smart Transporatation with OMNET++ và SUMO - IT3930
+IT3930 - Smart Transporation with Time Window.

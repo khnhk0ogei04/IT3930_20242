@@ -31,12 +31,6 @@
     <trip id="t_3" depart="0.00" from="-854" to="1737" via="852 879 1025 -1148 1150 1204 1474 1722"/>
     <trip id="t_30" depart="0.00" from="45" to="-3" via="-55 -444 587"/>
     <trip id="t_31" depart="0.00" from="-37" to="474" via="5 206"/>
-    <trip id="t_32" depart="0.00" departSpeed="4.10" from="-71" to="444"/>
-    <trip id="t_33" depart="0.00" from="92" to="-75" via="214 -219 -190 -172 164 -162"/>
-    <trip id="t_34" depart="0.00" from="-1774" to="1925"/>
-    <trip id="t_35" depart="0.00" from="1469" to="-879" via="-1209 -1154 -1025"/>
-    <trip id="t_36" depart="0.00" from="-865" to="123" via="-92 75 120"/>
-    <trip id="t_37" depart="0.00" departSpeed="4.10" from="-199" to="68"/>
     <trip id="t_4" depart="0.00" from="879" to="-162"/>
     <trip id="t_5" depart="0.00" from="865" to="-214"/>
     <trip id="t_6" depart="0.00" from="1148" to="1747" via="1242"/>
@@ -60,9 +54,6 @@
     </person>
     <person id="p_15" depart="0.00">
         <personTrip from="-1737" to="2149"/>
-    </person>
-    <person id="p_17" depart="0.00">
-        <personTrip from="120" to="172"/>
     </person>
     <person id="p_19" depart="0.00">
         <personTrip from="2158" to="-1934"/>
@@ -171,9 +162,6 @@
     </person>
     <personFlow id="pf_16" begin="5.00" end="3600.00" personsPerHour="549.62">
         <personTrip from="55" to="-1739"/>
-    </personFlow>
-    <personFlow id="pf_17" begin="5.00" end="3600.00" personsPerHour="380.15">
-        <personTrip from="334" to="1972"/>
     </personFlow>
     <personFlow id="pf_15" begin="10.00" end="3600.00" personsPerHour="310.08">
         <personTrip from="-1178" to="-1492"/>

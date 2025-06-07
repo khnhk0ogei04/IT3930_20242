@@ -22,53 +22,10 @@ void RSUControlApp::initialize(int stage) {
     if (stage == 0) {
         vehicleDataMap.clear();
         simulationIdToAddressMap.clear();
-        map<int, int> vehicleIdMapping = {
-            {0, 16},
-            {1, 22},
-            {2, 28},
-            {3, 34},
-            {4, 40},
-            {5, 46},
-            {6, 52},
-            {7, 58},
-            {8, 64},
-            {9, 70},
-            {10, 76},
-            {11, 82},
-            {12, 88},
-            {13, 94},
-            {14, 100},
-            {15, 106},
-            {16, 112},
-            {17, 118},
-            {18, 124},
-            {19, 130},
-            {20, 136},
-            {21, 142},
-            {22, 148},
-            {23, 154},
-            {24, 160},
-            {25, 166},
-            {26, 172},
-            {27, 178},
-            {28, 184},
-            {29, 190},
-            {30, 196},
-            {31, 202},
-            {32, 208},
-            {33, 214},
-            {34, 220},
-            {35, 226},
-            {36, 232},
-            {37, 238}
-        };
-        for (const auto& mapping : vehicleIdMapping) {
-            int internalId = mapping.first;
-            int simulationId = mapping.second;
-            vehicleDataMap[internalId].simulationId = simulationId;
-            EV << "[RSU] Pre-mapped internal vehicle " << internalId
-               << " to simulation ID " << simulationId << std::endl;
-        }
+        
+        // Will be updated when route file is loaded
+        numVehicles = 0;
+        
         mapName = "erlangen";
         routingAlgorithm = "ShortestPath";
         implementationVersion = "2.0";
@@ -95,11 +52,27 @@ void RSUControlApp::initialize(int stage) {
                 EV << "[RSU] Attempting to load route information" << std::endl;
                 if (xmlProcessor->loadRouteFile("./erlangen.rou.xml")) {
                     vector<VehicleInfo> vehicles = xmlProcessor->getVehicles();
+                    
+                    // For informational purposes only
+                    numVehicles = vehicles.size();
+                    EV << "[RSU] Found " << numVehicles << " vehicles in route file" << std::endl;
+                    
                     printVehicleRouteInfo(vehicles);
                 } else {
                     EV << "[RSU] Failed to load route file" << endl;
                 }
             }
+        }
+        
+        // Now create the vehicle ID mapping based on actual vehicle count
+        EV << "[RSU] Pre-mapping " << numVehicles << " vehicles" << std::endl;
+        
+        // Create mapping using formula: simulation_id = 16 + 6 * index
+        for (int internalId = 0; internalId < numVehicles; internalId++) {
+            int simulationId = 16 + 6 * internalId;
+            vehicleDataMap[internalId].simulationId = simulationId;
+            EV << "[RSU] Pre-mapped internal vehicle " << internalId
+               << " to simulation ID " << simulationId << std::endl;
         }
     }
 }
@@ -155,11 +128,34 @@ void RSUControlApp::onWSM(BaseFrame1609_4* wsm) {
 }
 
 void RSUControlApp::updateVehicleIdMapping(LAddress::L2Type vehicleAddress, int simulationId) {
-    // Store the simulation ID in the vehicle data
-    vehicleDataMap[vehicleAddress].simulationId = simulationId;
-
-    // Update the reverse mapping
-    simulationIdToAddressMap[simulationId] = vehicleAddress;
+    // If simulationId is provided, use it directly
+    if (simulationId > 0) {
+        vehicleDataMap[vehicleAddress].simulationId = simulationId;
+        simulationIdToAddressMap[simulationId] = vehicleAddress;
+        EV << "[RSU] Updated mapping: Vehicle address " << vehicleAddress << " -> Simulation ID " << simulationId << std::endl;
+        return;
+    }
+    
+    // If simulationId is not provided or invalid, we need to generate a new one based on next available index
+    if (vehicleDataMap[vehicleAddress].simulationId <= 0) {
+        // Find next available internal ID for this vehicle
+        int nextId = vehicleDataMap.size();
+        
+        // Check if we already have an entry with this ID (should not happen, but just in case)
+        while (vehicleDataMap.find(nextId) != vehicleDataMap.end()) {
+            nextId++;
+        }
+        
+        // Apply our formula: simulation_id = 16 + 6 * index
+        int newSimId = 16 + 6 * nextId;
+        
+        // Store the mapping
+        vehicleDataMap[vehicleAddress].simulationId = newSimId;
+        simulationIdToAddressMap[newSimId] = vehicleAddress;
+        
+        EV << "[RSU] Created new mapping: Vehicle address " << vehicleAddress 
+           << " -> Simulation ID " << newSimId << " (internal index " << nextId << ")" << std::endl;
+    }
 }
 
 void RSUControlApp::handleVehicleMessage(const string& message, LAddress::L2Type vehicleId) {
@@ -355,55 +351,6 @@ void RSUControlApp::handleVehicleMessage(const string& message, LAddress::L2Type
             sendRoadListMessage(vehicleId, errorMsg);
         }
     }
-    // Handle K paths request
-    else if (message.find("FIND_K_PATHS:") == 0 && graphProcessor && taskGenerator) {
-        EV << "[RSU] DEBUG: Received FIND_K_PATHS request: " << message << std::endl;
-        try {
-            std::string params = message.substr(13);
-            size_t firstComma = params.find(',');
-            size_t secondComma = params.find(',', firstComma + 1);
-            
-            if (firstComma != std::string::npos && secondComma != std::string::npos) {
-                std::string sourceId = params.substr(0, firstComma);
-                std::string targetId = params.substr(firstComma + 1, secondComma - firstComma - 1);
-                int k = std::stoi(params.substr(secondComma + 1));
-                
-                EV << "[RSU] Finding " << k << " paths from " << sourceId << " to " << targetId << std::endl;
-                
-                auto paths = taskGenerator->findKPaths(sourceId, targetId, k);
-                
-                EV << "[RSU] Found " << paths.size() << " paths" << std::endl;
-                std::vector<std::string> flattenedPaths;
-                for (size_t i = 0; i < paths.size(); i++) {
-                    const auto& path = paths[i];
-                    
-                    // Log each path for debugging
-                    EV << "[RSU] DEBUG: Path " << (i+1) << " (length " << path.size() << "): ";
-                    for (size_t j = 0; j < path.size(); j++) {
-                        EV << path[j];
-                        if (j < path.size() - 1) EV << " -> ";
-                    }
-                    EV << std::endl;
-                    
-                    for (const auto& roadId : path) {
-                        flattenedPaths.push_back(roadId);
-                    }
-                    flattenedPaths.push_back("PATH_SEPARATOR");
-                }
-                
-                sendRoadListMessage(vehicleId, flattenedPaths);
-            } else {
-                EV << "[RSU] ERROR: Malformed K paths request" << std::endl;
-                std::vector<std::string> errorMsg = {"ERROR: Malformed K paths request"};
-                sendRoadListMessage(vehicleId, errorMsg);
-            }
-        }
-        catch (const std::exception& e) {
-            EV << "[RSU] ERROR in FIND_K_PATHS: " << e.what() << std::endl;
-            std::vector<std::string> errorMsg = {"ERROR: Failed to find paths"};
-            sendRoadListMessage(vehicleId, errorMsg);
-        }
-    }
     // Handle valid assignment check
     else if (message.find("EXISTS_VALID_ASSIGNMENT:") == 0 && taskGenerator) {
         EV << "[RSU] DEBUG: Received EXISTS_VALID_ASSIGNMENT request: " << message << std::endl;
@@ -531,7 +478,7 @@ void RSUControlApp::sendRerouteToAllVehicles() {
 
     // We'll skip the direct TraCI access and just use the vehicle data map
     std::cout << "Rerouting based on stored vehicle data" << std::endl;
-    
+
     int vehiclesRerouted = 0;
 
 
@@ -1182,12 +1129,18 @@ void RSUControlApp::generateAndAssignDestinations(const std::vector<VehicleInfo>
         
         // Get the corresponding simulation ID from the mapping
         auto it = vehicleDataMap.find(vehicleIndex);
-        if (it == vehicleDataMap.end() || it->second.simulationId == -1) {
-            EV << "[RSU] WARNING: Vehicle with index " << vehicleIndex << " not found in vehicleDataMap" << std::endl;
-            continue;
-        }
+        int simulationId;
         
-        int simulationId = it->second.simulationId;
+        if (it == vehicleDataMap.end() || it->second.simulationId == -1) {
+            // Tự động tạo simulation ID nếu chưa có
+            simulationId = 16 + 6 * vehicleIndex;
+            vehicleDataMap[vehicleIndex].simulationId = simulationId;
+            simulationIdToAddressMap[simulationId] = vehicleIndex;
+            EV << "[RSU] Auto-generating simulationId " << simulationId 
+               << " for vehicle index " << vehicleIndex << std::endl;
+        } else {
+            simulationId = it->second.simulationId;
+        }
         
         // Store destination and path data in vehicleDataMap
         int destIndex = (i < assignment.size()) ? assignment[i] : -1;
@@ -1275,23 +1228,27 @@ double RSUControlApp::getEdgeLength(const std::string& edgeId) const {
 // Add new methods for logging
 
 void RSUControlApp::recordVehicleStart(int vehicleId, const std::string& startRoad, double startTime) {
-    // Convertir l'index interne en ID de simulation en utilisant le mapping existant
+    // Chuyển đổi từ index nội bộ sang simulation ID
     int simulationId = -1;
     
-    // Utiliser le mapping existant de RSUControlApp
+    // Sử dụng mapping hiện có của RSUControlApp
     auto it = vehicleDataMap.find(vehicleId);
     if (it != vehicleDataMap.end() && it->second.simulationId != -1) {
         simulationId = it->second.simulationId;
     } else {
-        // Véhicule non trouvé dans le mapping, utiliser l'ID original comme fallback
-        simulationId = vehicleId;
-        std::cout << "WARNING: Vehicle " << vehicleId << " not found in pre-defined mapping, using original ID" << std::endl;
+        // Nếu không tìm thấy mapping, sử dụng công thức tính
+        simulationId = 16 + 6 * vehicleId;
+        // Tự động tạo mapping cho xe này
+        vehicleDataMap[vehicleId].simulationId = simulationId;
+        simulationIdToAddressMap[simulationId] = vehicleId;
+        EV << "[RSU] Auto-creating mapping for vehicle " << vehicleId 
+           << " with simulation ID " << simulationId << std::endl;
     }
     
-    // Enregistrer avec l'ID de simulation
+    // Ghi lại với ID simulation
     SimulationLogger::getInstance().recordVehicleStart(simulationId, startRoad, startTime);
     
-    // Log
+    // Ghi log
     EV << "[RSU] Vehicle " << vehicleId << " (sim ID: " << simulationId << ") started at time " << startTime 
        << " from road " << startRoad << std::endl;
 }
@@ -1303,6 +1260,14 @@ void RSUControlApp::recordVehicleDestination(int vehicleId, const std::string& t
     auto it = vehicleDataMap.find(vehicleId);
     if (it != vehicleDataMap.end() && it->second.simulationId != -1) {
         simulationId = it->second.simulationId;
+    } else {
+        // Nếu không tìm thấy mapping, sử dụng công thức tính
+        simulationId = 16 + 6 * vehicleId;
+        // Tự động tạo mapping cho xe này
+        vehicleDataMap[vehicleId].simulationId = simulationId;
+        simulationIdToAddressMap[simulationId] = vehicleId;
+        EV << "[RSU] Auto-creating mapping for vehicle " << vehicleId 
+           << " with simulation ID " << simulationId << std::endl;
     }
     SimulationLogger::getInstance().updateVehicleDestination(
         simulationId, targetRoad, earliestArrival, latestArrival, path, pathLength);
@@ -1313,6 +1278,14 @@ void RSUControlApp::recordAlgorithmTime(int vehicleId, double algorithmTime) {
     auto it = vehicleDataMap.find(vehicleId);
     if (it != vehicleDataMap.end() && it->second.simulationId != -1) {
         simulationId = it->second.simulationId;
+    } else {
+        // Nếu không tìm thấy mapping, sử dụng công thức tính
+        simulationId = 16 + 6 * vehicleId;
+        // Tự động tạo mapping cho xe này
+        vehicleDataMap[vehicleId].simulationId = simulationId;
+        simulationIdToAddressMap[simulationId] = vehicleId;
+        EV << "[RSU] Auto-creating mapping for vehicle " << vehicleId 
+           << " with simulation ID " << simulationId << std::endl;
     }
     SimulationLogger::getInstance().recordAlgorithmTime(simulationId, algorithmTime);
     EV << "[RSU] Vehicle " << vehicleId << " (sim ID: " << simulationId << ") routing algorithm took " 
@@ -1344,4 +1317,3 @@ void RSUControlApp::processVehicleArrivalNotification(const std::string& data) {
            << arrivalTime << std::endl;
     }
 }
-

@@ -61,13 +61,13 @@ std::vector<Destination> TaskGenerator::generateDestinations(int n, unsigned see
     return destinations;
 }
 
-std::vector<std::vector<std::string>> TaskGenerator::findKPaths(
-    const std::string& sourceId,
-    const std::string& destinationId,
-    int k) {
-
-    return graphProcessor.findKShortestPaths(sourceId, destinationId, k);
-}
+//std::vector<std::vector<std::string>> TaskGenerator::findKPaths(
+//    const std::string& sourceId,
+//    const std::string& destinationId,
+//    int k) {
+//
+//    return graphProcessor.findKShortestPaths(sourceId, destinationId, k);
+//}
 
 bool TaskGenerator::existsValidAssignment(
     const std::vector<std::string>& sources,
@@ -153,35 +153,16 @@ std::vector<std::string> TaskGenerator::getPotentialDestinationEdges(int n, cons
                 // For now, we only require at least one source to have a valid path
             }
         }
-        
-        // If the destination is reachable from at least one source, add it
         if (isValidForAny) {
             validDestinations.push_back(destEdge);
         }
         
-        // If we've found enough valid destinations, stop searching
-        if (validDestinations.size() >= n * 2) { // Get extra for safety
-            break;
-        }
     }
-    
-    // If we didn't find enough valid destinations, log a warning
-    if (validDestinations.size() < n) {
-        std::cout << "WARNING: Could only find " << validDestinations.size() 
-                  << " valid destinations, requested " << n << std::endl;
-    }
-    
-    // Shuffle again to randomize order
     std::shuffle(validDestinations.begin(), validDestinations.end(), rng);
-    
-    // Take up to n valid destinations
     for (int i = 0; i < std::min(static_cast<size_t>(n), validDestinations.size()); ++i) {
         potentialDestEdges.push_back(validDestinations[i]);
     }
-
-    // Log some information about the destinations
     std::cout << "INFO: Selected " << potentialDestEdges.size() << " valid destinations" << std::endl;
-    
     return potentialDestEdges;
 }
 

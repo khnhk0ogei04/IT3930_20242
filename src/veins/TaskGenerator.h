@@ -13,7 +13,6 @@ namespace veins {
 struct TimeWindow {
     double earliness;  // Earliest arrival time
     double tardiness;  // Latest arrival time
-
     TimeWindow(double early = 0.0, double late = 0.0)
         : earliness(early), tardiness(late) {}
 };
@@ -21,7 +20,6 @@ struct TimeWindow {
 struct Destination {
     string nodeId; 
     TimeWindow timeWindow;  
-
     Destination(const string& id = "", const TimeWindow& tw = TimeWindow())
         : nodeId(id), timeWindow(tw) {}
 
@@ -39,7 +37,6 @@ public:
     TaskGenerator(const GraphProcessor& processor);
     vector<Destination> generateDestinations(int n, unsigned seedValue = 0);
     vector<string> getPotentialDestinationEdges(int n, const vector<string>& huidigeSourceEdges, unsigned seedValue = 0);
-    vector<vector<string>> findKPaths(const string& sourceId, const string& destinationId, int k);
     bool existsValidAssignment(const vector<string>& sources, const vector<string>& destinations);
     mt19937& getRNG() { return rng; }
 private:
