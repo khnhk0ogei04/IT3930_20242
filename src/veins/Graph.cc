@@ -14,9 +14,25 @@ void Graph::addNode(string id, double x, double y) {
     }
 }
 
+Edge Graph::getEdge(string edgeId) const {
+    auto it = edges.find(edgeId);
+    if (it != edges.end()) {
+        return it->second;
+    }
+    return Edge();
+}
+
 void Graph::addEdge(string from, string to, double length, string id) {
     Edge edge(id, from, to, length, "");
-    addEdge(edge);
+    if (nodes.find(from) == nodes.end()) {
+        nodes[from] = Node(from);
+    }
+    if (nodes.find(to) == nodes.end()) {
+        nodes[to] = Node(to);
+    }
+    adjList[from].push_back(edge);
+    edges[id] = edge;
+    edgeCount++;
 }
 
 void Graph::addEdge(const Edge& edge) {
@@ -45,17 +61,6 @@ size_t Graph::getEdgeCount() const {
     return edgeCount;
 }
 
-void Graph::printNeighbors() const {
-    for (const auto& nodePair : adjList) {
-        string fromId = nodePair.first;
-        const vector<Edge> edges = nodePair.second;
-        cout << "Node " << fromId << " adjacent to:\n";
-        for (const auto& edge : edges) {
-            cout << "  - Node " << edge.getTo() << " (Distance: " << edge.getLength() << ")\n";
-        }
-    }
-}
-
 vector<Edge> Graph::getRoadsFromXml(string filePath) {
     return veins::XMLProcessor::getRoadsFromXml(filePath);
 }
@@ -75,14 +80,6 @@ bool parseNetXml(string filePath, Graph& graph) {
     for (Edge edge: roads){
         graph.addEdge(edge);
     }
-
     return (!junctions.empty() || !roads.empty());
 }
 
-Edge Graph::getEdge(string edgeId) const {
-    auto it = edges.find(edgeId);
-    if (it != edges.end()) {
-        return it->second;
-    }
-    return Edge();
-}

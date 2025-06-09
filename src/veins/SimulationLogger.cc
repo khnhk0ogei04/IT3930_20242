@@ -22,10 +22,10 @@ SimulationLogger::~SimulationLogger() {
 
 void SimulationLogger::recordVehicleStart(int vehicleId, const std::string& startRoad, double startTime) {
     std::lock_guard<std::mutex> lock(mutex);
-    VehicleStats& stats = vehicleStats[vehicleId];
-    stats.vehicleId = vehicleId;
-    stats.startingRoad = startRoad;
-    stats.startTime = startTime;
+    Vehicle& vehicle = vehicleStats[vehicleId];
+    vehicle.vehicleId = vehicleId;
+    vehicle.startingRoad = startRoad;
+    vehicle.start(startTime);
 }
 
 void SimulationLogger::updateVehicleDestination(int vehicleId, const std::string& destination, 
@@ -39,27 +39,27 @@ void SimulationLogger::updateVehicleDestination(int vehicleId, const std::string
         it->second.targetRoad = destination;
         it->second.earliestArrival = earliestArrival;
         it->second.latestArrival = latestArrival;
-        it->second.path = path;
+        it->second.plannedPath = path;
         it->second.pathLength = pathLength;
         it->second.estimatedTravelTime = estimatedTravelTime;
     } else {
-        VehicleStats stats;
-        stats.vehicleId = vehicleId;
-        stats.targetRoad = destination;
-        stats.earliestArrival = earliestArrival;
-        stats.latestArrival = latestArrival;
-        stats.path = path;
-        stats.pathLength = pathLength;
-        stats.estimatedTravelTime = estimatedTravelTime;
+        Vehicle vehicle;
+        vehicle.vehicleId = vehicleId;
+        vehicle.targetRoad = destination;
+        vehicle.earliestArrival = earliestArrival;
+        vehicle.latestArrival = latestArrival;
+        vehicle.plannedPath = path;
+        vehicle.pathLength = pathLength;
+        vehicle.estimatedTravelTime = estimatedTravelTime;
         
-        vehicleStats[vehicleId] = stats;
+        vehicleStats[vehicleId] = vehicle;
     }
 }
 
 void SimulationLogger::recordAlgorithmTime(int vehicleId, double algorithmTime) {
     std::lock_guard<std::mutex> lock(mutex);
-    VehicleStats& stats = vehicleStats[vehicleId];
-    stats.algorithmTime = algorithmTime;
+    Vehicle& vehicle = vehicleStats[vehicleId];
+    vehicle.algorithmTime = algorithmTime;
     
     // Log
     std::cout << "Vehicle " << vehicleId << " routing algorithm time: " 
@@ -74,9 +74,9 @@ void SimulationLogger::recordVehicleEnd(int vehicleId, double endTime) {
         std::cout << "SimulationLogger: WARNING - Recording end for unknown vehicle " 
                   << vehicleId << " at time " << endTime << std::endl;
         // create new record for this vehicle if it doesn't exist
-        vehicleStats[vehicleId] = VehicleStats();
+        vehicleStats[vehicleId] = Vehicle();
         vehicleStats[vehicleId].vehicleId = vehicleId;
-        vehicleStats[vehicleId].endTime = endTime;
+        vehicleStats[vehicleId].finish(endTime);
     } else {
         it->second.endTime = endTime;
         
@@ -156,15 +156,15 @@ void SimulationLogger::calculateSummaryStats() {
     summary.totalAlgorithmTime = 0;
     
     for (const auto& pair : vehicleStats) {
-        const VehicleStats& stats = pair.second;
+        const Vehicle& vehicle = pair.second;
         
-        if (!stats.arrivedOnTime) {
+        if (!vehicle.arrivedOnTime) {
             summary.lateVehicles++;
         }
         
-        summary.totalTravelTime += stats.travelTime;
-        summary.totalTimeWindowDeviation += stats.timeWindowDeviation;
-        summary.totalAlgorithmTime += stats.algorithmTime;
+        summary.totalTravelTime += vehicle.travelTime;
+        summary.totalTimeWindowDeviation += vehicle.timeWindowDeviation;
+        summary.totalAlgorithmTime += vehicle.algorithmTime;
     }
     summary.objectiveFunctionValue = summary.totalTravelTime + summary.totalTimeWindowDeviation;
     summaryCalculated = true;
@@ -236,19 +236,19 @@ void SimulationLogger::saveToCSV(const std::string& filename) {
              
         // Vehicle data
         for (const auto& pair : vehicleStats) {
-            const VehicleStats& stats = pair.second;
-            file << stats.vehicleId << ","
-                 << stats.startingRoad << ","
-                 << stats.targetRoad << ","
-                 << stats.startTime << ","
-                 << stats.endTime << ","
-                 << stats.travelTime << ","
-                 << stats.earliestArrival << ","
-                 << stats.latestArrival << ","
-                 << stats.timeWindowDeviation << ","
-                 << (stats.arrivedOnTime ? "Yes" : "No") << ","
-                 << stats.pathLength << ","
-                 << stats.algorithmTime << std::endl;
+            const Vehicle& vehicle = pair.second;
+            file << vehicle.vehicleId << ","
+                 << vehicle.startingRoad << ","
+                 << vehicle.targetRoad << ","
+                 << vehicle.startTime << ","
+                 << vehicle.endTime << ","
+                 << vehicle.travelTime << ","
+                 << vehicle.earliestArrival << ","
+                 << vehicle.latestArrival << ","
+                 << vehicle.timeWindowDeviation << ","
+                 << (vehicle.arrivedOnTime ? "Yes" : "No") << ","
+                 << vehicle.pathLength << ","
+                 << vehicle.algorithmTime << std::endl;
         }
         
         file.close();

@@ -1,14 +1,14 @@
 version 2
-run General-0-20250607-11:20:04-31308
+run General-0-20250610-03:49:33-11064
 attr configname General
-attr datetime 20250607-11:20:04
+attr datetime 20250610-03:49:33
 attr experiment General
 attr inifile omnetpp.ini
 attr iterationvars ""
 attr iterationvarsf ""
 attr measurement ""
 attr network RSUExampleScenario
-attr processid 31308
+attr processid 11064
 attr repetition 0
 attr replication #0
 attr resultdir results
@@ -71,1252 +71,1252 @@ param *.node[*0].veinsmobility.accidentCount 1
 param *.node[*0].veinsmobility.accidentStart 73s
 param *.node[*0].veinsmobility.accidentDuration 50s
 
-scalar RSUExampleScenario.node[10].appl generatedWSMs 21
-scalar RSUExampleScenario.node[10].appl receivedWSMs 497
-scalar RSUExampleScenario.node[10].appl generatedBSMs 0
-scalar RSUExampleScenario.node[10].appl receivedBSMs 0
-scalar RSUExampleScenario.node[10].appl generatedWSAs 0
-scalar RSUExampleScenario.node[10].appl receivedWSAs 0
-scalar RSUExampleScenario.node[10].nic.phy80211p busyTime 0.012238
-scalar RSUExampleScenario.node[10].nic.mac1609_4 ReceivedUnicastPackets 5
-scalar RSUExampleScenario.node[10].nic.mac1609_4 ReceivedBroadcasts 492
-scalar RSUExampleScenario.node[10].nic.mac1609_4 SentPackets 21
-scalar RSUExampleScenario.node[10].nic.mac1609_4 SentAcknowledgements 0
-scalar RSUExampleScenario.node[10].nic.mac1609_4 RetriesExceeded 0
-scalar RSUExampleScenario.node[10].nic.mac1609_4 SNIRLostPackets 149
-scalar RSUExampleScenario.node[10].nic.mac1609_4 RXTXLostPackets 58
-scalar RSUExampleScenario.node[10].nic.mac1609_4 TotalLostPackets 207
-scalar RSUExampleScenario.node[10].nic.mac1609_4 DroppedPacketsInMac 0
-scalar RSUExampleScenario.node[10].nic.mac1609_4 TooLittleTime 0
-scalar RSUExampleScenario.node[10].nic.mac1609_4 TimesIntoBackoff 21
-scalar RSUExampleScenario.node[10].nic.mac1609_4 SlotsBackoff 22
-scalar RSUExampleScenario.node[10].nic.mac1609_4 NumInternalContention 0
-scalar RSUExampleScenario.node[10].nic.mac1609_4 totalBusyTime 0.183301
-scalar RSUExampleScenario.node[10].nic.mac1609_4 retriesExceeded:count 0
-attr source org_car2x_veins_modules_mac_sigRetriesExceeded
-scalar RSUExampleScenario.node[10].nic.mac1609_4 sentAcks:count 0
-attr source org_car2x_veins_modules_mac_sigSentAck
-scalar RSUExampleScenario.node[10].nic.mac1609_4 sentPackets:count 21
-attr source org_car2x_veins_modules_mac_sigSentPacket
-scalar RSUExampleScenario.node[10].nic.mac1609_4 collisions:count 0
-attr source org_car2x_veins_modules_mac_sigCollision
-scalar RSUExampleScenario.node[10].nic.mac1609_4 channelBusy:timeavg 0.0114563125
-attr source org_car2x_veins_modules_mac_sigChannelBusy
-scalar RSUExampleScenario.node[10].veinsmobility startTime 1
-scalar RSUExampleScenario.node[10].veinsmobility totalTime 15
-scalar RSUExampleScenario.node[10].veinsmobility stopTime 17
-scalar RSUExampleScenario.node[10].veinsmobility minSpeed 4.0918091744229
-scalar RSUExampleScenario.node[10].veinsmobility maxSpeed 15.62161494314
-scalar RSUExampleScenario.node[10].veinsmobility totalDistance 186.65893571056
-scalar RSUExampleScenario.node[10].veinsmobility totalCO2Emission 57.986941273908
-scalar RSUExampleScenario.node[24].appl generatedWSMs 26
-scalar RSUExampleScenario.node[24].appl receivedWSMs 495
-scalar RSUExampleScenario.node[24].appl generatedBSMs 0
-scalar RSUExampleScenario.node[24].appl receivedBSMs 0
-scalar RSUExampleScenario.node[24].appl generatedWSAs 0
-scalar RSUExampleScenario.node[24].appl receivedWSAs 0
-scalar RSUExampleScenario.node[24].nic.phy80211p busyTime 0.0128876
-scalar RSUExampleScenario.node[24].nic.mac1609_4 ReceivedUnicastPackets 8
-scalar RSUExampleScenario.node[24].nic.mac1609_4 ReceivedBroadcasts 487
-scalar RSUExampleScenario.node[24].nic.mac1609_4 SentPackets 26
-scalar RSUExampleScenario.node[24].nic.mac1609_4 SentAcknowledgements 0
-scalar RSUExampleScenario.node[24].nic.mac1609_4 RetriesExceeded 0
-scalar RSUExampleScenario.node[24].nic.mac1609_4 SNIRLostPackets 353
-scalar RSUExampleScenario.node[24].nic.mac1609_4 RXTXLostPackets 52
-scalar RSUExampleScenario.node[24].nic.mac1609_4 TotalLostPackets 405
-scalar RSUExampleScenario.node[24].nic.mac1609_4 DroppedPacketsInMac 0
-scalar RSUExampleScenario.node[24].nic.mac1609_4 TooLittleTime 0
-scalar RSUExampleScenario.node[24].nic.mac1609_4 TimesIntoBackoff 26
-scalar RSUExampleScenario.node[24].nic.mac1609_4 SlotsBackoff 40
-scalar RSUExampleScenario.node[24].nic.mac1609_4 NumInternalContention 0
-scalar RSUExampleScenario.node[24].nic.mac1609_4 totalBusyTime 0.236202
-scalar RSUExampleScenario.node[24].nic.mac1609_4 retriesExceeded:count 0
-attr source org_car2x_veins_modules_mac_sigRetriesExceeded
-scalar RSUExampleScenario.node[24].nic.mac1609_4 sentAcks:count 0
-attr source org_car2x_veins_modules_mac_sigSentAck
-scalar RSUExampleScenario.node[24].nic.mac1609_4 sentPackets:count 26
-attr source org_car2x_veins_modules_mac_sigSentPacket
-scalar RSUExampleScenario.node[24].nic.mac1609_4 collisions:count 0
-attr source org_car2x_veins_modules_mac_sigCollision
-scalar RSUExampleScenario.node[24].nic.mac1609_4 channelBusy:timeavg 0.0118101
-attr source org_car2x_veins_modules_mac_sigChannelBusy
-scalar RSUExampleScenario.node[24].veinsmobility startTime 1
-scalar RSUExampleScenario.node[24].veinsmobility totalTime 19
-scalar RSUExampleScenario.node[24].veinsmobility stopTime 21
-scalar RSUExampleScenario.node[24].veinsmobility minSpeed 3.9444516137408
-scalar RSUExampleScenario.node[24].veinsmobility maxSpeed 13.028902469393
-scalar RSUExampleScenario.node[24].veinsmobility totalDistance 183.39607820728
-scalar RSUExampleScenario.node[24].veinsmobility totalCO2Emission 62.661797862508
-scalar RSUExampleScenario.manager roiArea 0
-scalar RSUExampleScenario.rsu[0].appl generatedWSMs 354
-scalar RSUExampleScenario.rsu[0].appl receivedWSMs 623
-scalar RSUExampleScenario.rsu[0].appl generatedBSMs 0
-scalar RSUExampleScenario.rsu[0].appl receivedBSMs 0
-scalar RSUExampleScenario.rsu[0].appl generatedWSAs 0
-scalar RSUExampleScenario.rsu[0].appl receivedWSAs 0
-scalar RSUExampleScenario.rsu[0].nic.phy80211p busyTime 0.0086613333333334
-scalar RSUExampleScenario.rsu[0].nic.mac1609_4 ReceivedUnicastPackets 0
-scalar RSUExampleScenario.rsu[0].nic.mac1609_4 ReceivedBroadcasts 623
-scalar RSUExampleScenario.rsu[0].nic.mac1609_4 SentPackets 354
-scalar RSUExampleScenario.rsu[0].nic.mac1609_4 SentAcknowledgements 0
-scalar RSUExampleScenario.rsu[0].nic.mac1609_4 RetriesExceeded 0
-scalar RSUExampleScenario.rsu[0].nic.mac1609_4 SNIRLostPackets 161
-scalar RSUExampleScenario.rsu[0].nic.mac1609_4 RXTXLostPackets 51
-scalar RSUExampleScenario.rsu[0].nic.mac1609_4 TotalLostPackets 212
-scalar RSUExampleScenario.rsu[0].nic.mac1609_4 DroppedPacketsInMac 0
-scalar RSUExampleScenario.rsu[0].nic.mac1609_4 TooLittleTime 0
-scalar RSUExampleScenario.rsu[0].nic.mac1609_4 TimesIntoBackoff 354
-scalar RSUExampleScenario.rsu[0].nic.mac1609_4 SlotsBackoff 1291
-scalar RSUExampleScenario.rsu[0].nic.mac1609_4 NumInternalContention 0
-scalar RSUExampleScenario.rsu[0].nic.mac1609_4 totalBusyTime 0.23653
-scalar RSUExampleScenario.rsu[0].nic.mac1609_4 retriesExceeded:count 0
-attr source org_car2x_veins_modules_mac_sigRetriesExceeded
-scalar RSUExampleScenario.rsu[0].nic.mac1609_4 sentAcks:count 0
-attr source org_car2x_veins_modules_mac_sigSentAck
-scalar RSUExampleScenario.rsu[0].nic.mac1609_4 sentPackets:count 354
-attr source org_car2x_veins_modules_mac_sigSentPacket
-scalar RSUExampleScenario.rsu[0].nic.mac1609_4 collisions:count 0
-attr source org_car2x_veins_modules_mac_sigCollision
-scalar RSUExampleScenario.rsu[0].nic.mac1609_4 channelBusy:timeavg 0.011263333333334
-attr source org_car2x_veins_modules_mac_sigChannelBusy
-scalar RSUExampleScenario.node[0].appl generatedWSMs 26
-scalar RSUExampleScenario.node[0].appl receivedWSMs 506
-scalar RSUExampleScenario.node[0].appl generatedBSMs 0
-scalar RSUExampleScenario.node[0].appl receivedBSMs 0
-scalar RSUExampleScenario.node[0].appl generatedWSAs 0
-scalar RSUExampleScenario.node[0].appl receivedWSAs 0
-scalar RSUExampleScenario.node[0].nic.phy80211p busyTime 0.0128064
-scalar RSUExampleScenario.node[0].nic.mac1609_4 ReceivedUnicastPackets 6
-scalar RSUExampleScenario.node[0].nic.mac1609_4 ReceivedBroadcasts 500
-scalar RSUExampleScenario.node[0].nic.mac1609_4 SentPackets 26
-scalar RSUExampleScenario.node[0].nic.mac1609_4 SentAcknowledgements 0
-scalar RSUExampleScenario.node[0].nic.mac1609_4 RetriesExceeded 0
-scalar RSUExampleScenario.node[0].nic.mac1609_4 SNIRLostPackets 332
-scalar RSUExampleScenario.node[0].nic.mac1609_4 RXTXLostPackets 59
-scalar RSUExampleScenario.node[0].nic.mac1609_4 TotalLostPackets 391
-scalar RSUExampleScenario.node[0].nic.mac1609_4 DroppedPacketsInMac 0
-scalar RSUExampleScenario.node[0].nic.mac1609_4 TooLittleTime 0
-scalar RSUExampleScenario.node[0].nic.mac1609_4 TimesIntoBackoff 26
-scalar RSUExampleScenario.node[0].nic.mac1609_4 SlotsBackoff 41
-scalar RSUExampleScenario.node[0].nic.mac1609_4 NumInternalContention 0
-scalar RSUExampleScenario.node[0].nic.mac1609_4 totalBusyTime 0.236202109244
-scalar RSUExampleScenario.node[0].nic.mac1609_4 retriesExceeded:count 0
-attr source org_car2x_veins_modules_mac_sigRetriesExceeded
-scalar RSUExampleScenario.node[0].nic.mac1609_4 sentAcks:count 0
-attr source org_car2x_veins_modules_mac_sigSentAck
-scalar RSUExampleScenario.node[0].nic.mac1609_4 sentPackets:count 26
-attr source org_car2x_veins_modules_mac_sigSentPacket
-scalar RSUExampleScenario.node[0].nic.mac1609_4 collisions:count 0
-attr source org_car2x_veins_modules_mac_sigCollision
-scalar RSUExampleScenario.node[0].nic.mac1609_4 channelBusy:timeavg 0.0118101054622
-attr source org_car2x_veins_modules_mac_sigChannelBusy
-scalar RSUExampleScenario.node[0].veinsmobility startTime 1
-scalar RSUExampleScenario.node[0].veinsmobility totalTime 20
-scalar RSUExampleScenario.node[0].veinsmobility stopTime 21
-scalar RSUExampleScenario.node[0].veinsmobility minSpeed 4.0772753175295
-scalar RSUExampleScenario.node[0].veinsmobility maxSpeed 15.475586824666
-scalar RSUExampleScenario.node[0].veinsmobility totalDistance 220.84374785825
-scalar RSUExampleScenario.node[0].veinsmobility totalCO2Emission 84.858515405215
-scalar RSUExampleScenario.node[1].appl generatedWSMs 26
-scalar RSUExampleScenario.node[1].appl receivedWSMs 615
-scalar RSUExampleScenario.node[1].appl generatedBSMs 0
-scalar RSUExampleScenario.node[1].appl receivedBSMs 0
-scalar RSUExampleScenario.node[1].appl generatedWSAs 0
-scalar RSUExampleScenario.node[1].appl receivedWSAs 0
-scalar RSUExampleScenario.node[1].nic.phy80211p busyTime 0.0129804
-scalar RSUExampleScenario.node[1].nic.mac1609_4 ReceivedUnicastPackets 10
-scalar RSUExampleScenario.node[1].nic.mac1609_4 ReceivedBroadcasts 605
-scalar RSUExampleScenario.node[1].nic.mac1609_4 SentPackets 26
-scalar RSUExampleScenario.node[1].nic.mac1609_4 SentAcknowledgements 0
-scalar RSUExampleScenario.node[1].nic.mac1609_4 RetriesExceeded 0
-scalar RSUExampleScenario.node[1].nic.mac1609_4 SNIRLostPackets 240
-scalar RSUExampleScenario.node[1].nic.mac1609_4 RXTXLostPackets 44
-scalar RSUExampleScenario.node[1].nic.mac1609_4 TotalLostPackets 284
-scalar RSUExampleScenario.node[1].nic.mac1609_4 DroppedPacketsInMac 0
-scalar RSUExampleScenario.node[1].nic.mac1609_4 TooLittleTime 0
-scalar RSUExampleScenario.node[1].nic.mac1609_4 TimesIntoBackoff 26
-scalar RSUExampleScenario.node[1].nic.mac1609_4 SlotsBackoff 33
-scalar RSUExampleScenario.node[1].nic.mac1609_4 NumInternalContention 0
-scalar RSUExampleScenario.node[1].nic.mac1609_4 totalBusyTime 0.236202145814
-scalar RSUExampleScenario.node[1].nic.mac1609_4 retriesExceeded:count 0
-attr source org_car2x_veins_modules_mac_sigRetriesExceeded
-scalar RSUExampleScenario.node[1].nic.mac1609_4 sentAcks:count 0
-attr source org_car2x_veins_modules_mac_sigSentAck
-scalar RSUExampleScenario.node[1].nic.mac1609_4 sentPackets:count 26
-attr source org_car2x_veins_modules_mac_sigSentPacket
-scalar RSUExampleScenario.node[1].nic.mac1609_4 collisions:count 0
-attr source org_car2x_veins_modules_mac_sigCollision
-scalar RSUExampleScenario.node[1].nic.mac1609_4 channelBusy:timeavg 0.0118101072907
-attr source org_car2x_veins_modules_mac_sigChannelBusy
-scalar RSUExampleScenario.node[1].veinsmobility startTime 1
-scalar RSUExampleScenario.node[1].veinsmobility totalTime 20
-scalar RSUExampleScenario.node[1].veinsmobility stopTime 21
-scalar RSUExampleScenario.node[1].veinsmobility minSpeed 4.0059263462998
-scalar RSUExampleScenario.node[1].veinsmobility maxSpeed 14.561605310516
-scalar RSUExampleScenario.node[1].veinsmobility totalDistance 220.57179958204
-scalar RSUExampleScenario.node[1].veinsmobility totalCO2Emission 72.966032467373
-scalar RSUExampleScenario.node[2].appl generatedWSMs 27
-scalar RSUExampleScenario.node[2].appl receivedWSMs 569
-scalar RSUExampleScenario.node[2].appl generatedBSMs 0
-scalar RSUExampleScenario.node[2].appl receivedBSMs 0
-scalar RSUExampleScenario.node[2].appl generatedWSAs 0
-scalar RSUExampleScenario.node[2].appl receivedWSAs 0
-scalar RSUExampleScenario.node[2].nic.phy80211p busyTime 0.0128528
-scalar RSUExampleScenario.node[2].nic.mac1609_4 ReceivedUnicastPackets 9
-scalar RSUExampleScenario.node[2].nic.mac1609_4 ReceivedBroadcasts 560
-scalar RSUExampleScenario.node[2].nic.mac1609_4 SentPackets 27
-scalar RSUExampleScenario.node[2].nic.mac1609_4 SentAcknowledgements 0
-scalar RSUExampleScenario.node[2].nic.mac1609_4 RetriesExceeded 0
-scalar RSUExampleScenario.node[2].nic.mac1609_4 SNIRLostPackets 276
-scalar RSUExampleScenario.node[2].nic.mac1609_4 RXTXLostPackets 54
-scalar RSUExampleScenario.node[2].nic.mac1609_4 TotalLostPackets 330
-scalar RSUExampleScenario.node[2].nic.mac1609_4 DroppedPacketsInMac 0
-scalar RSUExampleScenario.node[2].nic.mac1609_4 TooLittleTime 0
-scalar RSUExampleScenario.node[2].nic.mac1609_4 TimesIntoBackoff 27
-scalar RSUExampleScenario.node[2].nic.mac1609_4 SlotsBackoff 45
-scalar RSUExampleScenario.node[2].nic.mac1609_4 NumInternalContention 0
-scalar RSUExampleScenario.node[2].nic.mac1609_4 totalBusyTime 0.236203
-scalar RSUExampleScenario.node[2].nic.mac1609_4 retriesExceeded:count 0
-attr source org_car2x_veins_modules_mac_sigRetriesExceeded
-scalar RSUExampleScenario.node[2].nic.mac1609_4 sentAcks:count 0
-attr source org_car2x_veins_modules_mac_sigSentAck
-scalar RSUExampleScenario.node[2].nic.mac1609_4 sentPackets:count 27
-attr source org_car2x_veins_modules_mac_sigSentPacket
-scalar RSUExampleScenario.node[2].nic.mac1609_4 collisions:count 0
-attr source org_car2x_veins_modules_mac_sigCollision
-scalar RSUExampleScenario.node[2].nic.mac1609_4 channelBusy:timeavg 0.01181015
-attr source org_car2x_veins_modules_mac_sigChannelBusy
-scalar RSUExampleScenario.node[2].veinsmobility startTime 1
-scalar RSUExampleScenario.node[2].veinsmobility totalTime 20
-scalar RSUExampleScenario.node[2].veinsmobility stopTime 21
-scalar RSUExampleScenario.node[2].veinsmobility minSpeed 3.9860061362494
-scalar RSUExampleScenario.node[2].veinsmobility maxSpeed 14.303056089052
-scalar RSUExampleScenario.node[2].veinsmobility totalDistance 211.95725576224
-scalar RSUExampleScenario.node[2].veinsmobility totalCO2Emission 72.592333490168
-scalar RSUExampleScenario.node[3].appl generatedWSMs 26
-scalar RSUExampleScenario.node[3].appl receivedWSMs 545
-scalar RSUExampleScenario.node[3].appl generatedBSMs 0
-scalar RSUExampleScenario.node[3].appl receivedBSMs 0
-scalar RSUExampleScenario.node[3].appl generatedWSAs 0
-scalar RSUExampleScenario.node[3].appl receivedWSAs 0
-scalar RSUExampleScenario.node[3].nic.phy80211p busyTime 0.01305
-scalar RSUExampleScenario.node[3].nic.mac1609_4 ReceivedUnicastPackets 10
-scalar RSUExampleScenario.node[3].nic.mac1609_4 ReceivedBroadcasts 535
-scalar RSUExampleScenario.node[3].nic.mac1609_4 SentPackets 25
-scalar RSUExampleScenario.node[3].nic.mac1609_4 SentAcknowledgements 0
-scalar RSUExampleScenario.node[3].nic.mac1609_4 RetriesExceeded 0
-scalar RSUExampleScenario.node[3].nic.mac1609_4 SNIRLostPackets 319
-scalar RSUExampleScenario.node[3].nic.mac1609_4 RXTXLostPackets 39
-scalar RSUExampleScenario.node[3].nic.mac1609_4 TotalLostPackets 358
-scalar RSUExampleScenario.node[3].nic.mac1609_4 DroppedPacketsInMac 0
-scalar RSUExampleScenario.node[3].nic.mac1609_4 TooLittleTime 0
-scalar RSUExampleScenario.node[3].nic.mac1609_4 TimesIntoBackoff 25
-scalar RSUExampleScenario.node[3].nic.mac1609_4 SlotsBackoff 38
-scalar RSUExampleScenario.node[3].nic.mac1609_4 NumInternalContention 0
-scalar RSUExampleScenario.node[3].nic.mac1609_4 totalBusyTime 0.236201133166
-scalar RSUExampleScenario.node[3].nic.mac1609_4 retriesExceeded:count 0
-attr source org_car2x_veins_modules_mac_sigRetriesExceeded
-scalar RSUExampleScenario.node[3].nic.mac1609_4 sentAcks:count 0
-attr source org_car2x_veins_modules_mac_sigSentAck
-scalar RSUExampleScenario.node[3].nic.mac1609_4 sentPackets:count 25
-attr source org_car2x_veins_modules_mac_sigSentPacket
-scalar RSUExampleScenario.node[3].nic.mac1609_4 collisions:count 0
-attr source org_car2x_veins_modules_mac_sigCollision
-scalar RSUExampleScenario.node[3].nic.mac1609_4 channelBusy:timeavg 0.0118100566583
-attr source org_car2x_veins_modules_mac_sigChannelBusy
-scalar RSUExampleScenario.node[3].veinsmobility startTime 1
-scalar RSUExampleScenario.node[3].veinsmobility totalTime 20
-scalar RSUExampleScenario.node[3].veinsmobility stopTime 21
-scalar RSUExampleScenario.node[3].veinsmobility minSpeed 4.1087391728456
-scalar RSUExampleScenario.node[3].veinsmobility maxSpeed 14.102085262505
-scalar RSUExampleScenario.node[3].veinsmobility totalDistance 244.34958231047
-scalar RSUExampleScenario.node[3].veinsmobility totalCO2Emission 61.247684258591
-scalar RSUExampleScenario.node[4].appl generatedWSMs 25
-scalar RSUExampleScenario.node[4].appl receivedWSMs 510
-scalar RSUExampleScenario.node[4].appl generatedBSMs 0
-scalar RSUExampleScenario.node[4].appl receivedBSMs 0
-scalar RSUExampleScenario.node[4].appl generatedWSAs 0
-scalar RSUExampleScenario.node[4].appl receivedWSAs 0
-scalar RSUExampleScenario.node[4].nic.phy80211p busyTime 0.0129224
-scalar RSUExampleScenario.node[4].nic.mac1609_4 ReceivedUnicastPackets 8
-scalar RSUExampleScenario.node[4].nic.mac1609_4 ReceivedBroadcasts 502
-scalar RSUExampleScenario.node[4].nic.mac1609_4 SentPackets 25
-scalar RSUExampleScenario.node[4].nic.mac1609_4 SentAcknowledgements 0
-scalar RSUExampleScenario.node[4].nic.mac1609_4 RetriesExceeded 0
-scalar RSUExampleScenario.node[4].nic.mac1609_4 SNIRLostPackets 341
-scalar RSUExampleScenario.node[4].nic.mac1609_4 RXTXLostPackets 50
-scalar RSUExampleScenario.node[4].nic.mac1609_4 TotalLostPackets 391
-scalar RSUExampleScenario.node[4].nic.mac1609_4 DroppedPacketsInMac 0
-scalar RSUExampleScenario.node[4].nic.mac1609_4 TooLittleTime 0
-scalar RSUExampleScenario.node[4].nic.mac1609_4 TimesIntoBackoff 25
-scalar RSUExampleScenario.node[4].nic.mac1609_4 SlotsBackoff 35
-scalar RSUExampleScenario.node[4].nic.mac1609_4 NumInternalContention 0
-scalar RSUExampleScenario.node[4].nic.mac1609_4 totalBusyTime 0.236201087704
-scalar RSUExampleScenario.node[4].nic.mac1609_4 retriesExceeded:count 0
-attr source org_car2x_veins_modules_mac_sigRetriesExceeded
-scalar RSUExampleScenario.node[4].nic.mac1609_4 sentAcks:count 0
-attr source org_car2x_veins_modules_mac_sigSentAck
-scalar RSUExampleScenario.node[4].nic.mac1609_4 sentPackets:count 25
-attr source org_car2x_veins_modules_mac_sigSentPacket
-scalar RSUExampleScenario.node[4].nic.mac1609_4 collisions:count 0
-attr source org_car2x_veins_modules_mac_sigCollision
-scalar RSUExampleScenario.node[4].nic.mac1609_4 channelBusy:timeavg 0.0118100543852
-attr source org_car2x_veins_modules_mac_sigChannelBusy
-scalar RSUExampleScenario.node[4].veinsmobility startTime 1
-scalar RSUExampleScenario.node[4].veinsmobility totalTime 20
-scalar RSUExampleScenario.node[4].veinsmobility stopTime 21
-scalar RSUExampleScenario.node[4].veinsmobility minSpeed 4.0581920730798
-scalar RSUExampleScenario.node[4].veinsmobility maxSpeed 12.261213314469
-scalar RSUExampleScenario.node[4].veinsmobility totalDistance 217.95952613717
-scalar RSUExampleScenario.node[4].veinsmobility totalCO2Emission 52.263235069123
-scalar RSUExampleScenario.node[5].appl generatedWSMs 27
-scalar RSUExampleScenario.node[5].appl receivedWSMs 330
-scalar RSUExampleScenario.node[5].appl generatedBSMs 0
-scalar RSUExampleScenario.node[5].appl receivedBSMs 0
-scalar RSUExampleScenario.node[5].appl generatedWSAs 0
-scalar RSUExampleScenario.node[5].appl receivedWSAs 0
-scalar RSUExampleScenario.node[5].nic.phy80211p busyTime 0.0127252
-scalar RSUExampleScenario.node[5].nic.mac1609_4 ReceivedUnicastPackets 6
-scalar RSUExampleScenario.node[5].nic.mac1609_4 ReceivedBroadcasts 324
-scalar RSUExampleScenario.node[5].nic.mac1609_4 SentPackets 27
-scalar RSUExampleScenario.node[5].nic.mac1609_4 SentAcknowledgements 0
-scalar RSUExampleScenario.node[5].nic.mac1609_4 RetriesExceeded 0
-scalar RSUExampleScenario.node[5].nic.mac1609_4 SNIRLostPackets 570
-scalar RSUExampleScenario.node[5].nic.mac1609_4 RXTXLostPackets 65
-scalar RSUExampleScenario.node[5].nic.mac1609_4 TotalLostPackets 635
-scalar RSUExampleScenario.node[5].nic.mac1609_4 DroppedPacketsInMac 0
-scalar RSUExampleScenario.node[5].nic.mac1609_4 TooLittleTime 0
-scalar RSUExampleScenario.node[5].nic.mac1609_4 TimesIntoBackoff 27
-scalar RSUExampleScenario.node[5].nic.mac1609_4 SlotsBackoff 44
-scalar RSUExampleScenario.node[5].nic.mac1609_4 NumInternalContention 0
-scalar RSUExampleScenario.node[5].nic.mac1609_4 totalBusyTime 0.236203
-scalar RSUExampleScenario.node[5].nic.mac1609_4 retriesExceeded:count 0
-attr source org_car2x_veins_modules_mac_sigRetriesExceeded
-scalar RSUExampleScenario.node[5].nic.mac1609_4 sentAcks:count 0
-attr source org_car2x_veins_modules_mac_sigSentAck
-scalar RSUExampleScenario.node[5].nic.mac1609_4 sentPackets:count 27
-attr source org_car2x_veins_modules_mac_sigSentPacket
-scalar RSUExampleScenario.node[5].nic.mac1609_4 collisions:count 0
-attr source org_car2x_veins_modules_mac_sigCollision
-scalar RSUExampleScenario.node[5].nic.mac1609_4 channelBusy:timeavg 0.01181015
-attr source org_car2x_veins_modules_mac_sigChannelBusy
-scalar RSUExampleScenario.node[5].veinsmobility startTime 1
-scalar RSUExampleScenario.node[5].veinsmobility totalTime 20
-scalar RSUExampleScenario.node[5].veinsmobility stopTime 21
-scalar RSUExampleScenario.node[5].veinsmobility minSpeed 4.1491335755735
-scalar RSUExampleScenario.node[5].veinsmobility maxSpeed 15.604131970809
-scalar RSUExampleScenario.node[5].veinsmobility totalDistance 188.75743968761
-scalar RSUExampleScenario.node[5].veinsmobility totalCO2Emission 85.765167870253
-scalar RSUExampleScenario.node[6].appl generatedWSMs 26
-scalar RSUExampleScenario.node[6].appl receivedWSMs 189
-scalar RSUExampleScenario.node[6].appl generatedBSMs 0
-scalar RSUExampleScenario.node[6].appl receivedBSMs 0
-scalar RSUExampleScenario.node[6].appl generatedWSAs 0
-scalar RSUExampleScenario.node[6].appl receivedWSAs 0
-scalar RSUExampleScenario.node[6].nic.phy80211p busyTime 0.012934
-scalar RSUExampleScenario.node[6].nic.mac1609_4 ReceivedUnicastPackets 0
-scalar RSUExampleScenario.node[6].nic.mac1609_4 ReceivedBroadcasts 189
-scalar RSUExampleScenario.node[6].nic.mac1609_4 SentPackets 26
-scalar RSUExampleScenario.node[6].nic.mac1609_4 SentAcknowledgements 0
-scalar RSUExampleScenario.node[6].nic.mac1609_4 RetriesExceeded 0
-scalar RSUExampleScenario.node[6].nic.mac1609_4 SNIRLostPackets 926
-scalar RSUExampleScenario.node[6].nic.mac1609_4 RXTXLostPackets 48
-scalar RSUExampleScenario.node[6].nic.mac1609_4 TotalLostPackets 974
-scalar RSUExampleScenario.node[6].nic.mac1609_4 DroppedPacketsInMac 0
-scalar RSUExampleScenario.node[6].nic.mac1609_4 TooLittleTime 0
-scalar RSUExampleScenario.node[6].nic.mac1609_4 TimesIntoBackoff 30
-scalar RSUExampleScenario.node[6].nic.mac1609_4 SlotsBackoff 43
-scalar RSUExampleScenario.node[6].nic.mac1609_4 NumInternalContention 0
-scalar RSUExampleScenario.node[6].nic.mac1609_4 totalBusyTime 0.236202
-scalar RSUExampleScenario.node[6].nic.mac1609_4 retriesExceeded:count 0
-attr source org_car2x_veins_modules_mac_sigRetriesExceeded
-scalar RSUExampleScenario.node[6].nic.mac1609_4 sentAcks:count 0
-attr source org_car2x_veins_modules_mac_sigSentAck
-scalar RSUExampleScenario.node[6].nic.mac1609_4 sentPackets:count 26
-attr source org_car2x_veins_modules_mac_sigSentPacket
-scalar RSUExampleScenario.node[6].nic.mac1609_4 collisions:count 0
-attr source org_car2x_veins_modules_mac_sigCollision
-scalar RSUExampleScenario.node[6].nic.mac1609_4 channelBusy:timeavg 0.0118101
-attr source org_car2x_veins_modules_mac_sigChannelBusy
-scalar RSUExampleScenario.node[6].veinsmobility startTime 1
-scalar RSUExampleScenario.node[6].veinsmobility totalTime 20
-scalar RSUExampleScenario.node[6].veinsmobility stopTime 21
-scalar RSUExampleScenario.node[6].veinsmobility minSpeed 3.9544707769432
-scalar RSUExampleScenario.node[6].veinsmobility maxSpeed 13.124524314515
-scalar RSUExampleScenario.node[6].veinsmobility totalDistance 193.72252223881
-scalar RSUExampleScenario.node[6].veinsmobility totalCO2Emission 70.400238790044
-scalar RSUExampleScenario.node[7].appl generatedWSMs 26
-scalar RSUExampleScenario.node[7].appl receivedWSMs 556
-scalar RSUExampleScenario.node[7].appl generatedBSMs 0
-scalar RSUExampleScenario.node[7].appl receivedBSMs 0
-scalar RSUExampleScenario.node[7].appl generatedWSAs 0
-scalar RSUExampleScenario.node[7].appl receivedWSAs 0
-scalar RSUExampleScenario.node[7].nic.phy80211p busyTime 0.0129108
-scalar RSUExampleScenario.node[7].nic.mac1609_4 ReceivedUnicastPackets 8
-scalar RSUExampleScenario.node[7].nic.mac1609_4 ReceivedBroadcasts 548
-scalar RSUExampleScenario.node[7].nic.mac1609_4 SentPackets 26
-scalar RSUExampleScenario.node[7].nic.mac1609_4 SentAcknowledgements 0
-scalar RSUExampleScenario.node[7].nic.mac1609_4 RetriesExceeded 0
-scalar RSUExampleScenario.node[7].nic.mac1609_4 SNIRLostPackets 294
-scalar RSUExampleScenario.node[7].nic.mac1609_4 RXTXLostPackets 50
-scalar RSUExampleScenario.node[7].nic.mac1609_4 TotalLostPackets 344
-scalar RSUExampleScenario.node[7].nic.mac1609_4 DroppedPacketsInMac 0
-scalar RSUExampleScenario.node[7].nic.mac1609_4 TooLittleTime 0
-scalar RSUExampleScenario.node[7].nic.mac1609_4 TimesIntoBackoff 26
-scalar RSUExampleScenario.node[7].nic.mac1609_4 SlotsBackoff 45
-scalar RSUExampleScenario.node[7].nic.mac1609_4 NumInternalContention 0
-scalar RSUExampleScenario.node[7].nic.mac1609_4 totalBusyTime 0.236202
-scalar RSUExampleScenario.node[7].nic.mac1609_4 retriesExceeded:count 0
-attr source org_car2x_veins_modules_mac_sigRetriesExceeded
-scalar RSUExampleScenario.node[7].nic.mac1609_4 sentAcks:count 0
-attr source org_car2x_veins_modules_mac_sigSentAck
-scalar RSUExampleScenario.node[7].nic.mac1609_4 sentPackets:count 26
-attr source org_car2x_veins_modules_mac_sigSentPacket
-scalar RSUExampleScenario.node[7].nic.mac1609_4 collisions:count 0
-attr source org_car2x_veins_modules_mac_sigCollision
-scalar RSUExampleScenario.node[7].nic.mac1609_4 channelBusy:timeavg 0.0118101
-attr source org_car2x_veins_modules_mac_sigChannelBusy
-scalar RSUExampleScenario.node[7].veinsmobility startTime 1
-scalar RSUExampleScenario.node[7].veinsmobility totalTime 20
-scalar RSUExampleScenario.node[7].veinsmobility stopTime 21
-scalar RSUExampleScenario.node[7].veinsmobility minSpeed 6.756747588994
-scalar RSUExampleScenario.node[7].veinsmobility maxSpeed 10.612691658362
-scalar RSUExampleScenario.node[7].veinsmobility totalDistance 190.89030788165
-scalar RSUExampleScenario.node[7].veinsmobility totalCO2Emission 47.429903624968
-scalar RSUExampleScenario.node[8].appl generatedWSMs 27
-scalar RSUExampleScenario.node[8].appl receivedWSMs 588
-scalar RSUExampleScenario.node[8].appl generatedBSMs 0
-scalar RSUExampleScenario.node[8].appl receivedBSMs 0
-scalar RSUExampleScenario.node[8].appl generatedWSAs 0
-scalar RSUExampleScenario.node[8].appl receivedWSAs 0
-scalar RSUExampleScenario.node[8].nic.phy80211p busyTime 0.012818
-scalar RSUExampleScenario.node[8].nic.mac1609_4 ReceivedUnicastPackets 12
-scalar RSUExampleScenario.node[8].nic.mac1609_4 ReceivedBroadcasts 576
-scalar RSUExampleScenario.node[8].nic.mac1609_4 SentPackets 27
-scalar RSUExampleScenario.node[8].nic.mac1609_4 SentAcknowledgements 0
-scalar RSUExampleScenario.node[8].nic.mac1609_4 RetriesExceeded 0
-scalar RSUExampleScenario.node[8].nic.mac1609_4 SNIRLostPackets 258
-scalar RSUExampleScenario.node[8].nic.mac1609_4 RXTXLostPackets 57
-scalar RSUExampleScenario.node[8].nic.mac1609_4 TotalLostPackets 315
-scalar RSUExampleScenario.node[8].nic.mac1609_4 DroppedPacketsInMac 0
-scalar RSUExampleScenario.node[8].nic.mac1609_4 TooLittleTime 0
-scalar RSUExampleScenario.node[8].nic.mac1609_4 TimesIntoBackoff 27
-scalar RSUExampleScenario.node[8].nic.mac1609_4 SlotsBackoff 40
-scalar RSUExampleScenario.node[8].nic.mac1609_4 NumInternalContention 0
-scalar RSUExampleScenario.node[8].nic.mac1609_4 totalBusyTime 0.236203087704
-scalar RSUExampleScenario.node[8].nic.mac1609_4 retriesExceeded:count 0
-attr source org_car2x_veins_modules_mac_sigRetriesExceeded
-scalar RSUExampleScenario.node[8].nic.mac1609_4 sentAcks:count 0
-attr source org_car2x_veins_modules_mac_sigSentAck
-scalar RSUExampleScenario.node[8].nic.mac1609_4 sentPackets:count 27
-attr source org_car2x_veins_modules_mac_sigSentPacket
-scalar RSUExampleScenario.node[8].nic.mac1609_4 collisions:count 0
-attr source org_car2x_veins_modules_mac_sigCollision
-scalar RSUExampleScenario.node[8].nic.mac1609_4 channelBusy:timeavg 0.0118101543852
-attr source org_car2x_veins_modules_mac_sigChannelBusy
-scalar RSUExampleScenario.node[8].veinsmobility startTime 1
-scalar RSUExampleScenario.node[8].veinsmobility totalTime 20
-scalar RSUExampleScenario.node[8].veinsmobility stopTime 21
-scalar RSUExampleScenario.node[8].veinsmobility minSpeed 3.7180970399628
-scalar RSUExampleScenario.node[8].veinsmobility maxSpeed 14.173574288393
-scalar RSUExampleScenario.node[8].veinsmobility totalDistance 171.4619053321
-scalar RSUExampleScenario.node[8].veinsmobility totalCO2Emission 83.739634521582
-scalar RSUExampleScenario.node[9].appl generatedWSMs 27
-scalar RSUExampleScenario.node[9].appl receivedWSMs 503
-scalar RSUExampleScenario.node[9].appl generatedBSMs 0
-scalar RSUExampleScenario.node[9].appl receivedBSMs 0
-scalar RSUExampleScenario.node[9].appl generatedWSAs 0
-scalar RSUExampleScenario.node[9].appl receivedWSAs 0
-scalar RSUExampleScenario.node[9].nic.phy80211p busyTime 0.0127832
-scalar RSUExampleScenario.node[9].nic.mac1609_4 ReceivedUnicastPackets 10
-scalar RSUExampleScenario.node[9].nic.mac1609_4 ReceivedBroadcasts 493
-scalar RSUExampleScenario.node[9].nic.mac1609_4 SentPackets 27
-scalar RSUExampleScenario.node[9].nic.mac1609_4 SentAcknowledgements 0
-scalar RSUExampleScenario.node[9].nic.mac1609_4 RetriesExceeded 0
-scalar RSUExampleScenario.node[9].nic.mac1609_4 SNIRLostPackets 338
-scalar RSUExampleScenario.node[9].nic.mac1609_4 RXTXLostPackets 60
-scalar RSUExampleScenario.node[9].nic.mac1609_4 TotalLostPackets 398
-scalar RSUExampleScenario.node[9].nic.mac1609_4 DroppedPacketsInMac 0
-scalar RSUExampleScenario.node[9].nic.mac1609_4 TooLittleTime 0
-scalar RSUExampleScenario.node[9].nic.mac1609_4 TimesIntoBackoff 27
-scalar RSUExampleScenario.node[9].nic.mac1609_4 SlotsBackoff 34
-scalar RSUExampleScenario.node[9].nic.mac1609_4 NumInternalContention 0
-scalar RSUExampleScenario.node[9].nic.mac1609_4 totalBusyTime 0.236203
-scalar RSUExampleScenario.node[9].nic.mac1609_4 retriesExceeded:count 0
-attr source org_car2x_veins_modules_mac_sigRetriesExceeded
-scalar RSUExampleScenario.node[9].nic.mac1609_4 sentAcks:count 0
-attr source org_car2x_veins_modules_mac_sigSentAck
-scalar RSUExampleScenario.node[9].nic.mac1609_4 sentPackets:count 27
-attr source org_car2x_veins_modules_mac_sigSentPacket
-scalar RSUExampleScenario.node[9].nic.mac1609_4 collisions:count 0
-attr source org_car2x_veins_modules_mac_sigCollision
-scalar RSUExampleScenario.node[9].nic.mac1609_4 channelBusy:timeavg 0.01181015
-attr source org_car2x_veins_modules_mac_sigChannelBusy
-scalar RSUExampleScenario.node[9].veinsmobility startTime 1
-scalar RSUExampleScenario.node[9].veinsmobility totalTime 20
-scalar RSUExampleScenario.node[9].veinsmobility stopTime 21
-scalar RSUExampleScenario.node[9].veinsmobility minSpeed 3.9793318004404
-scalar RSUExampleScenario.node[9].veinsmobility maxSpeed 17.577161418293
-scalar RSUExampleScenario.node[9].veinsmobility totalDistance 237.2606593898
-scalar RSUExampleScenario.node[9].veinsmobility totalCO2Emission 99.929902328252
-scalar RSUExampleScenario.node[11].appl generatedWSMs 26
-scalar RSUExampleScenario.node[11].appl receivedWSMs 589
-scalar RSUExampleScenario.node[11].appl generatedBSMs 0
-scalar RSUExampleScenario.node[11].appl receivedBSMs 0
-scalar RSUExampleScenario.node[11].appl generatedWSAs 0
-scalar RSUExampleScenario.node[11].appl receivedWSAs 0
-scalar RSUExampleScenario.node[11].nic.phy80211p busyTime 0.0127948
-scalar RSUExampleScenario.node[11].nic.mac1609_4 ReceivedUnicastPackets 10
-scalar RSUExampleScenario.node[11].nic.mac1609_4 ReceivedBroadcasts 579
-scalar RSUExampleScenario.node[11].nic.mac1609_4 SentPackets 26
-scalar RSUExampleScenario.node[11].nic.mac1609_4 SentAcknowledgements 0
-scalar RSUExampleScenario.node[11].nic.mac1609_4 RetriesExceeded 0
-scalar RSUExampleScenario.node[11].nic.mac1609_4 SNIRLostPackets 251
-scalar RSUExampleScenario.node[11].nic.mac1609_4 RXTXLostPackets 60
-scalar RSUExampleScenario.node[11].nic.mac1609_4 TotalLostPackets 311
-scalar RSUExampleScenario.node[11].nic.mac1609_4 DroppedPacketsInMac 0
-scalar RSUExampleScenario.node[11].nic.mac1609_4 TooLittleTime 0
-scalar RSUExampleScenario.node[11].nic.mac1609_4 TimesIntoBackoff 26
-scalar RSUExampleScenario.node[11].nic.mac1609_4 SlotsBackoff 32
-scalar RSUExampleScenario.node[11].nic.mac1609_4 NumInternalContention 0
-scalar RSUExampleScenario.node[11].nic.mac1609_4 totalBusyTime 0.236202148929
-scalar RSUExampleScenario.node[11].nic.mac1609_4 retriesExceeded:count 0
-attr source org_car2x_veins_modules_mac_sigRetriesExceeded
-scalar RSUExampleScenario.node[11].nic.mac1609_4 sentAcks:count 0
-attr source org_car2x_veins_modules_mac_sigSentAck
-scalar RSUExampleScenario.node[11].nic.mac1609_4 sentPackets:count 26
-attr source org_car2x_veins_modules_mac_sigSentPacket
-scalar RSUExampleScenario.node[11].nic.mac1609_4 collisions:count 0
-attr source org_car2x_veins_modules_mac_sigCollision
-scalar RSUExampleScenario.node[11].nic.mac1609_4 channelBusy:timeavg 0.01181010744645
-attr source org_car2x_veins_modules_mac_sigChannelBusy
-scalar RSUExampleScenario.node[11].veinsmobility startTime 1
-scalar RSUExampleScenario.node[11].veinsmobility totalTime 20
-scalar RSUExampleScenario.node[11].veinsmobility stopTime 21
-scalar RSUExampleScenario.node[11].veinsmobility minSpeed 4.0354242860583
-scalar RSUExampleScenario.node[11].veinsmobility maxSpeed 13.126380144298
-scalar RSUExampleScenario.node[11].veinsmobility totalDistance 231.29073183457
-scalar RSUExampleScenario.node[11].veinsmobility totalCO2Emission 56.404991912267
-scalar RSUExampleScenario.node[12].appl generatedWSMs 26
-scalar RSUExampleScenario.node[12].appl receivedWSMs 578
-scalar RSUExampleScenario.node[12].appl generatedBSMs 0
-scalar RSUExampleScenario.node[12].appl receivedBSMs 0
-scalar RSUExampleScenario.node[12].appl generatedWSAs 0
-scalar RSUExampleScenario.node[12].appl receivedWSAs 0
-scalar RSUExampleScenario.node[12].nic.phy80211p busyTime 0.0128064
-scalar RSUExampleScenario.node[12].nic.mac1609_4 ReceivedUnicastPackets 8
-scalar RSUExampleScenario.node[12].nic.mac1609_4 ReceivedBroadcasts 570
-scalar RSUExampleScenario.node[12].nic.mac1609_4 SentPackets 26
-scalar RSUExampleScenario.node[12].nic.mac1609_4 SentAcknowledgements 0
-scalar RSUExampleScenario.node[12].nic.mac1609_4 RetriesExceeded 0
-scalar RSUExampleScenario.node[12].nic.mac1609_4 SNIRLostPackets 262
-scalar RSUExampleScenario.node[12].nic.mac1609_4 RXTXLostPackets 59
-scalar RSUExampleScenario.node[12].nic.mac1609_4 TotalLostPackets 321
-scalar RSUExampleScenario.node[12].nic.mac1609_4 DroppedPacketsInMac 0
-scalar RSUExampleScenario.node[12].nic.mac1609_4 TooLittleTime 0
-scalar RSUExampleScenario.node[12].nic.mac1609_4 TimesIntoBackoff 26
-scalar RSUExampleScenario.node[12].nic.mac1609_4 SlotsBackoff 45
-scalar RSUExampleScenario.node[12].nic.mac1609_4 NumInternalContention 0
-scalar RSUExampleScenario.node[12].nic.mac1609_4 totalBusyTime 0.236202
-scalar RSUExampleScenario.node[12].nic.mac1609_4 retriesExceeded:count 0
-attr source org_car2x_veins_modules_mac_sigRetriesExceeded
-scalar RSUExampleScenario.node[12].nic.mac1609_4 sentAcks:count 0
-attr source org_car2x_veins_modules_mac_sigSentAck
-scalar RSUExampleScenario.node[12].nic.mac1609_4 sentPackets:count 26
-attr source org_car2x_veins_modules_mac_sigSentPacket
-scalar RSUExampleScenario.node[12].nic.mac1609_4 collisions:count 0
-attr source org_car2x_veins_modules_mac_sigCollision
-scalar RSUExampleScenario.node[12].nic.mac1609_4 channelBusy:timeavg 0.0118101
-attr source org_car2x_veins_modules_mac_sigChannelBusy
-scalar RSUExampleScenario.node[12].veinsmobility startTime 1
-scalar RSUExampleScenario.node[12].veinsmobility totalTime 20
-scalar RSUExampleScenario.node[12].veinsmobility stopTime 21
-scalar RSUExampleScenario.node[12].veinsmobility minSpeed 3.401435
-scalar RSUExampleScenario.node[12].veinsmobility maxSpeed 12.930979383469
-scalar RSUExampleScenario.node[12].veinsmobility totalDistance 191.37664047203
-scalar RSUExampleScenario.node[12].veinsmobility totalCO2Emission 58.805659552892
-scalar RSUExampleScenario.node[13].appl generatedWSMs 26
-scalar RSUExampleScenario.node[13].appl receivedWSMs 478
-scalar RSUExampleScenario.node[13].appl generatedBSMs 0
-scalar RSUExampleScenario.node[13].appl receivedBSMs 0
-scalar RSUExampleScenario.node[13].appl generatedWSAs 0
-scalar RSUExampleScenario.node[13].appl receivedWSAs 0
-scalar RSUExampleScenario.node[13].nic.phy80211p busyTime 0.0129456
-scalar RSUExampleScenario.node[13].nic.mac1609_4 ReceivedUnicastPackets 6
-scalar RSUExampleScenario.node[13].nic.mac1609_4 ReceivedBroadcasts 472
-scalar RSUExampleScenario.node[13].nic.mac1609_4 SentPackets 25
-scalar RSUExampleScenario.node[13].nic.mac1609_4 SentAcknowledgements 0
-scalar RSUExampleScenario.node[13].nic.mac1609_4 RetriesExceeded 0
-scalar RSUExampleScenario.node[13].nic.mac1609_4 SNIRLostPackets 373
-scalar RSUExampleScenario.node[13].nic.mac1609_4 RXTXLostPackets 48
-scalar RSUExampleScenario.node[13].nic.mac1609_4 TotalLostPackets 421
-scalar RSUExampleScenario.node[13].nic.mac1609_4 DroppedPacketsInMac 0
-scalar RSUExampleScenario.node[13].nic.mac1609_4 TooLittleTime 0
-scalar RSUExampleScenario.node[13].nic.mac1609_4 TimesIntoBackoff 26
-scalar RSUExampleScenario.node[13].nic.mac1609_4 SlotsBackoff 42
-scalar RSUExampleScenario.node[13].nic.mac1609_4 NumInternalContention 0
-scalar RSUExampleScenario.node[13].nic.mac1609_4 totalBusyTime 0.236201
-scalar RSUExampleScenario.node[13].nic.mac1609_4 retriesExceeded:count 0
-attr source org_car2x_veins_modules_mac_sigRetriesExceeded
-scalar RSUExampleScenario.node[13].nic.mac1609_4 sentAcks:count 0
-attr source org_car2x_veins_modules_mac_sigSentAck
-scalar RSUExampleScenario.node[13].nic.mac1609_4 sentPackets:count 25
-attr source org_car2x_veins_modules_mac_sigSentPacket
-scalar RSUExampleScenario.node[13].nic.mac1609_4 collisions:count 0
-attr source org_car2x_veins_modules_mac_sigCollision
-scalar RSUExampleScenario.node[13].nic.mac1609_4 channelBusy:timeavg 0.01181005
-attr source org_car2x_veins_modules_mac_sigChannelBusy
-scalar RSUExampleScenario.node[13].veinsmobility startTime 1
-scalar RSUExampleScenario.node[13].veinsmobility totalTime 20
-scalar RSUExampleScenario.node[13].veinsmobility stopTime 21
-scalar RSUExampleScenario.node[13].veinsmobility minSpeed 4.0223714623906
-scalar RSUExampleScenario.node[13].veinsmobility maxSpeed 13.695332401169
-scalar RSUExampleScenario.node[13].veinsmobility totalDistance 211.1853382674
-scalar RSUExampleScenario.node[13].veinsmobility totalCO2Emission 60.638018382909
-scalar RSUExampleScenario.node[14].appl generatedWSMs 26
-scalar RSUExampleScenario.node[14].appl receivedWSMs 296
-scalar RSUExampleScenario.node[14].appl generatedBSMs 0
-scalar RSUExampleScenario.node[14].appl receivedBSMs 0
-scalar RSUExampleScenario.node[14].appl generatedWSAs 0
-scalar RSUExampleScenario.node[14].appl receivedWSAs 0
-scalar RSUExampleScenario.node[14].nic.phy80211p busyTime 0.0127948
-scalar RSUExampleScenario.node[14].nic.mac1609_4 ReceivedUnicastPackets 10
-scalar RSUExampleScenario.node[14].nic.mac1609_4 ReceivedBroadcasts 286
-scalar RSUExampleScenario.node[14].nic.mac1609_4 SentPackets 26
-scalar RSUExampleScenario.node[14].nic.mac1609_4 SentAcknowledgements 0
-scalar RSUExampleScenario.node[14].nic.mac1609_4 RetriesExceeded 0
-scalar RSUExampleScenario.node[14].nic.mac1609_4 SNIRLostPackets 567
-scalar RSUExampleScenario.node[14].nic.mac1609_4 RXTXLostPackets 60
-scalar RSUExampleScenario.node[14].nic.mac1609_4 TotalLostPackets 627
-scalar RSUExampleScenario.node[14].nic.mac1609_4 DroppedPacketsInMac 0
-scalar RSUExampleScenario.node[14].nic.mac1609_4 TooLittleTime 0
-scalar RSUExampleScenario.node[14].nic.mac1609_4 TimesIntoBackoff 27
-scalar RSUExampleScenario.node[14].nic.mac1609_4 SlotsBackoff 39
-scalar RSUExampleScenario.node[14].nic.mac1609_4 NumInternalContention 0
-scalar RSUExampleScenario.node[14].nic.mac1609_4 totalBusyTime 0.236202
-scalar RSUExampleScenario.node[14].nic.mac1609_4 retriesExceeded:count 0
-attr source org_car2x_veins_modules_mac_sigRetriesExceeded
-scalar RSUExampleScenario.node[14].nic.mac1609_4 sentAcks:count 0
-attr source org_car2x_veins_modules_mac_sigSentAck
-scalar RSUExampleScenario.node[14].nic.mac1609_4 sentPackets:count 26
-attr source org_car2x_veins_modules_mac_sigSentPacket
-scalar RSUExampleScenario.node[14].nic.mac1609_4 collisions:count 0
-attr source org_car2x_veins_modules_mac_sigCollision
-scalar RSUExampleScenario.node[14].nic.mac1609_4 channelBusy:timeavg 0.0118101
-attr source org_car2x_veins_modules_mac_sigChannelBusy
-scalar RSUExampleScenario.node[14].veinsmobility startTime 1
-scalar RSUExampleScenario.node[14].veinsmobility totalTime 20
-scalar RSUExampleScenario.node[14].veinsmobility stopTime 21
-scalar RSUExampleScenario.node[14].veinsmobility minSpeed 4.1402637931638
-scalar RSUExampleScenario.node[14].veinsmobility maxSpeed 14.409166047404
-scalar RSUExampleScenario.node[14].veinsmobility totalDistance 247.56195245833
-scalar RSUExampleScenario.node[14].veinsmobility totalCO2Emission 62.398209960395
-scalar RSUExampleScenario.node[15].appl generatedWSMs 26
-scalar RSUExampleScenario.node[15].appl receivedWSMs 637
-scalar RSUExampleScenario.node[15].appl generatedBSMs 0
-scalar RSUExampleScenario.node[15].appl receivedBSMs 0
-scalar RSUExampleScenario.node[15].appl generatedWSAs 0
-scalar RSUExampleScenario.node[15].appl receivedWSAs 0
-scalar RSUExampleScenario.node[15].nic.phy80211p busyTime 0.0129804
-scalar RSUExampleScenario.node[15].nic.mac1609_4 ReceivedUnicastPackets 14
-scalar RSUExampleScenario.node[15].nic.mac1609_4 ReceivedBroadcasts 623
-scalar RSUExampleScenario.node[15].nic.mac1609_4 SentPackets 26
-scalar RSUExampleScenario.node[15].nic.mac1609_4 SentAcknowledgements 0
-scalar RSUExampleScenario.node[15].nic.mac1609_4 RetriesExceeded 0
-scalar RSUExampleScenario.node[15].nic.mac1609_4 SNIRLostPackets 222
-scalar RSUExampleScenario.node[15].nic.mac1609_4 RXTXLostPackets 44
-scalar RSUExampleScenario.node[15].nic.mac1609_4 TotalLostPackets 266
-scalar RSUExampleScenario.node[15].nic.mac1609_4 DroppedPacketsInMac 0
-scalar RSUExampleScenario.node[15].nic.mac1609_4 TooLittleTime 0
-scalar RSUExampleScenario.node[15].nic.mac1609_4 TimesIntoBackoff 26
-scalar RSUExampleScenario.node[15].nic.mac1609_4 SlotsBackoff 34
-scalar RSUExampleScenario.node[15].nic.mac1609_4 NumInternalContention 0
-scalar RSUExampleScenario.node[15].nic.mac1609_4 totalBusyTime 0.236203505418
-scalar RSUExampleScenario.node[15].nic.mac1609_4 retriesExceeded:count 0
-attr source org_car2x_veins_modules_mac_sigRetriesExceeded
-scalar RSUExampleScenario.node[15].nic.mac1609_4 sentAcks:count 0
-attr source org_car2x_veins_modules_mac_sigSentAck
-scalar RSUExampleScenario.node[15].nic.mac1609_4 sentPackets:count 26
-attr source org_car2x_veins_modules_mac_sigSentPacket
-scalar RSUExampleScenario.node[15].nic.mac1609_4 collisions:count 0
-attr source org_car2x_veins_modules_mac_sigCollision
-scalar RSUExampleScenario.node[15].nic.mac1609_4 channelBusy:timeavg 0.0118101752709
-attr source org_car2x_veins_modules_mac_sigChannelBusy
-scalar RSUExampleScenario.node[15].veinsmobility startTime 1
-scalar RSUExampleScenario.node[15].veinsmobility totalTime 20
-scalar RSUExampleScenario.node[15].veinsmobility stopTime 21
-scalar RSUExampleScenario.node[15].veinsmobility minSpeed 5.741962465391
-scalar RSUExampleScenario.node[15].veinsmobility maxSpeed 14.448964413192
-scalar RSUExampleScenario.node[15].veinsmobility totalDistance 237.53308036218
-scalar RSUExampleScenario.node[15].veinsmobility totalCO2Emission 71.240336381374
-scalar RSUExampleScenario.node[16].appl generatedWSMs 27
-scalar RSUExampleScenario.node[16].appl receivedWSMs 553
-scalar RSUExampleScenario.node[16].appl generatedBSMs 0
-scalar RSUExampleScenario.node[16].appl receivedBSMs 0
-scalar RSUExampleScenario.node[16].appl generatedWSAs 0
-scalar RSUExampleScenario.node[16].appl receivedWSAs 0
-scalar RSUExampleScenario.node[16].nic.phy80211p busyTime 0.0129108
-scalar RSUExampleScenario.node[16].nic.mac1609_4 ReceivedUnicastPackets 7
-scalar RSUExampleScenario.node[16].nic.mac1609_4 ReceivedBroadcasts 546
-scalar RSUExampleScenario.node[16].nic.mac1609_4 SentPackets 26
-scalar RSUExampleScenario.node[16].nic.mac1609_4 SentAcknowledgements 0
-scalar RSUExampleScenario.node[16].nic.mac1609_4 RetriesExceeded 0
-scalar RSUExampleScenario.node[16].nic.mac1609_4 SNIRLostPackets 294
-scalar RSUExampleScenario.node[16].nic.mac1609_4 RXTXLostPackets 50
-scalar RSUExampleScenario.node[16].nic.mac1609_4 TotalLostPackets 344
-scalar RSUExampleScenario.node[16].nic.mac1609_4 DroppedPacketsInMac 0
-scalar RSUExampleScenario.node[16].nic.mac1609_4 TooLittleTime 0
-scalar RSUExampleScenario.node[16].nic.mac1609_4 TimesIntoBackoff 26
-scalar RSUExampleScenario.node[16].nic.mac1609_4 SlotsBackoff 50
-scalar RSUExampleScenario.node[16].nic.mac1609_4 NumInternalContention 0
-scalar RSUExampleScenario.node[16].nic.mac1609_4 totalBusyTime 0.236202
-scalar RSUExampleScenario.node[16].nic.mac1609_4 retriesExceeded:count 0
-attr source org_car2x_veins_modules_mac_sigRetriesExceeded
-scalar RSUExampleScenario.node[16].nic.mac1609_4 sentAcks:count 0
-attr source org_car2x_veins_modules_mac_sigSentAck
-scalar RSUExampleScenario.node[16].nic.mac1609_4 sentPackets:count 26
-attr source org_car2x_veins_modules_mac_sigSentPacket
-scalar RSUExampleScenario.node[16].nic.mac1609_4 collisions:count 0
-attr source org_car2x_veins_modules_mac_sigCollision
-scalar RSUExampleScenario.node[16].nic.mac1609_4 channelBusy:timeavg 0.0118101
-attr source org_car2x_veins_modules_mac_sigChannelBusy
-scalar RSUExampleScenario.node[16].veinsmobility startTime 1
-scalar RSUExampleScenario.node[16].veinsmobility totalTime 20
-scalar RSUExampleScenario.node[16].veinsmobility stopTime 21
-scalar RSUExampleScenario.node[16].veinsmobility minSpeed 4.292120039142
-scalar RSUExampleScenario.node[16].veinsmobility maxSpeed 14.675849057857
-scalar RSUExampleScenario.node[16].veinsmobility totalDistance 227.54661383585
-scalar RSUExampleScenario.node[16].veinsmobility totalCO2Emission 82.815309319573
-scalar RSUExampleScenario.node[17].appl generatedWSMs 26
-scalar RSUExampleScenario.node[17].appl receivedWSMs 627
-scalar RSUExampleScenario.node[17].appl generatedBSMs 0
-scalar RSUExampleScenario.node[17].appl receivedBSMs 0
-scalar RSUExampleScenario.node[17].appl generatedWSAs 0
-scalar RSUExampleScenario.node[17].appl receivedWSAs 0
-scalar RSUExampleScenario.node[17].nic.phy80211p busyTime 0.0127948
-scalar RSUExampleScenario.node[17].nic.mac1609_4 ReceivedUnicastPackets 10
-scalar RSUExampleScenario.node[17].nic.mac1609_4 ReceivedBroadcasts 617
-scalar RSUExampleScenario.node[17].nic.mac1609_4 SentPackets 26
-scalar RSUExampleScenario.node[17].nic.mac1609_4 SentAcknowledgements 0
-scalar RSUExampleScenario.node[17].nic.mac1609_4 RetriesExceeded 0
-scalar RSUExampleScenario.node[17].nic.mac1609_4 SNIRLostPackets 213
-scalar RSUExampleScenario.node[17].nic.mac1609_4 RXTXLostPackets 60
-scalar RSUExampleScenario.node[17].nic.mac1609_4 TotalLostPackets 273
-scalar RSUExampleScenario.node[17].nic.mac1609_4 DroppedPacketsInMac 0
-scalar RSUExampleScenario.node[17].nic.mac1609_4 TooLittleTime 0
-scalar RSUExampleScenario.node[17].nic.mac1609_4 TimesIntoBackoff 26
-scalar RSUExampleScenario.node[17].nic.mac1609_4 SlotsBackoff 42
-scalar RSUExampleScenario.node[17].nic.mac1609_4 NumInternalContention 0
-scalar RSUExampleScenario.node[17].nic.mac1609_4 totalBusyTime 0.236202
-scalar RSUExampleScenario.node[17].nic.mac1609_4 retriesExceeded:count 0
-attr source org_car2x_veins_modules_mac_sigRetriesExceeded
-scalar RSUExampleScenario.node[17].nic.mac1609_4 sentAcks:count 0
-attr source org_car2x_veins_modules_mac_sigSentAck
-scalar RSUExampleScenario.node[17].nic.mac1609_4 sentPackets:count 26
-attr source org_car2x_veins_modules_mac_sigSentPacket
-scalar RSUExampleScenario.node[17].nic.mac1609_4 collisions:count 0
-attr source org_car2x_veins_modules_mac_sigCollision
-scalar RSUExampleScenario.node[17].nic.mac1609_4 channelBusy:timeavg 0.0118101
-attr source org_car2x_veins_modules_mac_sigChannelBusy
-scalar RSUExampleScenario.node[17].veinsmobility startTime 1
-scalar RSUExampleScenario.node[17].veinsmobility totalTime 20
-scalar RSUExampleScenario.node[17].veinsmobility stopTime 21
-scalar RSUExampleScenario.node[17].veinsmobility minSpeed 3.7277329877671
-scalar RSUExampleScenario.node[17].veinsmobility maxSpeed 10.050308725131
-scalar RSUExampleScenario.node[17].veinsmobility totalDistance 182.8264215489
-scalar RSUExampleScenario.node[17].veinsmobility totalCO2Emission 43.198169162172
-scalar RSUExampleScenario.node[18].appl generatedWSMs 26
-scalar RSUExampleScenario.node[18].appl receivedWSMs 561
-scalar RSUExampleScenario.node[18].appl generatedBSMs 0
-scalar RSUExampleScenario.node[18].appl receivedBSMs 0
-scalar RSUExampleScenario.node[18].appl generatedWSAs 0
-scalar RSUExampleScenario.node[18].appl receivedWSAs 0
-scalar RSUExampleScenario.node[18].nic.phy80211p busyTime 0.0129108
-scalar RSUExampleScenario.node[18].nic.mac1609_4 ReceivedUnicastPackets 10
-scalar RSUExampleScenario.node[18].nic.mac1609_4 ReceivedBroadcasts 551
-scalar RSUExampleScenario.node[18].nic.mac1609_4 SentPackets 26
-scalar RSUExampleScenario.node[18].nic.mac1609_4 SentAcknowledgements 0
-scalar RSUExampleScenario.node[18].nic.mac1609_4 RetriesExceeded 0
-scalar RSUExampleScenario.node[18].nic.mac1609_4 SNIRLostPackets 291
-scalar RSUExampleScenario.node[18].nic.mac1609_4 RXTXLostPackets 50
-scalar RSUExampleScenario.node[18].nic.mac1609_4 TotalLostPackets 341
-scalar RSUExampleScenario.node[18].nic.mac1609_4 DroppedPacketsInMac 0
-scalar RSUExampleScenario.node[18].nic.mac1609_4 TooLittleTime 0
-scalar RSUExampleScenario.node[18].nic.mac1609_4 TimesIntoBackoff 26
-scalar RSUExampleScenario.node[18].nic.mac1609_4 SlotsBackoff 39
-scalar RSUExampleScenario.node[18].nic.mac1609_4 NumInternalContention 0
-scalar RSUExampleScenario.node[18].nic.mac1609_4 totalBusyTime 0.236202
-scalar RSUExampleScenario.node[18].nic.mac1609_4 retriesExceeded:count 0
-attr source org_car2x_veins_modules_mac_sigRetriesExceeded
-scalar RSUExampleScenario.node[18].nic.mac1609_4 sentAcks:count 0
-attr source org_car2x_veins_modules_mac_sigSentAck
-scalar RSUExampleScenario.node[18].nic.mac1609_4 sentPackets:count 26
-attr source org_car2x_veins_modules_mac_sigSentPacket
-scalar RSUExampleScenario.node[18].nic.mac1609_4 collisions:count 0
-attr source org_car2x_veins_modules_mac_sigCollision
-scalar RSUExampleScenario.node[18].nic.mac1609_4 channelBusy:timeavg 0.0118101
-attr source org_car2x_veins_modules_mac_sigChannelBusy
-scalar RSUExampleScenario.node[18].veinsmobility startTime 1
-scalar RSUExampleScenario.node[18].veinsmobility totalTime 20
-scalar RSUExampleScenario.node[18].veinsmobility stopTime 21
-scalar RSUExampleScenario.node[18].veinsmobility minSpeed 4.068015635966
-scalar RSUExampleScenario.node[18].veinsmobility maxSpeed 15.379434874053
-scalar RSUExampleScenario.node[18].veinsmobility totalDistance 227.63131710068
-scalar RSUExampleScenario.node[18].veinsmobility totalCO2Emission 80.091000571027
-scalar RSUExampleScenario.node[19].appl generatedWSMs 26
-scalar RSUExampleScenario.node[19].appl receivedWSMs 631
-scalar RSUExampleScenario.node[19].appl generatedBSMs 0
-scalar RSUExampleScenario.node[19].appl receivedBSMs 0
-scalar RSUExampleScenario.node[19].appl generatedWSAs 0
-scalar RSUExampleScenario.node[19].appl receivedWSAs 0
-scalar RSUExampleScenario.node[19].nic.phy80211p busyTime 0.0129108
-scalar RSUExampleScenario.node[19].nic.mac1609_4 ReceivedUnicastPackets 7
-scalar RSUExampleScenario.node[19].nic.mac1609_4 ReceivedBroadcasts 624
-scalar RSUExampleScenario.node[19].nic.mac1609_4 SentPackets 26
-scalar RSUExampleScenario.node[19].nic.mac1609_4 SentAcknowledgements 0
-scalar RSUExampleScenario.node[19].nic.mac1609_4 RetriesExceeded 0
-scalar RSUExampleScenario.node[19].nic.mac1609_4 SNIRLostPackets 216
-scalar RSUExampleScenario.node[19].nic.mac1609_4 RXTXLostPackets 50
-scalar RSUExampleScenario.node[19].nic.mac1609_4 TotalLostPackets 266
-scalar RSUExampleScenario.node[19].nic.mac1609_4 DroppedPacketsInMac 0
-scalar RSUExampleScenario.node[19].nic.mac1609_4 TooLittleTime 0
-scalar RSUExampleScenario.node[19].nic.mac1609_4 TimesIntoBackoff 26
-scalar RSUExampleScenario.node[19].nic.mac1609_4 SlotsBackoff 37
-scalar RSUExampleScenario.node[19].nic.mac1609_4 NumInternalContention 0
-scalar RSUExampleScenario.node[19].nic.mac1609_4 totalBusyTime 0.236202
-scalar RSUExampleScenario.node[19].nic.mac1609_4 retriesExceeded:count 0
-attr source org_car2x_veins_modules_mac_sigRetriesExceeded
-scalar RSUExampleScenario.node[19].nic.mac1609_4 sentAcks:count 0
-attr source org_car2x_veins_modules_mac_sigSentAck
-scalar RSUExampleScenario.node[19].nic.mac1609_4 sentPackets:count 26
-attr source org_car2x_veins_modules_mac_sigSentPacket
-scalar RSUExampleScenario.node[19].nic.mac1609_4 collisions:count 0
-attr source org_car2x_veins_modules_mac_sigCollision
-scalar RSUExampleScenario.node[19].nic.mac1609_4 channelBusy:timeavg 0.0118101
-attr source org_car2x_veins_modules_mac_sigChannelBusy
-scalar RSUExampleScenario.node[19].veinsmobility startTime 1
-scalar RSUExampleScenario.node[19].veinsmobility totalTime 20
-scalar RSUExampleScenario.node[19].veinsmobility stopTime 21
-scalar RSUExampleScenario.node[19].veinsmobility minSpeed 3.9353988274582
-scalar RSUExampleScenario.node[19].veinsmobility maxSpeed 13.029515900865
-scalar RSUExampleScenario.node[19].veinsmobility totalDistance 228.88020366569
-scalar RSUExampleScenario.node[19].veinsmobility totalCO2Emission 55.785951771657
-scalar RSUExampleScenario.node[20].appl generatedWSMs 26
-scalar RSUExampleScenario.node[20].appl receivedWSMs 628
-scalar RSUExampleScenario.node[20].appl generatedBSMs 0
-scalar RSUExampleScenario.node[20].appl receivedBSMs 0
-scalar RSUExampleScenario.node[20].appl generatedWSAs 0
-scalar RSUExampleScenario.node[20].appl receivedWSAs 0
-scalar RSUExampleScenario.node[20].nic.phy80211p busyTime 0.0127832
-scalar RSUExampleScenario.node[20].nic.mac1609_4 ReceivedUnicastPackets 11
-scalar RSUExampleScenario.node[20].nic.mac1609_4 ReceivedBroadcasts 617
-scalar RSUExampleScenario.node[20].nic.mac1609_4 SentPackets 26
-scalar RSUExampleScenario.node[20].nic.mac1609_4 SentAcknowledgements 0
-scalar RSUExampleScenario.node[20].nic.mac1609_4 RetriesExceeded 0
-scalar RSUExampleScenario.node[20].nic.mac1609_4 SNIRLostPackets 211
-scalar RSUExampleScenario.node[20].nic.mac1609_4 RXTXLostPackets 61
-scalar RSUExampleScenario.node[20].nic.mac1609_4 TotalLostPackets 272
-scalar RSUExampleScenario.node[20].nic.mac1609_4 DroppedPacketsInMac 0
-scalar RSUExampleScenario.node[20].nic.mac1609_4 TooLittleTime 0
-scalar RSUExampleScenario.node[20].nic.mac1609_4 TimesIntoBackoff 26
-scalar RSUExampleScenario.node[20].nic.mac1609_4 SlotsBackoff 41
-scalar RSUExampleScenario.node[20].nic.mac1609_4 NumInternalContention 0
-scalar RSUExampleScenario.node[20].nic.mac1609_4 totalBusyTime 0.236202
-scalar RSUExampleScenario.node[20].nic.mac1609_4 retriesExceeded:count 0
-attr source org_car2x_veins_modules_mac_sigRetriesExceeded
-scalar RSUExampleScenario.node[20].nic.mac1609_4 sentAcks:count 0
-attr source org_car2x_veins_modules_mac_sigSentAck
-scalar RSUExampleScenario.node[20].nic.mac1609_4 sentPackets:count 26
-attr source org_car2x_veins_modules_mac_sigSentPacket
-scalar RSUExampleScenario.node[20].nic.mac1609_4 collisions:count 0
-attr source org_car2x_veins_modules_mac_sigCollision
-scalar RSUExampleScenario.node[20].nic.mac1609_4 channelBusy:timeavg 0.0118101
-attr source org_car2x_veins_modules_mac_sigChannelBusy
-scalar RSUExampleScenario.node[20].veinsmobility startTime 1
-scalar RSUExampleScenario.node[20].veinsmobility totalTime 20
-scalar RSUExampleScenario.node[20].veinsmobility stopTime 21
-scalar RSUExampleScenario.node[20].veinsmobility minSpeed 3.9409642170835
-scalar RSUExampleScenario.node[20].veinsmobility maxSpeed 16.395233283741
-scalar RSUExampleScenario.node[20].veinsmobility totalDistance 276.06973605819
-scalar RSUExampleScenario.node[20].veinsmobility totalCO2Emission 74.02012201468
-scalar RSUExampleScenario.node[21].appl generatedWSMs 28
-scalar RSUExampleScenario.node[21].appl receivedWSMs 606
-scalar RSUExampleScenario.node[21].appl generatedBSMs 0
-scalar RSUExampleScenario.node[21].appl receivedBSMs 0
-scalar RSUExampleScenario.node[21].appl generatedWSAs 0
-scalar RSUExampleScenario.node[21].appl receivedWSAs 0
-scalar RSUExampleScenario.node[21].nic.phy80211p busyTime 0.0127368
-scalar RSUExampleScenario.node[21].nic.mac1609_4 ReceivedUnicastPackets 9
-scalar RSUExampleScenario.node[21].nic.mac1609_4 ReceivedBroadcasts 597
-scalar RSUExampleScenario.node[21].nic.mac1609_4 SentPackets 28
-scalar RSUExampleScenario.node[21].nic.mac1609_4 SentAcknowledgements 0
-scalar RSUExampleScenario.node[21].nic.mac1609_4 RetriesExceeded 0
-scalar RSUExampleScenario.node[21].nic.mac1609_4 SNIRLostPackets 227
-scalar RSUExampleScenario.node[21].nic.mac1609_4 RXTXLostPackets 63
-scalar RSUExampleScenario.node[21].nic.mac1609_4 TotalLostPackets 290
-scalar RSUExampleScenario.node[21].nic.mac1609_4 DroppedPacketsInMac 0
-scalar RSUExampleScenario.node[21].nic.mac1609_4 TooLittleTime 0
-scalar RSUExampleScenario.node[21].nic.mac1609_4 TimesIntoBackoff 28
-scalar RSUExampleScenario.node[21].nic.mac1609_4 SlotsBackoff 38
-scalar RSUExampleScenario.node[21].nic.mac1609_4 NumInternalContention 0
-scalar RSUExampleScenario.node[21].nic.mac1609_4 totalBusyTime 0.236204241801
-scalar RSUExampleScenario.node[21].nic.mac1609_4 retriesExceeded:count 0
-attr source org_car2x_veins_modules_mac_sigRetriesExceeded
-scalar RSUExampleScenario.node[21].nic.mac1609_4 sentAcks:count 0
-attr source org_car2x_veins_modules_mac_sigSentAck
-scalar RSUExampleScenario.node[21].nic.mac1609_4 sentPackets:count 28
-attr source org_car2x_veins_modules_mac_sigSentPacket
-scalar RSUExampleScenario.node[21].nic.mac1609_4 collisions:count 0
-attr source org_car2x_veins_modules_mac_sigCollision
-scalar RSUExampleScenario.node[21].nic.mac1609_4 channelBusy:timeavg 0.01181021209005
-attr source org_car2x_veins_modules_mac_sigChannelBusy
-scalar RSUExampleScenario.node[21].veinsmobility startTime 1
-scalar RSUExampleScenario.node[21].veinsmobility totalTime 20
-scalar RSUExampleScenario.node[21].veinsmobility stopTime 21
-scalar RSUExampleScenario.node[21].veinsmobility minSpeed 4.0348821161805
-scalar RSUExampleScenario.node[21].veinsmobility maxSpeed 12.277466757157
-scalar RSUExampleScenario.node[21].veinsmobility totalDistance 183.59035475254
-scalar RSUExampleScenario.node[21].veinsmobility totalCO2Emission 52.524739793096
-scalar RSUExampleScenario.node[22].appl generatedWSMs 26
-scalar RSUExampleScenario.node[22].appl receivedWSMs 498
-scalar RSUExampleScenario.node[22].appl generatedBSMs 0
-scalar RSUExampleScenario.node[22].appl receivedBSMs 0
-scalar RSUExampleScenario.node[22].appl generatedWSAs 0
-scalar RSUExampleScenario.node[22].appl receivedWSAs 0
-scalar RSUExampleScenario.node[22].nic.phy80211p busyTime 0.0127948
-scalar RSUExampleScenario.node[22].nic.mac1609_4 ReceivedUnicastPackets 8
-scalar RSUExampleScenario.node[22].nic.mac1609_4 ReceivedBroadcasts 490
-scalar RSUExampleScenario.node[22].nic.mac1609_4 SentPackets 26
-scalar RSUExampleScenario.node[22].nic.mac1609_4 SentAcknowledgements 0
-scalar RSUExampleScenario.node[22].nic.mac1609_4 RetriesExceeded 0
-scalar RSUExampleScenario.node[22].nic.mac1609_4 SNIRLostPackets 342
-scalar RSUExampleScenario.node[22].nic.mac1609_4 RXTXLostPackets 60
-scalar RSUExampleScenario.node[22].nic.mac1609_4 TotalLostPackets 402
-scalar RSUExampleScenario.node[22].nic.mac1609_4 DroppedPacketsInMac 0
-scalar RSUExampleScenario.node[22].nic.mac1609_4 TooLittleTime 0
-scalar RSUExampleScenario.node[22].nic.mac1609_4 TimesIntoBackoff 28
-scalar RSUExampleScenario.node[22].nic.mac1609_4 SlotsBackoff 41
-scalar RSUExampleScenario.node[22].nic.mac1609_4 NumInternalContention 0
-scalar RSUExampleScenario.node[22].nic.mac1609_4 totalBusyTime 0.236202
-scalar RSUExampleScenario.node[22].nic.mac1609_4 retriesExceeded:count 0
-attr source org_car2x_veins_modules_mac_sigRetriesExceeded
-scalar RSUExampleScenario.node[22].nic.mac1609_4 sentAcks:count 0
-attr source org_car2x_veins_modules_mac_sigSentAck
-scalar RSUExampleScenario.node[22].nic.mac1609_4 sentPackets:count 26
-attr source org_car2x_veins_modules_mac_sigSentPacket
-scalar RSUExampleScenario.node[22].nic.mac1609_4 collisions:count 0
-attr source org_car2x_veins_modules_mac_sigCollision
-scalar RSUExampleScenario.node[22].nic.mac1609_4 channelBusy:timeavg 0.0118101
-attr source org_car2x_veins_modules_mac_sigChannelBusy
-scalar RSUExampleScenario.node[22].veinsmobility startTime 1
-scalar RSUExampleScenario.node[22].veinsmobility totalTime 20
-scalar RSUExampleScenario.node[22].veinsmobility stopTime 21
-scalar RSUExampleScenario.node[22].veinsmobility minSpeed 6.5003052939288
-scalar RSUExampleScenario.node[22].veinsmobility maxSpeed 13.929428795724
-scalar RSUExampleScenario.node[22].veinsmobility totalDistance 218.95768940419
-scalar RSUExampleScenario.node[22].veinsmobility totalCO2Emission 70.600140552298
-scalar RSUExampleScenario.node[23].appl generatedWSMs 26
-scalar RSUExampleScenario.node[23].appl receivedWSMs 531
-scalar RSUExampleScenario.node[23].appl generatedBSMs 0
-scalar RSUExampleScenario.node[23].appl receivedBSMs 0
-scalar RSUExampleScenario.node[23].appl generatedWSAs 0
-scalar RSUExampleScenario.node[23].appl receivedWSAs 0
-scalar RSUExampleScenario.node[23].nic.phy80211p busyTime 0.012818
-scalar RSUExampleScenario.node[23].nic.mac1609_4 ReceivedUnicastPackets 6
-scalar RSUExampleScenario.node[23].nic.mac1609_4 ReceivedBroadcasts 525
-scalar RSUExampleScenario.node[23].nic.mac1609_4 SentPackets 26
-scalar RSUExampleScenario.node[23].nic.mac1609_4 SentAcknowledgements 0
-scalar RSUExampleScenario.node[23].nic.mac1609_4 RetriesExceeded 0
-scalar RSUExampleScenario.node[23].nic.mac1609_4 SNIRLostPackets 309
-scalar RSUExampleScenario.node[23].nic.mac1609_4 RXTXLostPackets 58
-scalar RSUExampleScenario.node[23].nic.mac1609_4 TotalLostPackets 367
-scalar RSUExampleScenario.node[23].nic.mac1609_4 DroppedPacketsInMac 0
-scalar RSUExampleScenario.node[23].nic.mac1609_4 TooLittleTime 0
-scalar RSUExampleScenario.node[23].nic.mac1609_4 TimesIntoBackoff 26
-scalar RSUExampleScenario.node[23].nic.mac1609_4 SlotsBackoff 39
-scalar RSUExampleScenario.node[23].nic.mac1609_4 NumInternalContention 0
-scalar RSUExampleScenario.node[23].nic.mac1609_4 totalBusyTime 0.236202
-scalar RSUExampleScenario.node[23].nic.mac1609_4 retriesExceeded:count 0
-attr source org_car2x_veins_modules_mac_sigRetriesExceeded
-scalar RSUExampleScenario.node[23].nic.mac1609_4 sentAcks:count 0
-attr source org_car2x_veins_modules_mac_sigSentAck
-scalar RSUExampleScenario.node[23].nic.mac1609_4 sentPackets:count 26
-attr source org_car2x_veins_modules_mac_sigSentPacket
-scalar RSUExampleScenario.node[23].nic.mac1609_4 collisions:count 0
-attr source org_car2x_veins_modules_mac_sigCollision
-scalar RSUExampleScenario.node[23].nic.mac1609_4 channelBusy:timeavg 0.0118101
-attr source org_car2x_veins_modules_mac_sigChannelBusy
-scalar RSUExampleScenario.node[23].veinsmobility startTime 1
-scalar RSUExampleScenario.node[23].veinsmobility totalTime 20
-scalar RSUExampleScenario.node[23].veinsmobility stopTime 21
-scalar RSUExampleScenario.node[23].veinsmobility minSpeed 2.6773530570112
-scalar RSUExampleScenario.node[23].veinsmobility maxSpeed 10.40582700304
-scalar RSUExampleScenario.node[23].veinsmobility totalDistance 154.99752309534
-scalar RSUExampleScenario.node[23].veinsmobility totalCO2Emission 53.715442052638
-scalar RSUExampleScenario.node[25].appl generatedWSMs 28
-scalar RSUExampleScenario.node[25].appl receivedWSMs 616
-scalar RSUExampleScenario.node[25].appl generatedBSMs 0
-scalar RSUExampleScenario.node[25].appl receivedBSMs 0
-scalar RSUExampleScenario.node[25].appl generatedWSAs 0
-scalar RSUExampleScenario.node[25].appl receivedWSAs 0
-scalar RSUExampleScenario.node[25].nic.phy80211p busyTime 0.0126904
-scalar RSUExampleScenario.node[25].nic.mac1609_4 ReceivedUnicastPackets 8
-scalar RSUExampleScenario.node[25].nic.mac1609_4 ReceivedBroadcasts 608
-scalar RSUExampleScenario.node[25].nic.mac1609_4 SentPackets 28
-scalar RSUExampleScenario.node[25].nic.mac1609_4 SentAcknowledgements 0
-scalar RSUExampleScenario.node[25].nic.mac1609_4 RetriesExceeded 0
-scalar RSUExampleScenario.node[25].nic.mac1609_4 SNIRLostPackets 213
-scalar RSUExampleScenario.node[25].nic.mac1609_4 RXTXLostPackets 67
-scalar RSUExampleScenario.node[25].nic.mac1609_4 TotalLostPackets 280
-scalar RSUExampleScenario.node[25].nic.mac1609_4 DroppedPacketsInMac 0
-scalar RSUExampleScenario.node[25].nic.mac1609_4 TooLittleTime 0
-scalar RSUExampleScenario.node[25].nic.mac1609_4 TimesIntoBackoff 28
-scalar RSUExampleScenario.node[25].nic.mac1609_4 SlotsBackoff 37
-scalar RSUExampleScenario.node[25].nic.mac1609_4 NumInternalContention 0
-scalar RSUExampleScenario.node[25].nic.mac1609_4 totalBusyTime 0.236204133166
-scalar RSUExampleScenario.node[25].nic.mac1609_4 retriesExceeded:count 0
-attr source org_car2x_veins_modules_mac_sigRetriesExceeded
-scalar RSUExampleScenario.node[25].nic.mac1609_4 sentAcks:count 0
-attr source org_car2x_veins_modules_mac_sigSentAck
-scalar RSUExampleScenario.node[25].nic.mac1609_4 sentPackets:count 28
-attr source org_car2x_veins_modules_mac_sigSentPacket
-scalar RSUExampleScenario.node[25].nic.mac1609_4 collisions:count 0
-attr source org_car2x_veins_modules_mac_sigCollision
-scalar RSUExampleScenario.node[25].nic.mac1609_4 channelBusy:timeavg 0.0118102066583
-attr source org_car2x_veins_modules_mac_sigChannelBusy
-scalar RSUExampleScenario.node[25].veinsmobility startTime 1
-scalar RSUExampleScenario.node[25].veinsmobility totalTime 20
-scalar RSUExampleScenario.node[25].veinsmobility stopTime 21
-scalar RSUExampleScenario.node[25].veinsmobility minSpeed 3.9341955267307
-scalar RSUExampleScenario.node[25].veinsmobility maxSpeed 15.073434624618
-scalar RSUExampleScenario.node[25].veinsmobility totalDistance 213.09970568672
-scalar RSUExampleScenario.node[25].veinsmobility totalCO2Emission 72.351391219526
-scalar RSUExampleScenario.node[26].appl generatedWSMs 26
-scalar RSUExampleScenario.node[26].appl receivedWSMs 560
-scalar RSUExampleScenario.node[26].appl generatedBSMs 0
-scalar RSUExampleScenario.node[26].appl receivedBSMs 0
-scalar RSUExampleScenario.node[26].appl generatedWSAs 0
-scalar RSUExampleScenario.node[26].appl receivedWSAs 0
-scalar RSUExampleScenario.node[26].nic.phy80211p busyTime 0.0128528
-scalar RSUExampleScenario.node[26].nic.mac1609_4 ReceivedUnicastPackets 8
-scalar RSUExampleScenario.node[26].nic.mac1609_4 ReceivedBroadcasts 552
-scalar RSUExampleScenario.node[26].nic.mac1609_4 SentPackets 26
-scalar RSUExampleScenario.node[26].nic.mac1609_4 SentAcknowledgements 0
-scalar RSUExampleScenario.node[26].nic.mac1609_4 RetriesExceeded 0
-scalar RSUExampleScenario.node[26].nic.mac1609_4 SNIRLostPackets 283
-scalar RSUExampleScenario.node[26].nic.mac1609_4 RXTXLostPackets 55
-scalar RSUExampleScenario.node[26].nic.mac1609_4 TotalLostPackets 338
-scalar RSUExampleScenario.node[26].nic.mac1609_4 DroppedPacketsInMac 0
-scalar RSUExampleScenario.node[26].nic.mac1609_4 TooLittleTime 0
-scalar RSUExampleScenario.node[26].nic.mac1609_4 TimesIntoBackoff 26
-scalar RSUExampleScenario.node[26].nic.mac1609_4 SlotsBackoff 36
-scalar RSUExampleScenario.node[26].nic.mac1609_4 NumInternalContention 0
-scalar RSUExampleScenario.node[26].nic.mac1609_4 totalBusyTime 0.236202091079
-scalar RSUExampleScenario.node[26].nic.mac1609_4 retriesExceeded:count 0
-attr source org_car2x_veins_modules_mac_sigRetriesExceeded
-scalar RSUExampleScenario.node[26].nic.mac1609_4 sentAcks:count 0
-attr source org_car2x_veins_modules_mac_sigSentAck
-scalar RSUExampleScenario.node[26].nic.mac1609_4 sentPackets:count 26
-attr source org_car2x_veins_modules_mac_sigSentPacket
-scalar RSUExampleScenario.node[26].nic.mac1609_4 collisions:count 0
-attr source org_car2x_veins_modules_mac_sigCollision
-scalar RSUExampleScenario.node[26].nic.mac1609_4 channelBusy:timeavg 0.01181010455395
-attr source org_car2x_veins_modules_mac_sigChannelBusy
-scalar RSUExampleScenario.node[26].veinsmobility startTime 1
-scalar RSUExampleScenario.node[26].veinsmobility totalTime 20
-scalar RSUExampleScenario.node[26].veinsmobility stopTime 21
-scalar RSUExampleScenario.node[26].veinsmobility minSpeed 4.2028833847593
-scalar RSUExampleScenario.node[26].veinsmobility maxSpeed 13.57293485778
-scalar RSUExampleScenario.node[26].veinsmobility totalDistance 212.52858363829
-scalar RSUExampleScenario.node[26].veinsmobility totalCO2Emission 75.238135019129
-scalar RSUExampleScenario.node[27].appl generatedWSMs 26
-scalar RSUExampleScenario.node[27].appl receivedWSMs 582
-scalar RSUExampleScenario.node[27].appl generatedBSMs 0
-scalar RSUExampleScenario.node[27].appl receivedBSMs 0
-scalar RSUExampleScenario.node[27].appl generatedWSAs 0
-scalar RSUExampleScenario.node[27].appl receivedWSAs 0
-scalar RSUExampleScenario.node[27].nic.phy80211p busyTime 0.012876
-scalar RSUExampleScenario.node[27].nic.mac1609_4 ReceivedUnicastPackets 8
-scalar RSUExampleScenario.node[27].nic.mac1609_4 ReceivedBroadcasts 574
-scalar RSUExampleScenario.node[27].nic.mac1609_4 SentPackets 26
-scalar RSUExampleScenario.node[27].nic.mac1609_4 SentAcknowledgements 0
-scalar RSUExampleScenario.node[27].nic.mac1609_4 RetriesExceeded 0
-scalar RSUExampleScenario.node[27].nic.mac1609_4 SNIRLostPackets 263
-scalar RSUExampleScenario.node[27].nic.mac1609_4 RXTXLostPackets 53
-scalar RSUExampleScenario.node[27].nic.mac1609_4 TotalLostPackets 316
-scalar RSUExampleScenario.node[27].nic.mac1609_4 DroppedPacketsInMac 0
-scalar RSUExampleScenario.node[27].nic.mac1609_4 TooLittleTime 0
-scalar RSUExampleScenario.node[27].nic.mac1609_4 TimesIntoBackoff 28
-scalar RSUExampleScenario.node[27].nic.mac1609_4 SlotsBackoff 42
-scalar RSUExampleScenario.node[27].nic.mac1609_4 NumInternalContention 0
-scalar RSUExampleScenario.node[27].nic.mac1609_4 totalBusyTime 0.236202
-scalar RSUExampleScenario.node[27].nic.mac1609_4 retriesExceeded:count 0
-attr source org_car2x_veins_modules_mac_sigRetriesExceeded
-scalar RSUExampleScenario.node[27].nic.mac1609_4 sentAcks:count 0
-attr source org_car2x_veins_modules_mac_sigSentAck
-scalar RSUExampleScenario.node[27].nic.mac1609_4 sentPackets:count 26
-attr source org_car2x_veins_modules_mac_sigSentPacket
-scalar RSUExampleScenario.node[27].nic.mac1609_4 collisions:count 0
-attr source org_car2x_veins_modules_mac_sigCollision
-scalar RSUExampleScenario.node[27].nic.mac1609_4 channelBusy:timeavg 0.0118101
-attr source org_car2x_veins_modules_mac_sigChannelBusy
-scalar RSUExampleScenario.node[27].veinsmobility startTime 1
-scalar RSUExampleScenario.node[27].veinsmobility totalTime 20
-scalar RSUExampleScenario.node[27].veinsmobility stopTime 21
-scalar RSUExampleScenario.node[27].veinsmobility minSpeed 4.1475341022671
-scalar RSUExampleScenario.node[27].veinsmobility maxSpeed 14.157749467036
-scalar RSUExampleScenario.node[27].veinsmobility totalDistance 207.34286740615
-scalar RSUExampleScenario.node[27].veinsmobility totalCO2Emission 60.948167414073
-scalar RSUExampleScenario.node[28].appl generatedWSMs 26
-scalar RSUExampleScenario.node[28].appl receivedWSMs 487
-scalar RSUExampleScenario.node[28].appl generatedBSMs 0
-scalar RSUExampleScenario.node[28].appl receivedBSMs 0
-scalar RSUExampleScenario.node[28].appl generatedWSAs 0
-scalar RSUExampleScenario.node[28].appl receivedWSAs 0
-scalar RSUExampleScenario.node[28].nic.phy80211p busyTime 0.0128644
-scalar RSUExampleScenario.node[28].nic.mac1609_4 ReceivedUnicastPackets 12
-scalar RSUExampleScenario.node[28].nic.mac1609_4 ReceivedBroadcasts 475
-scalar RSUExampleScenario.node[28].nic.mac1609_4 SentPackets 26
-scalar RSUExampleScenario.node[28].nic.mac1609_4 SentAcknowledgements 0
-scalar RSUExampleScenario.node[28].nic.mac1609_4 RetriesExceeded 0
-scalar RSUExampleScenario.node[28].nic.mac1609_4 SNIRLostPackets 363
-scalar RSUExampleScenario.node[28].nic.mac1609_4 RXTXLostPackets 54
-scalar RSUExampleScenario.node[28].nic.mac1609_4 TotalLostPackets 417
-scalar RSUExampleScenario.node[28].nic.mac1609_4 DroppedPacketsInMac 0
-scalar RSUExampleScenario.node[28].nic.mac1609_4 TooLittleTime 0
-scalar RSUExampleScenario.node[28].nic.mac1609_4 TimesIntoBackoff 26
-scalar RSUExampleScenario.node[28].nic.mac1609_4 SlotsBackoff 57
-scalar RSUExampleScenario.node[28].nic.mac1609_4 NumInternalContention 0
-scalar RSUExampleScenario.node[28].nic.mac1609_4 totalBusyTime 0.236202
-scalar RSUExampleScenario.node[28].nic.mac1609_4 retriesExceeded:count 0
-attr source org_car2x_veins_modules_mac_sigRetriesExceeded
-scalar RSUExampleScenario.node[28].nic.mac1609_4 sentAcks:count 0
-attr source org_car2x_veins_modules_mac_sigSentAck
-scalar RSUExampleScenario.node[28].nic.mac1609_4 sentPackets:count 26
-attr source org_car2x_veins_modules_mac_sigSentPacket
-scalar RSUExampleScenario.node[28].nic.mac1609_4 collisions:count 0
-attr source org_car2x_veins_modules_mac_sigCollision
-scalar RSUExampleScenario.node[28].nic.mac1609_4 channelBusy:timeavg 0.0118101
-attr source org_car2x_veins_modules_mac_sigChannelBusy
-scalar RSUExampleScenario.node[28].veinsmobility startTime 1
-scalar RSUExampleScenario.node[28].veinsmobility totalTime 20
-scalar RSUExampleScenario.node[28].veinsmobility stopTime 21
-scalar RSUExampleScenario.node[28].veinsmobility minSpeed 3.8945559100624
-scalar RSUExampleScenario.node[28].veinsmobility maxSpeed 14.344142560917
-scalar RSUExampleScenario.node[28].veinsmobility totalDistance 222.43470081251
-scalar RSUExampleScenario.node[28].veinsmobility totalCO2Emission 81.271461614484
-scalar RSUExampleScenario.node[29].appl generatedWSMs 28
-scalar RSUExampleScenario.node[29].appl receivedWSMs 397
-scalar RSUExampleScenario.node[29].appl generatedBSMs 0
-scalar RSUExampleScenario.node[29].appl receivedBSMs 0
-scalar RSUExampleScenario.node[29].appl generatedWSAs 0
-scalar RSUExampleScenario.node[29].appl receivedWSAs 0
-scalar RSUExampleScenario.node[29].nic.phy80211p busyTime 0.0129572
-scalar RSUExampleScenario.node[29].nic.mac1609_4 ReceivedUnicastPackets 8
-scalar RSUExampleScenario.node[29].nic.mac1609_4 ReceivedBroadcasts 389
-scalar RSUExampleScenario.node[29].nic.mac1609_4 SentPackets 27
-scalar RSUExampleScenario.node[29].nic.mac1609_4 SentAcknowledgements 0
-scalar RSUExampleScenario.node[29].nic.mac1609_4 RetriesExceeded 0
-scalar RSUExampleScenario.node[29].nic.mac1609_4 SNIRLostPackets 461
-scalar RSUExampleScenario.node[29].nic.mac1609_4 RXTXLostPackets 45
-scalar RSUExampleScenario.node[29].nic.mac1609_4 TotalLostPackets 506
-scalar RSUExampleScenario.node[29].nic.mac1609_4 DroppedPacketsInMac 0
-scalar RSUExampleScenario.node[29].nic.mac1609_4 TooLittleTime 0
-scalar RSUExampleScenario.node[29].nic.mac1609_4 TimesIntoBackoff 27
-scalar RSUExampleScenario.node[29].nic.mac1609_4 SlotsBackoff 44
-scalar RSUExampleScenario.node[29].nic.mac1609_4 NumInternalContention 0
-scalar RSUExampleScenario.node[29].nic.mac1609_4 totalBusyTime 0.236203
-scalar RSUExampleScenario.node[29].nic.mac1609_4 retriesExceeded:count 0
-attr source org_car2x_veins_modules_mac_sigRetriesExceeded
-scalar RSUExampleScenario.node[29].nic.mac1609_4 sentAcks:count 0
-attr source org_car2x_veins_modules_mac_sigSentAck
-scalar RSUExampleScenario.node[29].nic.mac1609_4 sentPackets:count 27
-attr source org_car2x_veins_modules_mac_sigSentPacket
-scalar RSUExampleScenario.node[29].nic.mac1609_4 collisions:count 0
-attr source org_car2x_veins_modules_mac_sigCollision
-scalar RSUExampleScenario.node[29].nic.mac1609_4 channelBusy:timeavg 0.01181015
-attr source org_car2x_veins_modules_mac_sigChannelBusy
-scalar RSUExampleScenario.node[29].veinsmobility startTime 1
-scalar RSUExampleScenario.node[29].veinsmobility totalTime 20
-scalar RSUExampleScenario.node[29].veinsmobility stopTime 21
-scalar RSUExampleScenario.node[29].veinsmobility minSpeed 4.0910539485528
-scalar RSUExampleScenario.node[29].veinsmobility maxSpeed 14.579133625464
-scalar RSUExampleScenario.node[29].veinsmobility totalDistance 199.71841351596
-scalar RSUExampleScenario.node[29].veinsmobility totalCO2Emission 87.114506608582
-scalar RSUExampleScenario.node[30].appl generatedWSMs 28
-scalar RSUExampleScenario.node[30].appl receivedWSMs 395
-scalar RSUExampleScenario.node[30].appl generatedBSMs 0
-scalar RSUExampleScenario.node[30].appl receivedBSMs 0
-scalar RSUExampleScenario.node[30].appl generatedWSAs 0
-scalar RSUExampleScenario.node[30].appl receivedWSAs 0
-scalar RSUExampleScenario.node[30].nic.phy80211p busyTime 0.01276
-scalar RSUExampleScenario.node[30].nic.mac1609_4 ReceivedUnicastPackets 10
-scalar RSUExampleScenario.node[30].nic.mac1609_4 ReceivedBroadcasts 385
-scalar RSUExampleScenario.node[30].nic.mac1609_4 SentPackets 27
-scalar RSUExampleScenario.node[30].nic.mac1609_4 SentAcknowledgements 0
-scalar RSUExampleScenario.node[30].nic.mac1609_4 RetriesExceeded 0
-scalar RSUExampleScenario.node[30].nic.mac1609_4 SNIRLostPackets 446
-scalar RSUExampleScenario.node[30].nic.mac1609_4 RXTXLostPackets 62
-scalar RSUExampleScenario.node[30].nic.mac1609_4 TotalLostPackets 508
-scalar RSUExampleScenario.node[30].nic.mac1609_4 DroppedPacketsInMac 0
-scalar RSUExampleScenario.node[30].nic.mac1609_4 TooLittleTime 0
-scalar RSUExampleScenario.node[30].nic.mac1609_4 TimesIntoBackoff 27
-scalar RSUExampleScenario.node[30].nic.mac1609_4 SlotsBackoff 49
-scalar RSUExampleScenario.node[30].nic.mac1609_4 NumInternalContention 0
-scalar RSUExampleScenario.node[30].nic.mac1609_4 totalBusyTime 0.236203
-scalar RSUExampleScenario.node[30].nic.mac1609_4 retriesExceeded:count 0
-attr source org_car2x_veins_modules_mac_sigRetriesExceeded
-scalar RSUExampleScenario.node[30].nic.mac1609_4 sentAcks:count 0
-attr source org_car2x_veins_modules_mac_sigSentAck
-scalar RSUExampleScenario.node[30].nic.mac1609_4 sentPackets:count 27
-attr source org_car2x_veins_modules_mac_sigSentPacket
-scalar RSUExampleScenario.node[30].nic.mac1609_4 collisions:count 0
-attr source org_car2x_veins_modules_mac_sigCollision
-scalar RSUExampleScenario.node[30].nic.mac1609_4 channelBusy:timeavg 0.01181015
-attr source org_car2x_veins_modules_mac_sigChannelBusy
-scalar RSUExampleScenario.node[30].veinsmobility startTime 1
-scalar RSUExampleScenario.node[30].veinsmobility totalTime 20
-scalar RSUExampleScenario.node[30].veinsmobility stopTime 21
-scalar RSUExampleScenario.node[30].veinsmobility minSpeed 4.0062434990116
-scalar RSUExampleScenario.node[30].veinsmobility maxSpeed 15.974458443521
-scalar RSUExampleScenario.node[30].veinsmobility totalDistance 215.84114224899
-scalar RSUExampleScenario.node[30].veinsmobility totalCO2Emission 88.189344231881
-scalar RSUExampleScenario.node[31].appl generatedWSMs 28
-scalar RSUExampleScenario.node[31].appl receivedWSMs 460
+scalar RSUExampleScenario.node[31].appl generatedWSMs 20
+scalar RSUExampleScenario.node[31].appl receivedWSMs 360
 scalar RSUExampleScenario.node[31].appl generatedBSMs 0
 scalar RSUExampleScenario.node[31].appl receivedBSMs 0
 scalar RSUExampleScenario.node[31].appl generatedWSAs 0
 scalar RSUExampleScenario.node[31].appl receivedWSAs 0
-scalar RSUExampleScenario.node[31].nic.phy80211p busyTime 0.0127832
-scalar RSUExampleScenario.node[31].nic.mac1609_4 ReceivedUnicastPackets 8
-scalar RSUExampleScenario.node[31].nic.mac1609_4 ReceivedBroadcasts 452
-scalar RSUExampleScenario.node[31].nic.mac1609_4 SentPackets 27
+scalar RSUExampleScenario.node[31].nic.phy80211p busyTime 0.0125744
+scalar RSUExampleScenario.node[31].nic.mac1609_4 ReceivedUnicastPackets 9
+scalar RSUExampleScenario.node[31].nic.mac1609_4 ReceivedBroadcasts 351
+scalar RSUExampleScenario.node[31].nic.mac1609_4 SentPackets 20
 scalar RSUExampleScenario.node[31].nic.mac1609_4 SentAcknowledgements 0
 scalar RSUExampleScenario.node[31].nic.mac1609_4 RetriesExceeded 0
-scalar RSUExampleScenario.node[31].nic.mac1609_4 SNIRLostPackets 379
-scalar RSUExampleScenario.node[31].nic.mac1609_4 RXTXLostPackets 60
-scalar RSUExampleScenario.node[31].nic.mac1609_4 TotalLostPackets 439
+scalar RSUExampleScenario.node[31].nic.mac1609_4 SNIRLostPackets 269
+scalar RSUExampleScenario.node[31].nic.mac1609_4 RXTXLostPackets 50
+scalar RSUExampleScenario.node[31].nic.mac1609_4 TotalLostPackets 319
 scalar RSUExampleScenario.node[31].nic.mac1609_4 DroppedPacketsInMac 0
 scalar RSUExampleScenario.node[31].nic.mac1609_4 TooLittleTime 0
-scalar RSUExampleScenario.node[31].nic.mac1609_4 TimesIntoBackoff 27
-scalar RSUExampleScenario.node[31].nic.mac1609_4 SlotsBackoff 35
+scalar RSUExampleScenario.node[31].nic.mac1609_4 TimesIntoBackoff 20
+scalar RSUExampleScenario.node[31].nic.mac1609_4 SlotsBackoff 45
 scalar RSUExampleScenario.node[31].nic.mac1609_4 NumInternalContention 0
-scalar RSUExampleScenario.node[31].nic.mac1609_4 totalBusyTime 0.236203
+scalar RSUExampleScenario.node[31].nic.mac1609_4 totalBusyTime 0.17286
 scalar RSUExampleScenario.node[31].nic.mac1609_4 retriesExceeded:count 0
 attr source org_car2x_veins_modules_mac_sigRetriesExceeded
 scalar RSUExampleScenario.node[31].nic.mac1609_4 sentAcks:count 0
 attr source org_car2x_veins_modules_mac_sigSentAck
-scalar RSUExampleScenario.node[31].nic.mac1609_4 sentPackets:count 27
+scalar RSUExampleScenario.node[31].nic.mac1609_4 sentPackets:count 20
 attr source org_car2x_veins_modules_mac_sigSentPacket
 scalar RSUExampleScenario.node[31].nic.mac1609_4 collisions:count 0
 attr source org_car2x_veins_modules_mac_sigCollision
-scalar RSUExampleScenario.node[31].nic.mac1609_4 channelBusy:timeavg 0.01181015
+scalar RSUExampleScenario.node[31].nic.mac1609_4 channelBusy:timeavg 0.011524
 attr source org_car2x_veins_modules_mac_sigChannelBusy
 scalar RSUExampleScenario.node[31].veinsmobility startTime 1
-scalar RSUExampleScenario.node[31].veinsmobility totalTime 20
-scalar RSUExampleScenario.node[31].veinsmobility stopTime 21
+scalar RSUExampleScenario.node[31].veinsmobility totalTime 14
+scalar RSUExampleScenario.node[31].veinsmobility stopTime 16
 scalar RSUExampleScenario.node[31].veinsmobility minSpeed 3.9893178586375
-scalar RSUExampleScenario.node[31].veinsmobility maxSpeed 15.650676452099
-scalar RSUExampleScenario.node[31].veinsmobility totalDistance 198.10455208442
-scalar RSUExampleScenario.node[31].veinsmobility totalCO2Emission 97.902857004138
+scalar RSUExampleScenario.node[31].veinsmobility maxSpeed 16.533876041127
+scalar RSUExampleScenario.node[31].veinsmobility totalDistance 140.64955276724
+scalar RSUExampleScenario.node[31].veinsmobility totalCO2Emission 67.722851123317
+scalar RSUExampleScenario.node[1].appl generatedWSMs 22
+scalar RSUExampleScenario.node[1].appl receivedWSMs 498
+scalar RSUExampleScenario.node[1].appl generatedBSMs 0
+scalar RSUExampleScenario.node[1].appl receivedBSMs 0
+scalar RSUExampleScenario.node[1].appl generatedWSAs 0
+scalar RSUExampleScenario.node[1].appl receivedWSAs 0
+scalar RSUExampleScenario.node[1].nic.phy80211p busyTime 0.011535555555556
+scalar RSUExampleScenario.node[1].nic.mac1609_4 ReceivedUnicastPackets 7
+scalar RSUExampleScenario.node[1].nic.mac1609_4 ReceivedBroadcasts 491
+scalar RSUExampleScenario.node[1].nic.mac1609_4 SentPackets 22
+scalar RSUExampleScenario.node[1].nic.mac1609_4 SentAcknowledgements 0
+scalar RSUExampleScenario.node[1].nic.mac1609_4 RetriesExceeded 0
+scalar RSUExampleScenario.node[1].nic.mac1609_4 SNIRLostPackets 208
+scalar RSUExampleScenario.node[1].nic.mac1609_4 RXTXLostPackets 46
+scalar RSUExampleScenario.node[1].nic.mac1609_4 TotalLostPackets 254
+scalar RSUExampleScenario.node[1].nic.mac1609_4 DroppedPacketsInMac 0
+scalar RSUExampleScenario.node[1].nic.mac1609_4 TooLittleTime 0
+scalar RSUExampleScenario.node[1].nic.mac1609_4 TimesIntoBackoff 22
+scalar RSUExampleScenario.node[1].nic.mac1609_4 SlotsBackoff 34
+scalar RSUExampleScenario.node[1].nic.mac1609_4 NumInternalContention 0
+scalar RSUExampleScenario.node[1].nic.mac1609_4 totalBusyTime 0.187942145814
+scalar RSUExampleScenario.node[1].nic.mac1609_4 retriesExceeded:count 0
+attr source org_car2x_veins_modules_mac_sigRetriesExceeded
+scalar RSUExampleScenario.node[1].nic.mac1609_4 sentAcks:count 0
+attr source org_car2x_veins_modules_mac_sigSentAck
+scalar RSUExampleScenario.node[1].nic.mac1609_4 sentPackets:count 22
+attr source org_car2x_veins_modules_mac_sigSentPacket
+scalar RSUExampleScenario.node[1].nic.mac1609_4 collisions:count 0
+attr source org_car2x_veins_modules_mac_sigCollision
+scalar RSUExampleScenario.node[1].nic.mac1609_4 channelBusy:timeavg 0.010441230323
+attr source org_car2x_veins_modules_mac_sigChannelBusy
+scalar RSUExampleScenario.node[1].veinsmobility startTime 1
+scalar RSUExampleScenario.node[1].veinsmobility totalTime 17
+scalar RSUExampleScenario.node[1].veinsmobility stopTime 19
+scalar RSUExampleScenario.node[1].veinsmobility minSpeed 4.0467622141406
+scalar RSUExampleScenario.node[1].veinsmobility maxSpeed 11.643085811174
+scalar RSUExampleScenario.node[1].veinsmobility totalDistance 153.63843471863
+scalar RSUExampleScenario.node[1].veinsmobility totalCO2Emission 51.915440161253
+scalar RSUExampleScenario.node[23].appl generatedWSMs 27
+scalar RSUExampleScenario.node[23].appl receivedWSMs 559
+scalar RSUExampleScenario.node[23].appl generatedBSMs 0
+scalar RSUExampleScenario.node[23].appl receivedBSMs 0
+scalar RSUExampleScenario.node[23].appl generatedWSAs 0
+scalar RSUExampleScenario.node[23].appl receivedWSAs 0
+scalar RSUExampleScenario.node[23].nic.phy80211p busyTime 0.011478956521739
+scalar RSUExampleScenario.node[23].nic.mac1609_4 ReceivedUnicastPackets 8
+scalar RSUExampleScenario.node[23].nic.mac1609_4 ReceivedBroadcasts 551
+scalar RSUExampleScenario.node[23].nic.mac1609_4 SentPackets 27
+scalar RSUExampleScenario.node[23].nic.mac1609_4 SentAcknowledgements 0
+scalar RSUExampleScenario.node[23].nic.mac1609_4 RetriesExceeded 0
+scalar RSUExampleScenario.node[23].nic.mac1609_4 SNIRLostPackets 330
+scalar RSUExampleScenario.node[23].nic.mac1609_4 RXTXLostPackets 53
+scalar RSUExampleScenario.node[23].nic.mac1609_4 TotalLostPackets 383
+scalar RSUExampleScenario.node[23].nic.mac1609_4 DroppedPacketsInMac 0
+scalar RSUExampleScenario.node[23].nic.mac1609_4 TooLittleTime 0
+scalar RSUExampleScenario.node[23].nic.mac1609_4 TimesIntoBackoff 27
+scalar RSUExampleScenario.node[23].nic.mac1609_4 SlotsBackoff 45
+scalar RSUExampleScenario.node[23].nic.mac1609_4 NumInternalContention 0
+scalar RSUExampleScenario.node[23].nic.mac1609_4 totalBusyTime 0.238291
+scalar RSUExampleScenario.node[23].nic.mac1609_4 retriesExceeded:count 0
+attr source org_car2x_veins_modules_mac_sigRetriesExceeded
+scalar RSUExampleScenario.node[23].nic.mac1609_4 sentAcks:count 0
+attr source org_car2x_veins_modules_mac_sigSentAck
+scalar RSUExampleScenario.node[23].nic.mac1609_4 sentPackets:count 27
+attr source org_car2x_veins_modules_mac_sigSentPacket
+scalar RSUExampleScenario.node[23].nic.mac1609_4 collisions:count 0
+attr source org_car2x_veins_modules_mac_sigCollision
+scalar RSUExampleScenario.node[23].nic.mac1609_4 channelBusy:timeavg 0.01036047826087
+attr source org_car2x_veins_modules_mac_sigChannelBusy
+scalar RSUExampleScenario.node[23].veinsmobility startTime 1
+scalar RSUExampleScenario.node[23].veinsmobility totalTime 22
+scalar RSUExampleScenario.node[23].veinsmobility stopTime 24
+scalar RSUExampleScenario.node[23].veinsmobility minSpeed 3.9840510474849
+scalar RSUExampleScenario.node[23].veinsmobility maxSpeed 10.405708653317
+scalar RSUExampleScenario.node[23].veinsmobility totalDistance 203.84239203506
+scalar RSUExampleScenario.node[23].veinsmobility totalCO2Emission 54.149893654614
+scalar RSUExampleScenario.node[14].appl generatedWSMs 33
+scalar RSUExampleScenario.node[14].appl receivedWSMs 358
+scalar RSUExampleScenario.node[14].appl generatedBSMs 0
+scalar RSUExampleScenario.node[14].appl receivedBSMs 0
+scalar RSUExampleScenario.node[14].appl generatedWSAs 0
+scalar RSUExampleScenario.node[14].appl receivedWSAs 0
+scalar RSUExampleScenario.node[14].nic.phy80211p busyTime 0.012028307692308
+scalar RSUExampleScenario.node[14].nic.mac1609_4 ReceivedUnicastPackets 11
+scalar RSUExampleScenario.node[14].nic.mac1609_4 ReceivedBroadcasts 347
+scalar RSUExampleScenario.node[14].nic.mac1609_4 SentPackets 33
+scalar RSUExampleScenario.node[14].nic.mac1609_4 SentAcknowledgements 0
+scalar RSUExampleScenario.node[14].nic.mac1609_4 RetriesExceeded 0
+scalar RSUExampleScenario.node[14].nic.mac1609_4 SNIRLostPackets 700
+scalar RSUExampleScenario.node[14].nic.mac1609_4 RXTXLostPackets 65
+scalar RSUExampleScenario.node[14].nic.mac1609_4 TotalLostPackets 765
+scalar RSUExampleScenario.node[14].nic.mac1609_4 DroppedPacketsInMac 0
+scalar RSUExampleScenario.node[14].nic.mac1609_4 TooLittleTime 0
+scalar RSUExampleScenario.node[14].nic.mac1609_4 TimesIntoBackoff 34
+scalar RSUExampleScenario.node[14].nic.mac1609_4 SlotsBackoff 52
+scalar RSUExampleScenario.node[14].nic.mac1609_4 NumInternalContention 0
+scalar RSUExampleScenario.node[14].nic.mac1609_4 totalBusyTime 0.287481
+scalar RSUExampleScenario.node[14].nic.mac1609_4 retriesExceeded:count 0
+attr source org_car2x_veins_modules_mac_sigRetriesExceeded
+scalar RSUExampleScenario.node[14].nic.mac1609_4 sentAcks:count 0
+attr source org_car2x_veins_modules_mac_sigSentAck
+scalar RSUExampleScenario.node[14].nic.mac1609_4 sentPackets:count 33
+attr source org_car2x_veins_modules_mac_sigSentPacket
+scalar RSUExampleScenario.node[14].nic.mac1609_4 collisions:count 0
+attr source org_car2x_veins_modules_mac_sigCollision
+scalar RSUExampleScenario.node[14].nic.mac1609_4 channelBusy:timeavg 0.011056961538462
+attr source org_car2x_veins_modules_mac_sigChannelBusy
+scalar RSUExampleScenario.node[14].veinsmobility startTime 1
+scalar RSUExampleScenario.node[14].veinsmobility totalTime 25
+scalar RSUExampleScenario.node[14].veinsmobility stopTime 27
+scalar RSUExampleScenario.node[14].veinsmobility minSpeed 4.1402637931638
+scalar RSUExampleScenario.node[14].veinsmobility maxSpeed 14.412817320857
+scalar RSUExampleScenario.node[14].veinsmobility totalDistance 285.74491047982
+scalar RSUExampleScenario.node[14].veinsmobility totalCO2Emission 94.588656842864
+scalar RSUExampleScenario.node[5].appl generatedWSMs 36
+scalar RSUExampleScenario.node[5].appl receivedWSMs 392
+scalar RSUExampleScenario.node[5].appl generatedBSMs 0
+scalar RSUExampleScenario.node[5].appl receivedBSMs 0
+scalar RSUExampleScenario.node[5].appl generatedWSAs 0
+scalar RSUExampleScenario.node[5].appl receivedWSAs 0
+scalar RSUExampleScenario.node[5].nic.phy80211p busyTime 0.011992615384616
+scalar RSUExampleScenario.node[5].nic.mac1609_4 ReceivedUnicastPackets 2
+scalar RSUExampleScenario.node[5].nic.mac1609_4 ReceivedBroadcasts 390
+scalar RSUExampleScenario.node[5].nic.mac1609_4 SentPackets 36
+scalar RSUExampleScenario.node[5].nic.mac1609_4 SentAcknowledgements 0
+scalar RSUExampleScenario.node[5].nic.mac1609_4 RetriesExceeded 0
+scalar RSUExampleScenario.node[5].nic.mac1609_4 SNIRLostPackets 814
+scalar RSUExampleScenario.node[5].nic.mac1609_4 RXTXLostPackets 66
+scalar RSUExampleScenario.node[5].nic.mac1609_4 TotalLostPackets 880
+scalar RSUExampleScenario.node[5].nic.mac1609_4 DroppedPacketsInMac 0
+scalar RSUExampleScenario.node[5].nic.mac1609_4 TooLittleTime 0
+scalar RSUExampleScenario.node[5].nic.mac1609_4 TimesIntoBackoff 36
+scalar RSUExampleScenario.node[5].nic.mac1609_4 SlotsBackoff 52
+scalar RSUExampleScenario.node[5].nic.mac1609_4 NumInternalContention 0
+scalar RSUExampleScenario.node[5].nic.mac1609_4 totalBusyTime 0.287484
+scalar RSUExampleScenario.node[5].nic.mac1609_4 retriesExceeded:count 0
+attr source org_car2x_veins_modules_mac_sigRetriesExceeded
+scalar RSUExampleScenario.node[5].nic.mac1609_4 sentAcks:count 0
+attr source org_car2x_veins_modules_mac_sigSentAck
+scalar RSUExampleScenario.node[5].nic.mac1609_4 sentPackets:count 36
+attr source org_car2x_veins_modules_mac_sigSentPacket
+scalar RSUExampleScenario.node[5].nic.mac1609_4 collisions:count 0
+attr source org_car2x_veins_modules_mac_sigCollision
+scalar RSUExampleScenario.node[5].nic.mac1609_4 channelBusy:timeavg 0.011057076923077
+attr source org_car2x_veins_modules_mac_sigChannelBusy
+scalar RSUExampleScenario.node[5].veinsmobility startTime 1
+scalar RSUExampleScenario.node[5].veinsmobility totalTime 25
+scalar RSUExampleScenario.node[5].veinsmobility stopTime 27
+scalar RSUExampleScenario.node[5].veinsmobility minSpeed 4.0557845440995
+scalar RSUExampleScenario.node[5].veinsmobility maxSpeed 16.011319644094
+scalar RSUExampleScenario.node[5].veinsmobility totalDistance 262.49192262063
+scalar RSUExampleScenario.node[5].veinsmobility totalCO2Emission 103.05498385717
+scalar RSUExampleScenario.node[20].appl generatedWSMs 38
+scalar RSUExampleScenario.node[20].appl receivedWSMs 820
+scalar RSUExampleScenario.node[20].appl generatedBSMs 0
+scalar RSUExampleScenario.node[20].appl receivedBSMs 0
+scalar RSUExampleScenario.node[20].appl generatedWSAs 0
+scalar RSUExampleScenario.node[20].appl receivedWSAs 0
+scalar RSUExampleScenario.node[20].nic.phy80211p busyTime 0.011752
+scalar RSUExampleScenario.node[20].nic.mac1609_4 ReceivedUnicastPackets 10
+scalar RSUExampleScenario.node[20].nic.mac1609_4 ReceivedBroadcasts 810
+scalar RSUExampleScenario.node[20].nic.mac1609_4 SentPackets 38
+scalar RSUExampleScenario.node[20].nic.mac1609_4 SentAcknowledgements 0
+scalar RSUExampleScenario.node[20].nic.mac1609_4 RetriesExceeded 0
+scalar RSUExampleScenario.node[20].nic.mac1609_4 SNIRLostPackets 304
+scalar RSUExampleScenario.node[20].nic.mac1609_4 RXTXLostPackets 63
+scalar RSUExampleScenario.node[20].nic.mac1609_4 TotalLostPackets 367
+scalar RSUExampleScenario.node[20].nic.mac1609_4 DroppedPacketsInMac 0
+scalar RSUExampleScenario.node[20].nic.mac1609_4 TooLittleTime 0
+scalar RSUExampleScenario.node[20].nic.mac1609_4 TimesIntoBackoff 38
+scalar RSUExampleScenario.node[20].nic.mac1609_4 SlotsBackoff 53
+scalar RSUExampleScenario.node[20].nic.mac1609_4 NumInternalContention 0
+scalar RSUExampleScenario.node[20].nic.mac1609_4 totalBusyTime 0.311614
+scalar RSUExampleScenario.node[20].nic.mac1609_4 retriesExceeded:count 0
+attr source org_car2x_veins_modules_mac_sigRetriesExceeded
+scalar RSUExampleScenario.node[20].nic.mac1609_4 sentAcks:count 0
+attr source org_car2x_veins_modules_mac_sigSentAck
+scalar RSUExampleScenario.node[20].nic.mac1609_4 sentPackets:count 38
+attr source org_car2x_veins_modules_mac_sigSentPacket
+scalar RSUExampleScenario.node[20].nic.mac1609_4 collisions:count 0
+attr source org_car2x_veins_modules_mac_sigCollision
+scalar RSUExampleScenario.node[20].nic.mac1609_4 channelBusy:timeavg 0.010745310344828
+attr source org_car2x_veins_modules_mac_sigChannelBusy
+scalar RSUExampleScenario.node[20].veinsmobility startTime 1
+scalar RSUExampleScenario.node[20].veinsmobility totalTime 28
+scalar RSUExampleScenario.node[20].veinsmobility stopTime 30
+scalar RSUExampleScenario.node[20].veinsmobility minSpeed 3.887992514905
+scalar RSUExampleScenario.node[20].veinsmobility maxSpeed 16.419901900012
+scalar RSUExampleScenario.node[20].veinsmobility totalDistance 358.53365700363
+scalar RSUExampleScenario.node[20].veinsmobility totalCO2Emission 118.96344493252
+scalar RSUExampleScenario.node[2].appl generatedWSMs 40
+scalar RSUExampleScenario.node[2].appl receivedWSMs 836
+scalar RSUExampleScenario.node[2].appl generatedBSMs 0
+scalar RSUExampleScenario.node[2].appl receivedBSMs 0
+scalar RSUExampleScenario.node[2].appl generatedWSAs 0
+scalar RSUExampleScenario.node[2].appl receivedWSAs 0
+scalar RSUExampleScenario.node[2].nic.phy80211p busyTime 0.01165075
+scalar RSUExampleScenario.node[2].nic.mac1609_4 ReceivedUnicastPackets 17
+scalar RSUExampleScenario.node[2].nic.mac1609_4 ReceivedBroadcasts 819
+scalar RSUExampleScenario.node[2].nic.mac1609_4 SentPackets 40
+scalar RSUExampleScenario.node[2].nic.mac1609_4 SentAcknowledgements 0
+scalar RSUExampleScenario.node[2].nic.mac1609_4 RetriesExceeded 0
+scalar RSUExampleScenario.node[2].nic.mac1609_4 SNIRLostPackets 407
+scalar RSUExampleScenario.node[2].nic.mac1609_4 RXTXLostPackets 57
+scalar RSUExampleScenario.node[2].nic.mac1609_4 TotalLostPackets 464
+scalar RSUExampleScenario.node[2].nic.mac1609_4 DroppedPacketsInMac 0
+scalar RSUExampleScenario.node[2].nic.mac1609_4 TooLittleTime 0
+scalar RSUExampleScenario.node[2].nic.mac1609_4 TimesIntoBackoff 40
+scalar RSUExampleScenario.node[2].nic.mac1609_4 SlotsBackoff 61
+scalar RSUExampleScenario.node[2].nic.mac1609_4 NumInternalContention 0
+scalar RSUExampleScenario.node[2].nic.mac1609_4 totalBusyTime 0.339456
+scalar RSUExampleScenario.node[2].nic.mac1609_4 retriesExceeded:count 0
+attr source org_car2x_veins_modules_mac_sigRetriesExceeded
+scalar RSUExampleScenario.node[2].nic.mac1609_4 sentAcks:count 0
+attr source org_car2x_veins_modules_mac_sigSentAck
+scalar RSUExampleScenario.node[2].nic.mac1609_4 sentPackets:count 40
+attr source org_car2x_veins_modules_mac_sigSentPacket
+scalar RSUExampleScenario.node[2].nic.mac1609_4 collisions:count 0
+attr source org_car2x_veins_modules_mac_sigCollision
+scalar RSUExampleScenario.node[2].nic.mac1609_4 channelBusy:timeavg 0.010608
+attr source org_car2x_veins_modules_mac_sigChannelBusy
+scalar RSUExampleScenario.node[2].veinsmobility startTime 1
+scalar RSUExampleScenario.node[2].veinsmobility totalTime 31
+scalar RSUExampleScenario.node[2].veinsmobility stopTime 33
+scalar RSUExampleScenario.node[2].veinsmobility minSpeed 3.9860061362494
+scalar RSUExampleScenario.node[2].veinsmobility maxSpeed 14.305736847395
+scalar RSUExampleScenario.node[2].veinsmobility totalDistance 379.31557343318
+scalar RSUExampleScenario.node[2].veinsmobility totalCO2Emission 102.02609122008
+scalar RSUExampleScenario.node[16].appl generatedWSMs 40
+scalar RSUExampleScenario.node[16].appl receivedWSMs 719
+scalar RSUExampleScenario.node[16].appl generatedBSMs 0
+scalar RSUExampleScenario.node[16].appl receivedBSMs 0
+scalar RSUExampleScenario.node[16].appl generatedWSAs 0
+scalar RSUExampleScenario.node[16].appl receivedWSAs 0
+scalar RSUExampleScenario.node[16].nic.phy80211p busyTime 0.011304727272728
+scalar RSUExampleScenario.node[16].nic.mac1609_4 ReceivedUnicastPackets 8
+scalar RSUExampleScenario.node[16].nic.mac1609_4 ReceivedBroadcasts 711
+scalar RSUExampleScenario.node[16].nic.mac1609_4 SentPackets 40
+scalar RSUExampleScenario.node[16].nic.mac1609_4 SentAcknowledgements 0
+scalar RSUExampleScenario.node[16].nic.mac1609_4 RetriesExceeded 0
+scalar RSUExampleScenario.node[16].nic.mac1609_4 SNIRLostPackets 515
+scalar RSUExampleScenario.node[16].nic.mac1609_4 RXTXLostPackets 58
+scalar RSUExampleScenario.node[16].nic.mac1609_4 TotalLostPackets 573
+scalar RSUExampleScenario.node[16].nic.mac1609_4 DroppedPacketsInMac 0
+scalar RSUExampleScenario.node[16].nic.mac1609_4 TooLittleTime 0
+scalar RSUExampleScenario.node[16].nic.mac1609_4 TimesIntoBackoff 40
+scalar RSUExampleScenario.node[16].nic.mac1609_4 SlotsBackoff 52
+scalar RSUExampleScenario.node[16].nic.mac1609_4 NumInternalContention 0
+scalar RSUExampleScenario.node[16].nic.mac1609_4 totalBusyTime 0.339688
+scalar RSUExampleScenario.node[16].nic.mac1609_4 retriesExceeded:count 0
+attr source org_car2x_veins_modules_mac_sigRetriesExceeded
+scalar RSUExampleScenario.node[16].nic.mac1609_4 sentAcks:count 0
+attr source org_car2x_veins_modules_mac_sigSentAck
+scalar RSUExampleScenario.node[16].nic.mac1609_4 sentPackets:count 40
+attr source org_car2x_veins_modules_mac_sigSentPacket
+scalar RSUExampleScenario.node[16].nic.mac1609_4 collisions:count 0
+attr source org_car2x_veins_modules_mac_sigCollision
+scalar RSUExampleScenario.node[16].nic.mac1609_4 channelBusy:timeavg 0.010293575757576
+attr source org_car2x_veins_modules_mac_sigChannelBusy
+scalar RSUExampleScenario.node[16].veinsmobility startTime 1
+scalar RSUExampleScenario.node[16].veinsmobility totalTime 32
+scalar RSUExampleScenario.node[16].veinsmobility stopTime 34
+scalar RSUExampleScenario.node[16].veinsmobility minSpeed 4.292120039142
+scalar RSUExampleScenario.node[16].veinsmobility maxSpeed 14.678352640105
+scalar RSUExampleScenario.node[16].veinsmobility totalDistance 402.56190654757
+scalar RSUExampleScenario.node[16].veinsmobility totalCO2Emission 108.05463389139
+scalar RSUExampleScenario.node[4].appl generatedWSMs 42
+scalar RSUExampleScenario.node[4].appl receivedWSMs 741
+scalar RSUExampleScenario.node[4].appl generatedBSMs 0
+scalar RSUExampleScenario.node[4].appl receivedBSMs 0
+scalar RSUExampleScenario.node[4].appl generatedWSAs 0
+scalar RSUExampleScenario.node[4].appl receivedWSAs 0
+scalar RSUExampleScenario.node[4].nic.phy80211p busyTime 0.011606823529412
+scalar RSUExampleScenario.node[4].nic.mac1609_4 ReceivedUnicastPackets 19
+scalar RSUExampleScenario.node[4].nic.mac1609_4 ReceivedBroadcasts 722
+scalar RSUExampleScenario.node[4].nic.mac1609_4 SentPackets 42
+scalar RSUExampleScenario.node[4].nic.mac1609_4 SentAcknowledgements 0
+scalar RSUExampleScenario.node[4].nic.mac1609_4 RetriesExceeded 0
+scalar RSUExampleScenario.node[4].nic.mac1609_4 SNIRLostPackets 569
+scalar RSUExampleScenario.node[4].nic.mac1609_4 RXTXLostPackets 56
+scalar RSUExampleScenario.node[4].nic.mac1609_4 TotalLostPackets 625
+scalar RSUExampleScenario.node[4].nic.mac1609_4 DroppedPacketsInMac 0
+scalar RSUExampleScenario.node[4].nic.mac1609_4 TooLittleTime 0
+scalar RSUExampleScenario.node[4].nic.mac1609_4 TimesIntoBackoff 42
+scalar RSUExampleScenario.node[4].nic.mac1609_4 SlotsBackoff 78
+scalar RSUExampleScenario.node[4].nic.mac1609_4 NumInternalContention 0
+scalar RSUExampleScenario.node[4].nic.mac1609_4 totalBusyTime 0.360338087704
+scalar RSUExampleScenario.node[4].nic.mac1609_4 retriesExceeded:count 0
+attr source org_car2x_veins_modules_mac_sigRetriesExceeded
+scalar RSUExampleScenario.node[4].nic.mac1609_4 sentAcks:count 0
+attr source org_car2x_veins_modules_mac_sigSentAck
+scalar RSUExampleScenario.node[4].nic.mac1609_4 sentPackets:count 42
+attr source org_car2x_veins_modules_mac_sigSentPacket
+scalar RSUExampleScenario.node[4].nic.mac1609_4 collisions:count 0
+attr source org_car2x_veins_modules_mac_sigCollision
+scalar RSUExampleScenario.node[4].nic.mac1609_4 channelBusy:timeavg 0.010598179050118
+attr source org_car2x_veins_modules_mac_sigChannelBusy
+scalar RSUExampleScenario.node[4].veinsmobility startTime 1
+scalar RSUExampleScenario.node[4].veinsmobility totalTime 33
+scalar RSUExampleScenario.node[4].veinsmobility stopTime 35
+scalar RSUExampleScenario.node[4].veinsmobility minSpeed 4.0581920730798
+scalar RSUExampleScenario.node[4].veinsmobility maxSpeed 12.263895136338
+scalar RSUExampleScenario.node[4].veinsmobility totalDistance 376.36200660441
+scalar RSUExampleScenario.node[4].veinsmobility totalCO2Emission 76.401169649114
+scalar RSUExampleScenario.node[29].appl generatedWSMs 53
+scalar RSUExampleScenario.node[29].appl receivedWSMs 573
+scalar RSUExampleScenario.node[29].appl generatedBSMs 0
+scalar RSUExampleScenario.node[29].appl receivedBSMs 0
+scalar RSUExampleScenario.node[29].appl generatedWSAs 0
+scalar RSUExampleScenario.node[29].appl receivedWSAs 0
+scalar RSUExampleScenario.node[29].nic.phy80211p busyTime 0.01109180952381
+scalar RSUExampleScenario.node[29].nic.mac1609_4 ReceivedUnicastPackets 16
+scalar RSUExampleScenario.node[29].nic.mac1609_4 ReceivedBroadcasts 557
+scalar RSUExampleScenario.node[29].nic.mac1609_4 SentPackets 53
+scalar RSUExampleScenario.node[29].nic.mac1609_4 SentAcknowledgements 0
+scalar RSUExampleScenario.node[29].nic.mac1609_4 RetriesExceeded 0
+scalar RSUExampleScenario.node[29].nic.mac1609_4 SNIRLostPackets 974
+scalar RSUExampleScenario.node[29].nic.mac1609_4 RXTXLostPackets 60
+scalar RSUExampleScenario.node[29].nic.mac1609_4 TotalLostPackets 1034
+scalar RSUExampleScenario.node[29].nic.mac1609_4 DroppedPacketsInMac 0
+scalar RSUExampleScenario.node[29].nic.mac1609_4 TooLittleTime 0
+scalar RSUExampleScenario.node[29].nic.mac1609_4 TimesIntoBackoff 53
+scalar RSUExampleScenario.node[29].nic.mac1609_4 SlotsBackoff 74
+scalar RSUExampleScenario.node[29].nic.mac1609_4 NumInternalContention 0
+scalar RSUExampleScenario.node[29].nic.mac1609_4 totalBusyTime 0.427165
+scalar RSUExampleScenario.node[29].nic.mac1609_4 retriesExceeded:count 0
+attr source org_car2x_veins_modules_mac_sigRetriesExceeded
+scalar RSUExampleScenario.node[29].nic.mac1609_4 sentAcks:count 0
+attr source org_car2x_veins_modules_mac_sigSentAck
+scalar RSUExampleScenario.node[29].nic.mac1609_4 sentPackets:count 53
+attr source org_car2x_veins_modules_mac_sigSentPacket
+scalar RSUExampleScenario.node[29].nic.mac1609_4 collisions:count 0
+attr source org_car2x_veins_modules_mac_sigCollision
+scalar RSUExampleScenario.node[29].nic.mac1609_4 channelBusy:timeavg 0.010170595238096
+attr source org_car2x_veins_modules_mac_sigChannelBusy
+scalar RSUExampleScenario.node[29].veinsmobility startTime 1
+scalar RSUExampleScenario.node[29].veinsmobility totalTime 41
+scalar RSUExampleScenario.node[29].veinsmobility stopTime 43
+scalar RSUExampleScenario.node[29].veinsmobility minSpeed 4.0910539485528
+scalar RSUExampleScenario.node[29].veinsmobility maxSpeed 14.62415562128
+scalar RSUExampleScenario.node[29].veinsmobility totalDistance 490.64086300005
+scalar RSUExampleScenario.node[29].veinsmobility totalCO2Emission 149.82901143296
+scalar RSUExampleScenario.node[18].appl generatedWSMs 57
+scalar RSUExampleScenario.node[18].appl receivedWSMs 1070
+scalar RSUExampleScenario.node[18].appl generatedBSMs 0
+scalar RSUExampleScenario.node[18].appl receivedBSMs 0
+scalar RSUExampleScenario.node[18].appl generatedWSAs 0
+scalar RSUExampleScenario.node[18].appl receivedWSAs 0
+scalar RSUExampleScenario.node[18].nic.phy80211p busyTime 0.010662333333334
+scalar RSUExampleScenario.node[18].nic.mac1609_4 ReceivedUnicastPackets 23
+scalar RSUExampleScenario.node[18].nic.mac1609_4 ReceivedBroadcasts 1047
+scalar RSUExampleScenario.node[18].nic.mac1609_4 SentPackets 57
+scalar RSUExampleScenario.node[18].nic.mac1609_4 SentAcknowledgements 0
+scalar RSUExampleScenario.node[18].nic.mac1609_4 RetriesExceeded 0
+scalar RSUExampleScenario.node[18].nic.mac1609_4 SNIRLostPackets 622
+scalar RSUExampleScenario.node[18].nic.mac1609_4 RXTXLostPackets 59
+scalar RSUExampleScenario.node[18].nic.mac1609_4 TotalLostPackets 681
+scalar RSUExampleScenario.node[18].nic.mac1609_4 DroppedPacketsInMac 0
+scalar RSUExampleScenario.node[18].nic.mac1609_4 TooLittleTime 0
+scalar RSUExampleScenario.node[18].nic.mac1609_4 TimesIntoBackoff 57
+scalar RSUExampleScenario.node[18].nic.mac1609_4 SlotsBackoff 89
+scalar RSUExampleScenario.node[18].nic.mac1609_4 NumInternalContention 0
+scalar RSUExampleScenario.node[18].nic.mac1609_4 totalBusyTime 0.470089
+scalar RSUExampleScenario.node[18].nic.mac1609_4 retriesExceeded:count 0
+attr source org_car2x_veins_modules_mac_sigRetriesExceeded
+scalar RSUExampleScenario.node[18].nic.mac1609_4 sentAcks:count 0
+attr source org_car2x_veins_modules_mac_sigSentAck
+scalar RSUExampleScenario.node[18].nic.mac1609_4 sentPackets:count 57
+attr source org_car2x_veins_modules_mac_sigSentPacket
+scalar RSUExampleScenario.node[18].nic.mac1609_4 collisions:count 0
+attr source org_car2x_veins_modules_mac_sigCollision
+scalar RSUExampleScenario.node[18].nic.mac1609_4 channelBusy:timeavg 0.0097935208333336
+attr source org_car2x_veins_modules_mac_sigChannelBusy
+scalar RSUExampleScenario.node[18].veinsmobility startTime 1
+scalar RSUExampleScenario.node[18].veinsmobility totalTime 47
+scalar RSUExampleScenario.node[18].veinsmobility stopTime 49
+scalar RSUExampleScenario.node[18].veinsmobility minSpeed 4.068015635966
+scalar RSUExampleScenario.node[18].veinsmobility maxSpeed 15.380992387885
+scalar RSUExampleScenario.node[18].veinsmobility totalDistance 592.28464095788
+scalar RSUExampleScenario.node[18].veinsmobility totalCO2Emission 166.2603111384
+scalar RSUExampleScenario.node[8].appl generatedWSMs 63
+scalar RSUExampleScenario.node[8].appl receivedWSMs 1158
+scalar RSUExampleScenario.node[8].appl generatedBSMs 0
+scalar RSUExampleScenario.node[8].appl receivedBSMs 0
+scalar RSUExampleScenario.node[8].appl generatedWSAs 0
+scalar RSUExampleScenario.node[8].appl receivedWSAs 0
+scalar RSUExampleScenario.node[8].nic.phy80211p busyTime 0.010590117647059
+scalar RSUExampleScenario.node[8].nic.mac1609_4 ReceivedUnicastPackets 20
+scalar RSUExampleScenario.node[8].nic.mac1609_4 ReceivedBroadcasts 1138
+scalar RSUExampleScenario.node[8].nic.mac1609_4 SentPackets 63
+scalar RSUExampleScenario.node[8].nic.mac1609_4 SentAcknowledgements 0
+scalar RSUExampleScenario.node[8].nic.mac1609_4 RetriesExceeded 0
+scalar RSUExampleScenario.node[8].nic.mac1609_4 SNIRLostPackets 606
+scalar RSUExampleScenario.node[8].nic.mac1609_4 RXTXLostPackets 76
+scalar RSUExampleScenario.node[8].nic.mac1609_4 TotalLostPackets 682
+scalar RSUExampleScenario.node[8].nic.mac1609_4 DroppedPacketsInMac 0
+scalar RSUExampleScenario.node[8].nic.mac1609_4 TooLittleTime 0
+scalar RSUExampleScenario.node[8].nic.mac1609_4 TimesIntoBackoff 63
+scalar RSUExampleScenario.node[8].nic.mac1609_4 SlotsBackoff 90
+scalar RSUExampleScenario.node[8].nic.mac1609_4 NumInternalContention 0
+scalar RSUExampleScenario.node[8].nic.mac1609_4 totalBusyTime 0.501183087704
+scalar RSUExampleScenario.node[8].nic.mac1609_4 retriesExceeded:count 0
+attr source org_car2x_veins_modules_mac_sigRetriesExceeded
+scalar RSUExampleScenario.node[8].nic.mac1609_4 sentAcks:count 0
+attr source org_car2x_veins_modules_mac_sigSentAck
+scalar RSUExampleScenario.node[8].nic.mac1609_4 sentPackets:count 63
+attr source org_car2x_veins_modules_mac_sigSentPacket
+scalar RSUExampleScenario.node[8].nic.mac1609_4 collisions:count 0
+attr source org_car2x_veins_modules_mac_sigCollision
+scalar RSUExampleScenario.node[8].nic.mac1609_4 channelBusy:timeavg 0.0098271193667454
+attr source org_car2x_veins_modules_mac_sigChannelBusy
+scalar RSUExampleScenario.node[8].veinsmobility startTime 1
+scalar RSUExampleScenario.node[8].veinsmobility totalTime 50
+scalar RSUExampleScenario.node[8].veinsmobility stopTime 52
+scalar RSUExampleScenario.node[8].veinsmobility minSpeed 3.7180970399628
+scalar RSUExampleScenario.node[8].veinsmobility maxSpeed 14.623570219384
+scalar RSUExampleScenario.node[8].veinsmobility totalDistance 529.35079999268
+scalar RSUExampleScenario.node[8].veinsmobility totalCO2Emission 178.37866309055
+scalar RSUExampleScenario.node[3].appl generatedWSMs 73
+scalar RSUExampleScenario.node[3].appl receivedWSMs 1130
+scalar RSUExampleScenario.node[3].appl generatedBSMs 0
+scalar RSUExampleScenario.node[3].appl receivedBSMs 0
+scalar RSUExampleScenario.node[3].appl generatedWSAs 0
+scalar RSUExampleScenario.node[3].appl receivedWSAs 0
+scalar RSUExampleScenario.node[3].nic.phy80211p busyTime 0.010068
+scalar RSUExampleScenario.node[3].nic.mac1609_4 ReceivedUnicastPackets 20
+scalar RSUExampleScenario.node[3].nic.mac1609_4 ReceivedBroadcasts 1110
+scalar RSUExampleScenario.node[3].nic.mac1609_4 SentPackets 73
+scalar RSUExampleScenario.node[3].nic.mac1609_4 SentAcknowledgements 0
+scalar RSUExampleScenario.node[3].nic.mac1609_4 RetriesExceeded 0
+scalar RSUExampleScenario.node[3].nic.mac1609_4 SNIRLostPackets 810
+scalar RSUExampleScenario.node[3].nic.mac1609_4 RXTXLostPackets 79
+scalar RSUExampleScenario.node[3].nic.mac1609_4 TotalLostPackets 889
+scalar RSUExampleScenario.node[3].nic.mac1609_4 DroppedPacketsInMac 0
+scalar RSUExampleScenario.node[3].nic.mac1609_4 TooLittleTime 0
+scalar RSUExampleScenario.node[3].nic.mac1609_4 TimesIntoBackoff 73
+scalar RSUExampleScenario.node[3].nic.mac1609_4 SlotsBackoff 110
+scalar RSUExampleScenario.node[3].nic.mac1609_4 NumInternalContention 0
+scalar RSUExampleScenario.node[3].nic.mac1609_4 totalBusyTime 0.543185133166
+scalar RSUExampleScenario.node[3].nic.mac1609_4 retriesExceeded:count 0
+attr source org_car2x_veins_modules_mac_sigRetriesExceeded
+scalar RSUExampleScenario.node[3].nic.mac1609_4 sentAcks:count 0
+attr source org_car2x_veins_modules_mac_sigSentAck
+scalar RSUExampleScenario.node[3].nic.mac1609_4 sentPackets:count 73
+attr source org_car2x_veins_modules_mac_sigSentPacket
+scalar RSUExampleScenario.node[3].nic.mac1609_4 collisions:count 0
+attr source org_car2x_veins_modules_mac_sigCollision
+scalar RSUExampleScenario.node[3].nic.mac1609_4 channelBusy:timeavg 0.0093652609166555
+attr source org_car2x_veins_modules_mac_sigChannelBusy
+scalar RSUExampleScenario.node[3].veinsmobility startTime 1
+scalar RSUExampleScenario.node[3].veinsmobility totalTime 57
+scalar RSUExampleScenario.node[3].veinsmobility stopTime 59
+scalar RSUExampleScenario.node[3].veinsmobility minSpeed 3.9936443185378
+scalar RSUExampleScenario.node[3].veinsmobility maxSpeed 14.088617483488
+scalar RSUExampleScenario.node[3].veinsmobility totalDistance 635.5178322223
+scalar RSUExampleScenario.node[3].veinsmobility totalCO2Emission 193.55953095828
+scalar RSUExampleScenario.node[30].appl generatedWSMs 75
+scalar RSUExampleScenario.node[30].appl receivedWSMs 658
+scalar RSUExampleScenario.node[30].appl generatedBSMs 0
+scalar RSUExampleScenario.node[30].appl receivedBSMs 0
+scalar RSUExampleScenario.node[30].appl generatedWSAs 0
+scalar RSUExampleScenario.node[30].appl receivedWSAs 0
+scalar RSUExampleScenario.node[30].nic.phy80211p busyTime 0.010044
+scalar RSUExampleScenario.node[30].nic.mac1609_4 ReceivedUnicastPackets 18
+scalar RSUExampleScenario.node[30].nic.mac1609_4 ReceivedBroadcasts 640
+scalar RSUExampleScenario.node[30].nic.mac1609_4 SentPackets 75
+scalar RSUExampleScenario.node[30].nic.mac1609_4 SentAcknowledgements 0
+scalar RSUExampleScenario.node[30].nic.mac1609_4 RetriesExceeded 0
+scalar RSUExampleScenario.node[30].nic.mac1609_4 SNIRLostPackets 1401
+scalar RSUExampleScenario.node[30].nic.mac1609_4 RXTXLostPackets 83
+scalar RSUExampleScenario.node[30].nic.mac1609_4 TotalLostPackets 1484
+scalar RSUExampleScenario.node[30].nic.mac1609_4 DroppedPacketsInMac 0
+scalar RSUExampleScenario.node[30].nic.mac1609_4 TooLittleTime 0
+scalar RSUExampleScenario.node[30].nic.mac1609_4 TimesIntoBackoff 75
+scalar RSUExampleScenario.node[30].nic.mac1609_4 SlotsBackoff 121
+scalar RSUExampleScenario.node[30].nic.mac1609_4 NumInternalContention 0
+scalar RSUExampleScenario.node[30].nic.mac1609_4 totalBusyTime 0.543187
+scalar RSUExampleScenario.node[30].nic.mac1609_4 retriesExceeded:count 0
+attr source org_car2x_veins_modules_mac_sigRetriesExceeded
+scalar RSUExampleScenario.node[30].nic.mac1609_4 sentAcks:count 0
+attr source org_car2x_veins_modules_mac_sigSentAck
+scalar RSUExampleScenario.node[30].nic.mac1609_4 sentPackets:count 75
+attr source org_car2x_veins_modules_mac_sigSentPacket
+scalar RSUExampleScenario.node[30].nic.mac1609_4 collisions:count 0
+attr source org_car2x_veins_modules_mac_sigCollision
+scalar RSUExampleScenario.node[30].nic.mac1609_4 channelBusy:timeavg 0.0093652931034486
+attr source org_car2x_veins_modules_mac_sigChannelBusy
+scalar RSUExampleScenario.node[30].veinsmobility startTime 1
+scalar RSUExampleScenario.node[30].veinsmobility totalTime 57
+scalar RSUExampleScenario.node[30].veinsmobility stopTime 59
+scalar RSUExampleScenario.node[30].veinsmobility minSpeed 4.0062434990116
+scalar RSUExampleScenario.node[30].veinsmobility maxSpeed 15.986534438358
+scalar RSUExampleScenario.node[30].veinsmobility totalDistance 670.42533319943
+scalar RSUExampleScenario.node[30].veinsmobility totalCO2Emission 260.30065683618
+scalar RSUExampleScenario.node[13].appl generatedWSMs 73
+scalar RSUExampleScenario.node[13].appl receivedWSMs 841
+scalar RSUExampleScenario.node[13].appl generatedBSMs 0
+scalar RSUExampleScenario.node[13].appl receivedBSMs 0
+scalar RSUExampleScenario.node[13].appl generatedWSAs 0
+scalar RSUExampleScenario.node[13].appl receivedWSAs 0
+scalar RSUExampleScenario.node[13].nic.phy80211p busyTime 0.010105762711865
+scalar RSUExampleScenario.node[13].nic.mac1609_4 ReceivedUnicastPackets 24
+scalar RSUExampleScenario.node[13].nic.mac1609_4 ReceivedBroadcasts 817
+scalar RSUExampleScenario.node[13].nic.mac1609_4 SentPackets 73
+scalar RSUExampleScenario.node[13].nic.mac1609_4 SentAcknowledgements 0
+scalar RSUExampleScenario.node[13].nic.mac1609_4 RetriesExceeded 0
+scalar RSUExampleScenario.node[13].nic.mac1609_4 SNIRLostPackets 1185
+scalar RSUExampleScenario.node[13].nic.mac1609_4 RXTXLostPackets 61
+scalar RSUExampleScenario.node[13].nic.mac1609_4 TotalLostPackets 1246
+scalar RSUExampleScenario.node[13].nic.mac1609_4 DroppedPacketsInMac 0
+scalar RSUExampleScenario.node[13].nic.mac1609_4 TooLittleTime 0
+scalar RSUExampleScenario.node[13].nic.mac1609_4 TimesIntoBackoff 78
+scalar RSUExampleScenario.node[13].nic.mac1609_4 SlotsBackoff 102
+scalar RSUExampleScenario.node[13].nic.mac1609_4 NumInternalContention 0
+scalar RSUExampleScenario.node[13].nic.mac1609_4 totalBusyTime 0.550145
+scalar RSUExampleScenario.node[13].nic.mac1609_4 retriesExceeded:count 0
+attr source org_car2x_veins_modules_mac_sigRetriesExceeded
+scalar RSUExampleScenario.node[13].nic.mac1609_4 sentAcks:count 0
+attr source org_car2x_veins_modules_mac_sigSentAck
+scalar RSUExampleScenario.node[13].nic.mac1609_4 sentPackets:count 73
+attr source org_car2x_veins_modules_mac_sigSentPacket
+scalar RSUExampleScenario.node[13].nic.mac1609_4 collisions:count 0
+attr source org_car2x_veins_modules_mac_sigCollision
+scalar RSUExampleScenario.node[13].nic.mac1609_4 channelBusy:timeavg 0.009324491525424
+attr source org_car2x_veins_modules_mac_sigChannelBusy
+scalar RSUExampleScenario.node[13].veinsmobility startTime 1
+scalar RSUExampleScenario.node[13].veinsmobility totalTime 58
+scalar RSUExampleScenario.node[13].veinsmobility stopTime 60
+scalar RSUExampleScenario.node[13].veinsmobility minSpeed 4.0223714623906
+scalar RSUExampleScenario.node[13].veinsmobility maxSpeed 13.702134434851
+scalar RSUExampleScenario.node[13].veinsmobility totalDistance 703.12918556343
+scalar RSUExampleScenario.node[13].veinsmobility totalCO2Emission 162.99976107119
+scalar RSUExampleScenario.node[9].appl generatedWSMs 71
+scalar RSUExampleScenario.node[9].appl receivedWSMs 1076
+scalar RSUExampleScenario.node[9].appl generatedBSMs 0
+scalar RSUExampleScenario.node[9].appl receivedBSMs 0
+scalar RSUExampleScenario.node[9].appl generatedWSAs 0
+scalar RSUExampleScenario.node[9].appl receivedWSAs 0
+scalar RSUExampleScenario.node[9].nic.phy80211p busyTime 0.010082169491526
+scalar RSUExampleScenario.node[9].nic.mac1609_4 ReceivedUnicastPackets 22
+scalar RSUExampleScenario.node[9].nic.mac1609_4 ReceivedBroadcasts 1054
+scalar RSUExampleScenario.node[9].nic.mac1609_4 SentPackets 71
+scalar RSUExampleScenario.node[9].nic.mac1609_4 SentAcknowledgements 0
+scalar RSUExampleScenario.node[9].nic.mac1609_4 RetriesExceeded 0
+scalar RSUExampleScenario.node[9].nic.mac1609_4 SNIRLostPackets 885
+scalar RSUExampleScenario.node[9].nic.mac1609_4 RXTXLostPackets 69
+scalar RSUExampleScenario.node[9].nic.mac1609_4 TotalLostPackets 954
+scalar RSUExampleScenario.node[9].nic.mac1609_4 DroppedPacketsInMac 0
+scalar RSUExampleScenario.node[9].nic.mac1609_4 TooLittleTime 0
+scalar RSUExampleScenario.node[9].nic.mac1609_4 TimesIntoBackoff 71
+scalar RSUExampleScenario.node[9].nic.mac1609_4 SlotsBackoff 93
+scalar RSUExampleScenario.node[9].nic.mac1609_4 NumInternalContention 0
+scalar RSUExampleScenario.node[9].nic.mac1609_4 totalBusyTime 0.550143
+scalar RSUExampleScenario.node[9].nic.mac1609_4 retriesExceeded:count 0
+attr source org_car2x_veins_modules_mac_sigRetriesExceeded
+scalar RSUExampleScenario.node[9].nic.mac1609_4 sentAcks:count 0
+attr source org_car2x_veins_modules_mac_sigSentAck
+scalar RSUExampleScenario.node[9].nic.mac1609_4 sentPackets:count 71
+attr source org_car2x_veins_modules_mac_sigSentPacket
+scalar RSUExampleScenario.node[9].nic.mac1609_4 collisions:count 0
+attr source org_car2x_veins_modules_mac_sigCollision
+scalar RSUExampleScenario.node[9].nic.mac1609_4 channelBusy:timeavg 0.0093244576271189
+attr source org_car2x_veins_modules_mac_sigChannelBusy
+scalar RSUExampleScenario.node[9].veinsmobility startTime 1
+scalar RSUExampleScenario.node[9].veinsmobility totalTime 58
+scalar RSUExampleScenario.node[9].veinsmobility stopTime 60
+scalar RSUExampleScenario.node[9].veinsmobility minSpeed 3.9793318004404
+scalar RSUExampleScenario.node[9].veinsmobility maxSpeed 17.608739006606
+scalar RSUExampleScenario.node[9].veinsmobility totalDistance 761.55680650798
+scalar RSUExampleScenario.node[9].veinsmobility totalCO2Emission 252.75966606471
+scalar RSUExampleScenario.node[6].appl generatedWSMs 82
+scalar RSUExampleScenario.node[6].appl receivedWSMs 849
+scalar RSUExampleScenario.node[6].appl generatedBSMs 0
+scalar RSUExampleScenario.node[6].appl receivedBSMs 0
+scalar RSUExampleScenario.node[6].appl generatedWSAs 0
+scalar RSUExampleScenario.node[6].appl receivedWSAs 0
+scalar RSUExampleScenario.node[6].nic.phy80211p busyTime 0.0097158787878791
+scalar RSUExampleScenario.node[6].nic.mac1609_4 ReceivedUnicastPackets 14
+scalar RSUExampleScenario.node[6].nic.mac1609_4 ReceivedBroadcasts 835
+scalar RSUExampleScenario.node[6].nic.mac1609_4 SentPackets 82
+scalar RSUExampleScenario.node[6].nic.mac1609_4 SentAcknowledgements 0
+scalar RSUExampleScenario.node[6].nic.mac1609_4 RetriesExceeded 0
+scalar RSUExampleScenario.node[6].nic.mac1609_4 SNIRLostPackets 1570
+scalar RSUExampleScenario.node[6].nic.mac1609_4 RXTXLostPackets 85
+scalar RSUExampleScenario.node[6].nic.mac1609_4 TotalLostPackets 1655
+scalar RSUExampleScenario.node[6].nic.mac1609_4 DroppedPacketsInMac 0
+scalar RSUExampleScenario.node[6].nic.mac1609_4 TooLittleTime 0
+scalar RSUExampleScenario.node[6].nic.mac1609_4 TimesIntoBackoff 95
+scalar RSUExampleScenario.node[6].nic.mac1609_4 SlotsBackoff 154
+scalar RSUExampleScenario.node[6].nic.mac1609_4 NumInternalContention 0
+scalar RSUExampleScenario.node[6].nic.mac1609_4 totalBusyTime 0.599338
+scalar RSUExampleScenario.node[6].nic.mac1609_4 retriesExceeded:count 0
+attr source org_car2x_veins_modules_mac_sigRetriesExceeded
+scalar RSUExampleScenario.node[6].nic.mac1609_4 sentAcks:count 0
+attr source org_car2x_veins_modules_mac_sigSentAck
+scalar RSUExampleScenario.node[6].nic.mac1609_4 sentPackets:count 82
+attr source org_car2x_veins_modules_mac_sigSentPacket
+scalar RSUExampleScenario.node[6].nic.mac1609_4 collisions:count 0
+attr source org_car2x_veins_modules_mac_sigCollision
+scalar RSUExampleScenario.node[6].nic.mac1609_4 channelBusy:timeavg 0.0090808787878791
+attr source org_car2x_veins_modules_mac_sigChannelBusy
+scalar RSUExampleScenario.node[6].veinsmobility startTime 1
+scalar RSUExampleScenario.node[6].veinsmobility totalTime 65
+scalar RSUExampleScenario.node[6].veinsmobility stopTime 67
+scalar RSUExampleScenario.node[6].veinsmobility minSpeed 3.9544707769432
+scalar RSUExampleScenario.node[6].veinsmobility maxSpeed 13.131495177561
+scalar RSUExampleScenario.node[6].veinsmobility totalDistance 721.21913775107
+scalar RSUExampleScenario.node[6].veinsmobility totalCO2Emission 205.93258126583
+scalar RSUExampleScenario.node[26].appl generatedWSMs 80
+scalar RSUExampleScenario.node[26].appl receivedWSMs 1150
+scalar RSUExampleScenario.node[26].appl generatedBSMs 0
+scalar RSUExampleScenario.node[26].appl receivedBSMs 0
+scalar RSUExampleScenario.node[26].appl generatedWSAs 0
+scalar RSUExampleScenario.node[26].appl receivedWSAs 0
+scalar RSUExampleScenario.node[26].nic.phy80211p busyTime 0.0096262686567167
+scalar RSUExampleScenario.node[26].nic.mac1609_4 ReceivedUnicastPackets 22
+scalar RSUExampleScenario.node[26].nic.mac1609_4 ReceivedBroadcasts 1128
+scalar RSUExampleScenario.node[26].nic.mac1609_4 SentPackets 80
+scalar RSUExampleScenario.node[26].nic.mac1609_4 SentAcknowledgements 0
+scalar RSUExampleScenario.node[26].nic.mac1609_4 RetriesExceeded 0
+scalar RSUExampleScenario.node[26].nic.mac1609_4 SNIRLostPackets 961
+scalar RSUExampleScenario.node[26].nic.mac1609_4 RXTXLostPackets 71
+scalar RSUExampleScenario.node[26].nic.mac1609_4 TotalLostPackets 1032
+scalar RSUExampleScenario.node[26].nic.mac1609_4 DroppedPacketsInMac 0
+scalar RSUExampleScenario.node[26].nic.mac1609_4 TooLittleTime 0
+scalar RSUExampleScenario.node[26].nic.mac1609_4 TimesIntoBackoff 80
+scalar RSUExampleScenario.node[26].nic.mac1609_4 SlotsBackoff 121
+scalar RSUExampleScenario.node[26].nic.mac1609_4 NumInternalContention 0
+scalar RSUExampleScenario.node[26].nic.mac1609_4 totalBusyTime 0.599336091079
+scalar RSUExampleScenario.node[26].nic.mac1609_4 retriesExceeded:count 0
+attr source org_car2x_veins_modules_mac_sigRetriesExceeded
+scalar RSUExampleScenario.node[26].nic.mac1609_4 sentAcks:count 0
+attr source org_car2x_veins_modules_mac_sigSentAck
+scalar RSUExampleScenario.node[26].nic.mac1609_4 sentPackets:count 80
+attr source org_car2x_veins_modules_mac_sigSentPacket
+scalar RSUExampleScenario.node[26].nic.mac1609_4 collisions:count 0
+attr source org_car2x_veins_modules_mac_sigCollision
+scalar RSUExampleScenario.node[26].nic.mac1609_4 channelBusy:timeavg 0.0089453147922242
+attr source org_car2x_veins_modules_mac_sigChannelBusy
+scalar RSUExampleScenario.node[26].veinsmobility startTime 1
+scalar RSUExampleScenario.node[26].veinsmobility totalTime 66
+scalar RSUExampleScenario.node[26].veinsmobility stopTime 68
+scalar RSUExampleScenario.node[26].veinsmobility minSpeed 4.2028833847593
+scalar RSUExampleScenario.node[26].veinsmobility maxSpeed 13.57293485778
+scalar RSUExampleScenario.node[26].veinsmobility totalDistance 790.10709930623
+scalar RSUExampleScenario.node[26].veinsmobility totalCO2Emission 196.44748733353
+scalar RSUExampleScenario.node[22].appl generatedWSMs 85
+scalar RSUExampleScenario.node[22].appl receivedWSMs 1123
+scalar RSUExampleScenario.node[22].appl generatedBSMs 0
+scalar RSUExampleScenario.node[22].appl receivedBSMs 0
+scalar RSUExampleScenario.node[22].appl generatedWSAs 0
+scalar RSUExampleScenario.node[22].appl receivedWSAs 0
+scalar RSUExampleScenario.node[22].nic.phy80211p busyTime 0.0094212173913047
+scalar RSUExampleScenario.node[22].nic.mac1609_4 ReceivedUnicastPackets 18
+scalar RSUExampleScenario.node[22].nic.mac1609_4 ReceivedBroadcasts 1105
+scalar RSUExampleScenario.node[22].nic.mac1609_4 SentPackets 85
+scalar RSUExampleScenario.node[22].nic.mac1609_4 SentAcknowledgements 0
+scalar RSUExampleScenario.node[22].nic.mac1609_4 RetriesExceeded 0
+scalar RSUExampleScenario.node[22].nic.mac1609_4 SNIRLostPackets 1156
+scalar RSUExampleScenario.node[22].nic.mac1609_4 RXTXLostPackets 85
+scalar RSUExampleScenario.node[22].nic.mac1609_4 TotalLostPackets 1241
+scalar RSUExampleScenario.node[22].nic.mac1609_4 DroppedPacketsInMac 0
+scalar RSUExampleScenario.node[22].nic.mac1609_4 TooLittleTime 0
+scalar RSUExampleScenario.node[22].nic.mac1609_4 TimesIntoBackoff 88
+scalar RSUExampleScenario.node[22].nic.mac1609_4 SlotsBackoff 142
+scalar RSUExampleScenario.node[22].nic.mac1609_4 NumInternalContention 0
+scalar RSUExampleScenario.node[22].nic.mac1609_4 totalBusyTime 0.608621020526
+scalar RSUExampleScenario.node[22].nic.mac1609_4 retriesExceeded:count 0
+attr source org_car2x_veins_modules_mac_sigRetriesExceeded
+scalar RSUExampleScenario.node[22].nic.mac1609_4 sentAcks:count 0
+attr source org_car2x_veins_modules_mac_sigSentAck
+scalar RSUExampleScenario.node[22].nic.mac1609_4 sentPackets:count 85
+attr source org_car2x_veins_modules_mac_sigSentPacket
+scalar RSUExampleScenario.node[22].nic.mac1609_4 collisions:count 0
+attr source org_car2x_veins_modules_mac_sigCollision
+scalar RSUExampleScenario.node[22].nic.mac1609_4 channelBusy:timeavg 0.0088205945003771
+attr source org_car2x_veins_modules_mac_sigChannelBusy
+scalar RSUExampleScenario.node[22].veinsmobility startTime 1
+scalar RSUExampleScenario.node[22].veinsmobility totalTime 68
+scalar RSUExampleScenario.node[22].veinsmobility stopTime 70
+scalar RSUExampleScenario.node[22].veinsmobility minSpeed 3.5984604278473
+scalar RSUExampleScenario.node[22].veinsmobility maxSpeed 13.958720248466
+scalar RSUExampleScenario.node[22].veinsmobility totalDistance 776.64118006041
+scalar RSUExampleScenario.node[22].veinsmobility totalCO2Emission 218.87088898394
+scalar RSUExampleScenario.node[15].appl generatedWSMs 92
+scalar RSUExampleScenario.node[15].appl receivedWSMs 1389
+scalar RSUExampleScenario.node[15].appl generatedBSMs 0
+scalar RSUExampleScenario.node[15].appl receivedBSMs 0
+scalar RSUExampleScenario.node[15].appl generatedWSAs 0
+scalar RSUExampleScenario.node[15].appl receivedWSAs 0
+scalar RSUExampleScenario.node[15].nic.phy80211p busyTime 0.0092542222222225
+scalar RSUExampleScenario.node[15].nic.mac1609_4 ReceivedUnicastPackets 34
+scalar RSUExampleScenario.node[15].nic.mac1609_4 ReceivedBroadcasts 1355
+scalar RSUExampleScenario.node[15].nic.mac1609_4 SentPackets 92
+scalar RSUExampleScenario.node[15].nic.mac1609_4 SentAcknowledgements 0
+scalar RSUExampleScenario.node[15].nic.mac1609_4 RetriesExceeded 0
+scalar RSUExampleScenario.node[15].nic.mac1609_4 SNIRLostPackets 794
+scalar RSUExampleScenario.node[15].nic.mac1609_4 RXTXLostPackets 89
+scalar RSUExampleScenario.node[15].nic.mac1609_4 TotalLostPackets 883
+scalar RSUExampleScenario.node[15].nic.mac1609_4 DroppedPacketsInMac 0
+scalar RSUExampleScenario.node[15].nic.mac1609_4 TooLittleTime 0
+scalar RSUExampleScenario.node[15].nic.mac1609_4 TimesIntoBackoff 92
+scalar RSUExampleScenario.node[15].nic.mac1609_4 SlotsBackoff 139
+scalar RSUExampleScenario.node[15].nic.mac1609_4 NumInternalContention 0
+scalar RSUExampleScenario.node[15].nic.mac1609_4 totalBusyTime 0.625564352838
+scalar RSUExampleScenario.node[15].nic.mac1609_4 retriesExceeded:count 0
+attr source org_car2x_veins_modules_mac_sigRetriesExceeded
+scalar RSUExampleScenario.node[15].nic.mac1609_4 sentAcks:count 0
+attr source org_car2x_veins_modules_mac_sigSentAck
+scalar RSUExampleScenario.node[15].nic.mac1609_4 sentPackets:count 92
+attr source org_car2x_veins_modules_mac_sigSentPacket
+scalar RSUExampleScenario.node[15].nic.mac1609_4 collisions:count 0
+attr source org_car2x_veins_modules_mac_sigCollision
+scalar RSUExampleScenario.node[15].nic.mac1609_4 channelBusy:timeavg 0.008688393789417
+attr source org_car2x_veins_modules_mac_sigChannelBusy
+scalar RSUExampleScenario.node[15].veinsmobility startTime 1
+scalar RSUExampleScenario.node[15].veinsmobility totalTime 71
+scalar RSUExampleScenario.node[15].veinsmobility stopTime 73
+scalar RSUExampleScenario.node[15].veinsmobility minSpeed 3.7434086864806
+scalar RSUExampleScenario.node[15].veinsmobility maxSpeed 14.444343534878
+scalar RSUExampleScenario.node[15].veinsmobility totalDistance 816.22592215733
+scalar RSUExampleScenario.node[15].veinsmobility totalCO2Emission 235.73595775083
+scalar RSUExampleScenario.node[7].appl generatedWSMs 96
+scalar RSUExampleScenario.node[7].appl receivedWSMs 915
+scalar RSUExampleScenario.node[7].appl generatedBSMs 0
+scalar RSUExampleScenario.node[7].appl receivedBSMs 0
+scalar RSUExampleScenario.node[7].appl generatedWSAs 0
+scalar RSUExampleScenario.node[7].appl receivedWSAs 0
+scalar RSUExampleScenario.node[7].nic.phy80211p busyTime 0.0089141538461542
+scalar RSUExampleScenario.node[7].nic.mac1609_4 ReceivedUnicastPackets 40
+scalar RSUExampleScenario.node[7].nic.mac1609_4 ReceivedBroadcasts 875
+scalar RSUExampleScenario.node[7].nic.mac1609_4 SentPackets 96
+scalar RSUExampleScenario.node[7].nic.mac1609_4 SentAcknowledgements 0
+scalar RSUExampleScenario.node[7].nic.mac1609_4 RetriesExceeded 0
+scalar RSUExampleScenario.node[7].nic.mac1609_4 SNIRLostPackets 1388
+scalar RSUExampleScenario.node[7].nic.mac1609_4 RXTXLostPackets 73
+scalar RSUExampleScenario.node[7].nic.mac1609_4 TotalLostPackets 1461
+scalar RSUExampleScenario.node[7].nic.mac1609_4 DroppedPacketsInMac 0
+scalar RSUExampleScenario.node[7].nic.mac1609_4 TooLittleTime 0
+scalar RSUExampleScenario.node[7].nic.mac1609_4 TimesIntoBackoff 96
+scalar RSUExampleScenario.node[7].nic.mac1609_4 SlotsBackoff 166
+scalar RSUExampleScenario.node[7].nic.mac1609_4 NumInternalContention 0
+scalar RSUExampleScenario.node[7].nic.mac1609_4 totalBusyTime 0.65016
+scalar RSUExampleScenario.node[7].nic.mac1609_4 retriesExceeded:count 0
+attr source org_car2x_veins_modules_mac_sigRetriesExceeded
+scalar RSUExampleScenario.node[7].nic.mac1609_4 sentAcks:count 0
+attr source org_car2x_veins_modules_mac_sigSentAck
+scalar RSUExampleScenario.node[7].nic.mac1609_4 sentPackets:count 96
+attr source org_car2x_veins_modules_mac_sigSentPacket
+scalar RSUExampleScenario.node[7].nic.mac1609_4 collisions:count 0
+attr source org_car2x_veins_modules_mac_sigCollision
+scalar RSUExampleScenario.node[7].nic.mac1609_4 channelBusy:timeavg 0.0083353846153849
+attr source org_car2x_veins_modules_mac_sigChannelBusy
+scalar RSUExampleScenario.node[7].veinsmobility startTime 1
+scalar RSUExampleScenario.node[7].veinsmobility totalTime 77
+scalar RSUExampleScenario.node[7].veinsmobility stopTime 79
+scalar RSUExampleScenario.node[7].veinsmobility minSpeed 4.6801655776148
+scalar RSUExampleScenario.node[7].veinsmobility maxSpeed 10.616905587329
+scalar RSUExampleScenario.node[7].veinsmobility totalDistance 731.01549687631
+scalar RSUExampleScenario.node[7].veinsmobility totalCO2Emission 168.93998693314
+scalar RSUExampleScenario.node[28].appl generatedWSMs 103
+scalar RSUExampleScenario.node[28].appl receivedWSMs 914
+scalar RSUExampleScenario.node[28].appl generatedBSMs 0
+scalar RSUExampleScenario.node[28].appl receivedBSMs 0
+scalar RSUExampleScenario.node[28].appl generatedWSAs 0
+scalar RSUExampleScenario.node[28].appl receivedWSAs 0
+scalar RSUExampleScenario.node[28].nic.phy80211p busyTime 0.0086660487804881
+scalar RSUExampleScenario.node[28].nic.mac1609_4 ReceivedUnicastPackets 38
+scalar RSUExampleScenario.node[28].nic.mac1609_4 ReceivedBroadcasts 876
+scalar RSUExampleScenario.node[28].nic.mac1609_4 SentPackets 103
+scalar RSUExampleScenario.node[28].nic.mac1609_4 SentAcknowledgements 0
+scalar RSUExampleScenario.node[28].nic.mac1609_4 RetriesExceeded 0
+scalar RSUExampleScenario.node[28].nic.mac1609_4 SNIRLostPackets 1427
+scalar RSUExampleScenario.node[28].nic.mac1609_4 RXTXLostPackets 80
+scalar RSUExampleScenario.node[28].nic.mac1609_4 TotalLostPackets 1507
+scalar RSUExampleScenario.node[28].nic.mac1609_4 DroppedPacketsInMac 0
+scalar RSUExampleScenario.node[28].nic.mac1609_4 TooLittleTime 0
+scalar RSUExampleScenario.node[28].nic.mac1609_4 TimesIntoBackoff 103
+scalar RSUExampleScenario.node[28].nic.mac1609_4 SlotsBackoff 163
+scalar RSUExampleScenario.node[28].nic.mac1609_4 NumInternalContention 0
+scalar RSUExampleScenario.node[28].nic.mac1609_4 totalBusyTime 0.667103
+scalar RSUExampleScenario.node[28].nic.mac1609_4 retriesExceeded:count 0
+attr source org_car2x_veins_modules_mac_sigRetriesExceeded
+scalar RSUExampleScenario.node[28].nic.mac1609_4 sentAcks:count 0
+attr source org_car2x_veins_modules_mac_sigSentAck
+scalar RSUExampleScenario.node[28].nic.mac1609_4 sentPackets:count 103
+attr source org_car2x_veins_modules_mac_sigSentPacket
+scalar RSUExampleScenario.node[28].nic.mac1609_4 collisions:count 0
+attr source org_car2x_veins_modules_mac_sigCollision
+scalar RSUExampleScenario.node[28].nic.mac1609_4 channelBusy:timeavg 0.0081354024390247
+attr source org_car2x_veins_modules_mac_sigChannelBusy
+scalar RSUExampleScenario.node[28].veinsmobility startTime 1
+scalar RSUExampleScenario.node[28].veinsmobility totalTime 81
+scalar RSUExampleScenario.node[28].veinsmobility stopTime 83
+scalar RSUExampleScenario.node[28].veinsmobility minSpeed 3.8945559100624
+scalar RSUExampleScenario.node[28].veinsmobility maxSpeed 14.369556381332
+scalar RSUExampleScenario.node[28].veinsmobility totalDistance 952.63358844426
+scalar RSUExampleScenario.node[28].veinsmobility totalCO2Emission 286.81022621187
+scalar RSUExampleScenario.node[12].appl generatedWSMs 112
+scalar RSUExampleScenario.node[12].appl receivedWSMs 1568
+scalar RSUExampleScenario.node[12].appl generatedBSMs 0
+scalar RSUExampleScenario.node[12].appl receivedBSMs 0
+scalar RSUExampleScenario.node[12].appl generatedWSAs 0
+scalar RSUExampleScenario.node[12].appl receivedWSAs 0
+scalar RSUExampleScenario.node[12].nic.phy80211p busyTime 0.0081505934065937
+scalar RSUExampleScenario.node[12].nic.mac1609_4 ReceivedUnicastPackets 45
+scalar RSUExampleScenario.node[12].nic.mac1609_4 ReceivedBroadcasts 1523
+scalar RSUExampleScenario.node[12].nic.mac1609_4 SentPackets 112
+scalar RSUExampleScenario.node[12].nic.mac1609_4 SentAcknowledgements 0
+scalar RSUExampleScenario.node[12].nic.mac1609_4 RetriesExceeded 0
+scalar RSUExampleScenario.node[12].nic.mac1609_4 SNIRLostPackets 877
+scalar RSUExampleScenario.node[12].nic.mac1609_4 RXTXLostPackets 85
+scalar RSUExampleScenario.node[12].nic.mac1609_4 TotalLostPackets 962
+scalar RSUExampleScenario.node[12].nic.mac1609_4 DroppedPacketsInMac 0
+scalar RSUExampleScenario.node[12].nic.mac1609_4 TooLittleTime 0
+scalar RSUExampleScenario.node[12].nic.mac1609_4 TimesIntoBackoff 112
+scalar RSUExampleScenario.node[12].nic.mac1609_4 SlotsBackoff 181
+scalar RSUExampleScenario.node[12].nic.mac1609_4 NumInternalContention 0
+scalar RSUExampleScenario.node[12].nic.mac1609_4 totalBusyTime 0.69936
+scalar RSUExampleScenario.node[12].nic.mac1609_4 retriesExceeded:count 0
+attr source org_car2x_veins_modules_mac_sigRetriesExceeded
+scalar RSUExampleScenario.node[12].nic.mac1609_4 sentAcks:count 0
+attr source org_car2x_veins_modules_mac_sigSentAck
+scalar RSUExampleScenario.node[12].nic.mac1609_4 sentPackets:count 112
+attr source org_car2x_veins_modules_mac_sigSentPacket
+scalar RSUExampleScenario.node[12].nic.mac1609_4 collisions:count 0
+attr source org_car2x_veins_modules_mac_sigCollision
+scalar RSUExampleScenario.node[12].nic.mac1609_4 channelBusy:timeavg 0.007685274725275
+attr source org_car2x_veins_modules_mac_sigChannelBusy
+scalar RSUExampleScenario.node[12].veinsmobility startTime 1
+scalar RSUExampleScenario.node[12].veinsmobility totalTime 90
+scalar RSUExampleScenario.node[12].veinsmobility stopTime 92
+scalar RSUExampleScenario.node[12].veinsmobility minSpeed 3.401435
+scalar RSUExampleScenario.node[12].veinsmobility maxSpeed 12.939564271823
+scalar RSUExampleScenario.node[12].veinsmobility totalDistance 1003.3234972817
+scalar RSUExampleScenario.node[12].veinsmobility totalCO2Emission 246.10913735132
+scalar RSUExampleScenario.node[25].appl generatedWSMs 121
+scalar RSUExampleScenario.node[25].appl receivedWSMs 1678
+scalar RSUExampleScenario.node[25].appl generatedBSMs 0
+scalar RSUExampleScenario.node[25].appl receivedBSMs 0
+scalar RSUExampleScenario.node[25].appl generatedWSAs 0
+scalar RSUExampleScenario.node[25].appl receivedWSAs 0
+scalar RSUExampleScenario.node[25].nic.phy80211p busyTime 0.0077899381443302
+scalar RSUExampleScenario.node[25].nic.mac1609_4 ReceivedUnicastPackets 46
+scalar RSUExampleScenario.node[25].nic.mac1609_4 ReceivedBroadcasts 1632
+scalar RSUExampleScenario.node[25].nic.mac1609_4 SentPackets 121
+scalar RSUExampleScenario.node[25].nic.mac1609_4 SentAcknowledgements 0
+scalar RSUExampleScenario.node[25].nic.mac1609_4 RetriesExceeded 0
+scalar RSUExampleScenario.node[25].nic.mac1609_4 SNIRLostPackets 814
+scalar RSUExampleScenario.node[25].nic.mac1609_4 RXTXLostPackets 90
+scalar RSUExampleScenario.node[25].nic.mac1609_4 TotalLostPackets 904
+scalar RSUExampleScenario.node[25].nic.mac1609_4 DroppedPacketsInMac 0
+scalar RSUExampleScenario.node[25].nic.mac1609_4 TooLittleTime 0
+scalar RSUExampleScenario.node[25].nic.mac1609_4 TimesIntoBackoff 121
+scalar RSUExampleScenario.node[25].nic.mac1609_4 SlotsBackoff 167
+scalar RSUExampleScenario.node[25].nic.mac1609_4 NumInternalContention 0
+scalar RSUExampleScenario.node[25].nic.mac1609_4 totalBusyTime 0.715841347358
+scalar RSUExampleScenario.node[25].nic.mac1609_4 retriesExceeded:count 0
+attr source org_car2x_veins_modules_mac_sigRetriesExceeded
+scalar RSUExampleScenario.node[25].nic.mac1609_4 sentAcks:count 0
+attr source org_car2x_veins_modules_mac_sigSentAck
+scalar RSUExampleScenario.node[25].nic.mac1609_4 sentPackets:count 121
+attr source org_car2x_veins_modules_mac_sigSentPacket
+scalar RSUExampleScenario.node[25].nic.mac1609_4 collisions:count 0
+attr source org_car2x_veins_modules_mac_sigCollision
+scalar RSUExampleScenario.node[25].nic.mac1609_4 channelBusy:timeavg 0.0073798077047219
+attr source org_car2x_veins_modules_mac_sigChannelBusy
+scalar RSUExampleScenario.node[25].veinsmobility startTime 1
+scalar RSUExampleScenario.node[25].veinsmobility totalTime 96
+scalar RSUExampleScenario.node[25].veinsmobility stopTime 98
+scalar RSUExampleScenario.node[25].veinsmobility minSpeed 0
+scalar RSUExampleScenario.node[25].veinsmobility maxSpeed 15.073768063597
+scalar RSUExampleScenario.node[25].veinsmobility totalDistance 1034.7239111897
+scalar RSUExampleScenario.node[25].veinsmobility totalCO2Emission 296.309364703
+scalar RSUExampleScenario.node[17].appl generatedWSMs 124
+scalar RSUExampleScenario.node[17].appl receivedWSMs 1503
+scalar RSUExampleScenario.node[17].appl generatedBSMs 0
+scalar RSUExampleScenario.node[17].appl receivedBSMs 0
+scalar RSUExampleScenario.node[17].appl generatedWSAs 0
+scalar RSUExampleScenario.node[17].appl receivedWSAs 0
+scalar RSUExampleScenario.node[17].nic.phy80211p busyTime 0.0076284356435646
+scalar RSUExampleScenario.node[17].nic.mac1609_4 ReceivedUnicastPackets 39
+scalar RSUExampleScenario.node[17].nic.mac1609_4 ReceivedBroadcasts 1464
+scalar RSUExampleScenario.node[17].nic.mac1609_4 SentPackets 124
+scalar RSUExampleScenario.node[17].nic.mac1609_4 SentAcknowledgements 0
+scalar RSUExampleScenario.node[17].nic.mac1609_4 RetriesExceeded 0
+scalar RSUExampleScenario.node[17].nic.mac1609_4 SNIRLostPackets 1059
+scalar RSUExampleScenario.node[17].nic.mac1609_4 RXTXLostPackets 80
+scalar RSUExampleScenario.node[17].nic.mac1609_4 TotalLostPackets 1139
+scalar RSUExampleScenario.node[17].nic.mac1609_4 DroppedPacketsInMac 0
+scalar RSUExampleScenario.node[17].nic.mac1609_4 TooLittleTime 0
+scalar RSUExampleScenario.node[17].nic.mac1609_4 TimesIntoBackoff 124
+scalar RSUExampleScenario.node[17].nic.mac1609_4 SlotsBackoff 169
+scalar RSUExampleScenario.node[17].nic.mac1609_4 NumInternalContention 0
+scalar RSUExampleScenario.node[17].nic.mac1609_4 totalBusyTime 0.728836
+scalar RSUExampleScenario.node[17].nic.mac1609_4 retriesExceeded:count 0
+attr source org_car2x_veins_modules_mac_sigRetriesExceeded
+scalar RSUExampleScenario.node[17].nic.mac1609_4 sentAcks:count 0
+attr source org_car2x_veins_modules_mac_sigSentAck
+scalar RSUExampleScenario.node[17].nic.mac1609_4 sentPackets:count 124
+attr source org_car2x_veins_modules_mac_sigSentPacket
+scalar RSUExampleScenario.node[17].nic.mac1609_4 collisions:count 0
+attr source org_car2x_veins_modules_mac_sigCollision
+scalar RSUExampleScenario.node[17].nic.mac1609_4 channelBusy:timeavg 0.0072161980198022
+attr source org_car2x_veins_modules_mac_sigChannelBusy
+scalar RSUExampleScenario.node[17].veinsmobility startTime 1
+scalar RSUExampleScenario.node[17].veinsmobility totalTime 100
+scalar RSUExampleScenario.node[17].veinsmobility stopTime 102
+scalar RSUExampleScenario.node[17].veinsmobility minSpeed 2.6243170489477
+scalar RSUExampleScenario.node[17].veinsmobility maxSpeed 10.055525345891
+scalar RSUExampleScenario.node[17].veinsmobility totalDistance 876.63938883675
+scalar RSUExampleScenario.node[17].veinsmobility totalCO2Emission 213.76982167743
+scalar RSUExampleScenario.node[27].appl generatedWSMs 131
+scalar RSUExampleScenario.node[27].appl receivedWSMs 1443
+scalar RSUExampleScenario.node[27].appl generatedBSMs 0
+scalar RSUExampleScenario.node[27].appl receivedBSMs 0
+scalar RSUExampleScenario.node[27].appl generatedWSAs 0
+scalar RSUExampleScenario.node[27].appl receivedWSAs 0
+scalar RSUExampleScenario.node[27].nic.phy80211p busyTime 0.0074394666666669
+scalar RSUExampleScenario.node[27].nic.mac1609_4 ReceivedUnicastPackets 53
+scalar RSUExampleScenario.node[27].nic.mac1609_4 ReceivedBroadcasts 1390
+scalar RSUExampleScenario.node[27].nic.mac1609_4 SentPackets 131
+scalar RSUExampleScenario.node[27].nic.mac1609_4 SentAcknowledgements 0
+scalar RSUExampleScenario.node[27].nic.mac1609_4 RetriesExceeded 0
+scalar RSUExampleScenario.node[27].nic.mac1609_4 SNIRLostPackets 1137
+scalar RSUExampleScenario.node[27].nic.mac1609_4 RXTXLostPackets 77
+scalar RSUExampleScenario.node[27].nic.mac1609_4 TotalLostPackets 1214
+scalar RSUExampleScenario.node[27].nic.mac1609_4 DroppedPacketsInMac 0
+scalar RSUExampleScenario.node[27].nic.mac1609_4 TooLittleTime 0
+scalar RSUExampleScenario.node[27].nic.mac1609_4 TimesIntoBackoff 138
+scalar RSUExampleScenario.node[27].nic.mac1609_4 SlotsBackoff 199
+scalar RSUExampleScenario.node[27].nic.mac1609_4 NumInternalContention 0
+scalar RSUExampleScenario.node[27].nic.mac1609_4 totalBusyTime 0.740211
+scalar RSUExampleScenario.node[27].nic.mac1609_4 retriesExceeded:count 0
+attr source org_car2x_veins_modules_mac_sigRetriesExceeded
+scalar RSUExampleScenario.node[27].nic.mac1609_4 sentAcks:count 0
+attr source org_car2x_veins_modules_mac_sigSentAck
+scalar RSUExampleScenario.node[27].nic.mac1609_4 sentPackets:count 131
+attr source org_car2x_veins_modules_mac_sigSentPacket
+scalar RSUExampleScenario.node[27].nic.mac1609_4 collisions:count 0
+attr source org_car2x_veins_modules_mac_sigCollision
+scalar RSUExampleScenario.node[27].nic.mac1609_4 channelBusy:timeavg 0.0070496285714288
+attr source org_car2x_veins_modules_mac_sigChannelBusy
+scalar RSUExampleScenario.node[27].veinsmobility startTime 1
+scalar RSUExampleScenario.node[27].veinsmobility totalTime 104
+scalar RSUExampleScenario.node[27].veinsmobility stopTime 106
+scalar RSUExampleScenario.node[27].veinsmobility minSpeed 3.6971038343434
+scalar RSUExampleScenario.node[27].veinsmobility maxSpeed 14.167442773493
+scalar RSUExampleScenario.node[27].veinsmobility totalDistance 1211.0181863937
+scalar RSUExampleScenario.node[27].veinsmobility totalCO2Emission 336.45999250913
+scalar RSUExampleScenario.node[19].appl generatedWSMs 148
+scalar RSUExampleScenario.node[19].appl receivedWSMs 1769
+scalar RSUExampleScenario.node[19].appl generatedBSMs 0
+scalar RSUExampleScenario.node[19].appl receivedBSMs 0
+scalar RSUExampleScenario.node[19].appl generatedWSAs 0
+scalar RSUExampleScenario.node[19].appl receivedWSAs 0
+scalar RSUExampleScenario.node[19].nic.phy80211p busyTime 0.0068360000000002
+scalar RSUExampleScenario.node[19].nic.mac1609_4 ReceivedUnicastPackets 43
+scalar RSUExampleScenario.node[19].nic.mac1609_4 ReceivedBroadcasts 1726
+scalar RSUExampleScenario.node[19].nic.mac1609_4 SentPackets 148
+scalar RSUExampleScenario.node[19].nic.mac1609_4 SentAcknowledgements 0
+scalar RSUExampleScenario.node[19].nic.mac1609_4 RetriesExceeded 0
+scalar RSUExampleScenario.node[19].nic.mac1609_4 SNIRLostPackets 848
+scalar RSUExampleScenario.node[19].nic.mac1609_4 RXTXLostPackets 99
+scalar RSUExampleScenario.node[19].nic.mac1609_4 TotalLostPackets 947
+scalar RSUExampleScenario.node[19].nic.mac1609_4 DroppedPacketsInMac 0
+scalar RSUExampleScenario.node[19].nic.mac1609_4 TooLittleTime 0
+scalar RSUExampleScenario.node[19].nic.mac1609_4 TimesIntoBackoff 148
+scalar RSUExampleScenario.node[19].nic.mac1609_4 SlotsBackoff 227
+scalar RSUExampleScenario.node[19].nic.mac1609_4 NumInternalContention 0
+scalar RSUExampleScenario.node[19].nic.mac1609_4 totalBusyTime 0.760644116719
+scalar RSUExampleScenario.node[19].nic.mac1609_4 retriesExceeded:count 0
+attr source org_car2x_veins_modules_mac_sigRetriesExceeded
+scalar RSUExampleScenario.node[19].nic.mac1609_4 sentAcks:count 0
+attr source org_car2x_veins_modules_mac_sigSentAck
+scalar RSUExampleScenario.node[19].nic.mac1609_4 sentPackets:count 148
+attr source org_car2x_veins_modules_mac_sigSentPacket
+scalar RSUExampleScenario.node[19].nic.mac1609_4 collisions:count 0
+attr source org_car2x_veins_modules_mac_sigCollision
+scalar RSUExampleScenario.node[19].nic.mac1609_4 channelBusy:timeavg 0.0065572768682675
+attr source org_car2x_veins_modules_mac_sigChannelBusy
+scalar RSUExampleScenario.node[19].veinsmobility startTime 1
+scalar RSUExampleScenario.node[19].veinsmobility totalTime 115
+scalar RSUExampleScenario.node[19].veinsmobility stopTime 117
+scalar RSUExampleScenario.node[19].veinsmobility minSpeed 3.9353988274582
+scalar RSUExampleScenario.node[19].veinsmobility maxSpeed 13.03580911379
+scalar RSUExampleScenario.node[19].veinsmobility totalDistance 1305.4221466568
+scalar RSUExampleScenario.node[19].veinsmobility totalCO2Emission 320.25691334245
+scalar RSUExampleScenario.node[21].appl generatedWSMs 181
+scalar RSUExampleScenario.node[21].appl receivedWSMs 1717
+scalar RSUExampleScenario.node[21].appl generatedBSMs 0
+scalar RSUExampleScenario.node[21].appl receivedBSMs 0
+scalar RSUExampleScenario.node[21].appl generatedWSAs 0
+scalar RSUExampleScenario.node[21].appl receivedWSAs 0
+scalar RSUExampleScenario.node[21].nic.phy80211p busyTime 0.0057131972789118
+scalar RSUExampleScenario.node[21].nic.mac1609_4 ReceivedUnicastPackets 42
+scalar RSUExampleScenario.node[21].nic.mac1609_4 ReceivedBroadcasts 1675
+scalar RSUExampleScenario.node[21].nic.mac1609_4 SentPackets 181
+scalar RSUExampleScenario.node[21].nic.mac1609_4 SentAcknowledgements 0
+scalar RSUExampleScenario.node[21].nic.mac1609_4 RetriesExceeded 0
+scalar RSUExampleScenario.node[21].nic.mac1609_4 SNIRLostPackets 1172
+scalar RSUExampleScenario.node[21].nic.mac1609_4 RXTXLostPackets 75
+scalar RSUExampleScenario.node[21].nic.mac1609_4 TotalLostPackets 1247
+scalar RSUExampleScenario.node[21].nic.mac1609_4 DroppedPacketsInMac 0
+scalar RSUExampleScenario.node[21].nic.mac1609_4 TooLittleTime 0
+scalar RSUExampleScenario.node[21].nic.mac1609_4 TimesIntoBackoff 181
+scalar RSUExampleScenario.node[21].nic.mac1609_4 SlotsBackoff 290
+scalar RSUExampleScenario.node[21].nic.mac1609_4 NumInternalContention 0
+scalar RSUExampleScenario.node[21].nic.mac1609_4 totalBusyTime 0.807541820106
+scalar RSUExampleScenario.node[21].nic.mac1609_4 retriesExceeded:count 0
+attr source org_car2x_veins_modules_mac_sigRetriesExceeded
+scalar RSUExampleScenario.node[21].nic.mac1609_4 sentAcks:count 0
+attr source org_car2x_veins_modules_mac_sigSentAck
+scalar RSUExampleScenario.node[21].nic.mac1609_4 sentPackets:count 181
+attr source org_car2x_veins_modules_mac_sigSentPacket
+scalar RSUExampleScenario.node[21].nic.mac1609_4 collisions:count 0
+attr source org_car2x_veins_modules_mac_sigCollision
+scalar RSUExampleScenario.node[21].nic.mac1609_4 channelBusy:timeavg 0.0054934817694288
+attr source org_car2x_veins_modules_mac_sigChannelBusy
+scalar RSUExampleScenario.node[21].veinsmobility startTime 1
+scalar RSUExampleScenario.node[21].veinsmobility totalTime 146
+scalar RSUExampleScenario.node[21].veinsmobility stopTime 148
+scalar RSUExampleScenario.node[21].veinsmobility minSpeed 0
+scalar RSUExampleScenario.node[21].veinsmobility maxSpeed 12.296546763991
+scalar RSUExampleScenario.node[21].veinsmobility totalDistance 1256.5481114943
+scalar RSUExampleScenario.node[21].veinsmobility totalCO2Emission 360.86832225053
+scalar RSUExampleScenario.node[10].appl generatedWSMs 196
+scalar RSUExampleScenario.node[10].appl receivedWSMs 1960
+scalar RSUExampleScenario.node[10].appl generatedBSMs 0
+scalar RSUExampleScenario.node[10].appl receivedBSMs 0
+scalar RSUExampleScenario.node[10].appl generatedWSAs 0
+scalar RSUExampleScenario.node[10].appl receivedWSAs 0
+scalar RSUExampleScenario.node[10].nic.phy80211p busyTime 0.0052783602484474
+scalar RSUExampleScenario.node[10].nic.mac1609_4 ReceivedUnicastPackets 76
+scalar RSUExampleScenario.node[10].nic.mac1609_4 ReceivedBroadcasts 1884
+scalar RSUExampleScenario.node[10].nic.mac1609_4 SentPackets 196
+scalar RSUExampleScenario.node[10].nic.mac1609_4 SentAcknowledgements 0
+scalar RSUExampleScenario.node[10].nic.mac1609_4 RetriesExceeded 0
+scalar RSUExampleScenario.node[10].nic.mac1609_4 SNIRLostPackets 902
+scalar RSUExampleScenario.node[10].nic.mac1609_4 RXTXLostPackets 97
+scalar RSUExampleScenario.node[10].nic.mac1609_4 TotalLostPackets 999
+scalar RSUExampleScenario.node[10].nic.mac1609_4 DroppedPacketsInMac 0
+scalar RSUExampleScenario.node[10].nic.mac1609_4 TooLittleTime 0
+scalar RSUExampleScenario.node[10].nic.mac1609_4 TimesIntoBackoff 196
+scalar RSUExampleScenario.node[10].nic.mac1609_4 SlotsBackoff 300
+scalar RSUExampleScenario.node[10].nic.mac1609_4 NumInternalContention 0
+scalar RSUExampleScenario.node[10].nic.mac1609_4 totalBusyTime 0.825188189373
+scalar RSUExampleScenario.node[10].nic.mac1609_4 retriesExceeded:count 0
+attr source org_car2x_veins_modules_mac_sigRetriesExceeded
+scalar RSUExampleScenario.node[10].nic.mac1609_4 sentAcks:count 0
+attr source org_car2x_veins_modules_mac_sigSentAck
+scalar RSUExampleScenario.node[10].nic.mac1609_4 sentPackets:count 196
+attr source org_car2x_veins_modules_mac_sigSentPacket
+scalar RSUExampleScenario.node[10].nic.mac1609_4 collisions:count 0
+attr source org_car2x_veins_modules_mac_sigCollision
+scalar RSUExampleScenario.node[10].nic.mac1609_4 channelBusy:timeavg 0.0051253924805778
+attr source org_car2x_veins_modules_mac_sigChannelBusy
+scalar RSUExampleScenario.node[10].veinsmobility startTime 1
+scalar RSUExampleScenario.node[10].veinsmobility totalTime 160
+scalar RSUExampleScenario.node[10].veinsmobility stopTime 162
+scalar RSUExampleScenario.node[10].veinsmobility minSpeed 0
+scalar RSUExampleScenario.node[10].veinsmobility maxSpeed 15.563932132819
+scalar RSUExampleScenario.node[10].veinsmobility totalDistance 1148.4249447873
+scalar RSUExampleScenario.node[10].veinsmobility totalCO2Emission 419.73584889338
+scalar RSUExampleScenario.node[11].appl generatedWSMs 200
+scalar RSUExampleScenario.node[11].appl receivedWSMs 1742
+scalar RSUExampleScenario.node[11].appl generatedBSMs 0
+scalar RSUExampleScenario.node[11].appl receivedBSMs 0
+scalar RSUExampleScenario.node[11].appl generatedWSAs 0
+scalar RSUExampleScenario.node[11].appl receivedWSAs 0
+scalar RSUExampleScenario.node[11].nic.phy80211p busyTime 0.0052486419753088
+scalar RSUExampleScenario.node[11].nic.mac1609_4 ReceivedUnicastPackets 39
+scalar RSUExampleScenario.node[11].nic.mac1609_4 ReceivedBroadcasts 1703
+scalar RSUExampleScenario.node[11].nic.mac1609_4 SentPackets 200
+scalar RSUExampleScenario.node[11].nic.mac1609_4 SentAcknowledgements 0
+scalar RSUExampleScenario.node[11].nic.mac1609_4 RetriesExceeded 0
+scalar RSUExampleScenario.node[11].nic.mac1609_4 SNIRLostPackets 1211
+scalar RSUExampleScenario.node[11].nic.mac1609_4 RXTXLostPackets 94
+scalar RSUExampleScenario.node[11].nic.mac1609_4 TotalLostPackets 1305
+scalar RSUExampleScenario.node[11].nic.mac1609_4 DroppedPacketsInMac 0
+scalar RSUExampleScenario.node[11].nic.mac1609_4 TooLittleTime 0
+scalar RSUExampleScenario.node[11].nic.mac1609_4 TimesIntoBackoff 200
+scalar RSUExampleScenario.node[11].nic.mac1609_4 SlotsBackoff 297
+scalar RSUExampleScenario.node[11].nic.mac1609_4 NumInternalContention 0
+scalar RSUExampleScenario.node[11].nic.mac1609_4 totalBusyTime 0.825888148929
+scalar RSUExampleScenario.node[11].nic.mac1609_4 retriesExceeded:count 0
+attr source org_car2x_veins_modules_mac_sigRetriesExceeded
+scalar RSUExampleScenario.node[11].nic.mac1609_4 sentAcks:count 0
+attr source org_car2x_veins_modules_mac_sigSentAck
+scalar RSUExampleScenario.node[11].nic.mac1609_4 sentPackets:count 200
+attr source org_car2x_veins_modules_mac_sigSentPacket
+scalar RSUExampleScenario.node[11].nic.mac1609_4 collisions:count 0
+attr source org_car2x_veins_modules_mac_sigCollision
+scalar RSUExampleScenario.node[11].nic.mac1609_4 channelBusy:timeavg 0.0050980749933891
+attr source org_car2x_veins_modules_mac_sigChannelBusy
+scalar RSUExampleScenario.node[11].veinsmobility startTime 1
+scalar RSUExampleScenario.node[11].veinsmobility totalTime 161
+scalar RSUExampleScenario.node[11].veinsmobility stopTime 163
+scalar RSUExampleScenario.node[11].veinsmobility minSpeed 4.0354242860583
+scalar RSUExampleScenario.node[11].veinsmobility maxSpeed 13.126662852714
+scalar RSUExampleScenario.node[11].veinsmobility totalDistance 1495.8487240807
+scalar RSUExampleScenario.node[11].veinsmobility totalCO2Emission 392.32511227319
+scalar RSUExampleScenario.node[0].appl generatedWSMs 196
+scalar RSUExampleScenario.node[0].appl receivedWSMs 995
+scalar RSUExampleScenario.node[0].appl generatedBSMs 0
+scalar RSUExampleScenario.node[0].appl receivedBSMs 0
+scalar RSUExampleScenario.node[0].appl generatedWSAs 0
+scalar RSUExampleScenario.node[0].appl receivedWSAs 0
+scalar RSUExampleScenario.node[0].nic.phy80211p busyTime 0.0052107484662579
+scalar RSUExampleScenario.node[0].nic.mac1609_4 ReceivedUnicastPackets 45
+scalar RSUExampleScenario.node[0].nic.mac1609_4 ReceivedBroadcasts 950
+scalar RSUExampleScenario.node[0].nic.mac1609_4 SentPackets 196
+scalar RSUExampleScenario.node[0].nic.mac1609_4 SentAcknowledgements 0
+scalar RSUExampleScenario.node[0].nic.mac1609_4 RetriesExceeded 0
+scalar RSUExampleScenario.node[0].nic.mac1609_4 SNIRLostPackets 1852
+scalar RSUExampleScenario.node[0].nic.mac1609_4 RXTXLostPackets 102
+scalar RSUExampleScenario.node[0].nic.mac1609_4 TotalLostPackets 1954
+scalar RSUExampleScenario.node[0].nic.mac1609_4 DroppedPacketsInMac 0
+scalar RSUExampleScenario.node[0].nic.mac1609_4 TooLittleTime 0
+scalar RSUExampleScenario.node[0].nic.mac1609_4 TimesIntoBackoff 196
+scalar RSUExampleScenario.node[0].nic.mac1609_4 SlotsBackoff 294
+scalar RSUExampleScenario.node[0].nic.mac1609_4 NumInternalContention 0
+scalar RSUExampleScenario.node[0].nic.mac1609_4 totalBusyTime 0.825884109244
+scalar RSUExampleScenario.node[0].nic.mac1609_4 retriesExceeded:count 0
+attr source org_car2x_veins_modules_mac_sigRetriesExceeded
+scalar RSUExampleScenario.node[0].nic.mac1609_4 sentAcks:count 0
+attr source org_car2x_veins_modules_mac_sigSentAck
+scalar RSUExampleScenario.node[0].nic.mac1609_4 sentPackets:count 196
+attr source org_car2x_veins_modules_mac_sigSentPacket
+scalar RSUExampleScenario.node[0].nic.mac1609_4 collisions:count 0
+attr source org_car2x_veins_modules_mac_sigCollision
+scalar RSUExampleScenario.node[0].nic.mac1609_4 channelBusy:timeavg 0.0050667736763438
+attr source org_car2x_veins_modules_mac_sigChannelBusy
+scalar RSUExampleScenario.node[0].veinsmobility startTime 1
+scalar RSUExampleScenario.node[0].veinsmobility totalTime 162
+scalar RSUExampleScenario.node[0].veinsmobility stopTime 164
+scalar RSUExampleScenario.node[0].veinsmobility minSpeed 0
+scalar RSUExampleScenario.node[0].veinsmobility maxSpeed 15.503593295836
+scalar RSUExampleScenario.node[0].veinsmobility totalDistance 1266.26792132
+scalar RSUExampleScenario.node[0].veinsmobility totalCO2Emission 407.23925661624
+scalar RSUExampleScenario.node[24].appl generatedWSMs 206
+scalar RSUExampleScenario.node[24].appl receivedWSMs 1561
+scalar RSUExampleScenario.node[24].appl generatedBSMs 0
+scalar RSUExampleScenario.node[24].appl receivedBSMs 0
+scalar RSUExampleScenario.node[24].appl generatedWSAs 0
+scalar RSUExampleScenario.node[24].appl receivedWSAs 0
+scalar RSUExampleScenario.node[24].nic.phy80211p busyTime 0.0049941052631581
+scalar RSUExampleScenario.node[24].nic.mac1609_4 ReceivedUnicastPackets 23
+scalar RSUExampleScenario.node[24].nic.mac1609_4 ReceivedBroadcasts 1538
+scalar RSUExampleScenario.node[24].nic.mac1609_4 SentPackets 206
+scalar RSUExampleScenario.node[24].nic.mac1609_4 SentAcknowledgements 0
+scalar RSUExampleScenario.node[24].nic.mac1609_4 RetriesExceeded 0
+scalar RSUExampleScenario.node[24].nic.mac1609_4 SNIRLostPackets 1572
+scalar RSUExampleScenario.node[24].nic.mac1609_4 RXTXLostPackets 84
+scalar RSUExampleScenario.node[24].nic.mac1609_4 TotalLostPackets 1656
+scalar RSUExampleScenario.node[24].nic.mac1609_4 DroppedPacketsInMac 0
+scalar RSUExampleScenario.node[24].nic.mac1609_4 TooLittleTime 0
+scalar RSUExampleScenario.node[24].nic.mac1609_4 TimesIntoBackoff 206
+scalar RSUExampleScenario.node[24].nic.mac1609_4 SlotsBackoff 290
+scalar RSUExampleScenario.node[24].nic.mac1609_4 NumInternalContention 0
+scalar RSUExampleScenario.node[24].nic.mac1609_4 totalBusyTime 0.828678570121
+scalar RSUExampleScenario.node[24].nic.mac1609_4 retriesExceeded:count 0
+attr source org_car2x_veins_modules_mac_sigRetriesExceeded
+scalar RSUExampleScenario.node[24].nic.mac1609_4 sentAcks:count 0
+attr source org_car2x_veins_modules_mac_sigSentAck
+scalar RSUExampleScenario.node[24].nic.mac1609_4 sentPackets:count 206
+attr source org_car2x_veins_modules_mac_sigSentPacket
+scalar RSUExampleScenario.node[24].nic.mac1609_4 collisions:count 0
+attr source org_car2x_veins_modules_mac_sigCollision
+scalar RSUExampleScenario.node[24].nic.mac1609_4 channelBusy:timeavg 0.0048460735094797
+attr source org_car2x_veins_modules_mac_sigChannelBusy
+scalar RSUExampleScenario.node[24].veinsmobility startTime 1
+scalar RSUExampleScenario.node[24].veinsmobility totalTime 170
+scalar RSUExampleScenario.node[24].veinsmobility stopTime 172
+scalar RSUExampleScenario.node[24].veinsmobility minSpeed 0
+scalar RSUExampleScenario.node[24].veinsmobility maxSpeed 13.067498181606
+scalar RSUExampleScenario.node[24].veinsmobility totalDistance 1040.698423028
+scalar RSUExampleScenario.node[24].veinsmobility totalCO2Emission 370.33292940065
+scalar RSUExampleScenario.manager roiArea 0
+scalar RSUExampleScenario.rsu[0].appl generatedWSMs 1055
+scalar RSUExampleScenario.rsu[0].appl receivedWSMs 1987
+scalar RSUExampleScenario.rsu[0].appl generatedBSMs 0
+scalar RSUExampleScenario.rsu[0].appl receivedBSMs 0
+scalar RSUExampleScenario.rsu[0].appl generatedWSAs 0
+scalar RSUExampleScenario.rsu[0].appl receivedWSAs 0
+scalar RSUExampleScenario.rsu[0].nic.phy80211p busyTime 0.00064240800000002
+scalar RSUExampleScenario.rsu[0].nic.mac1609_4 ReceivedUnicastPackets 0
+scalar RSUExampleScenario.rsu[0].nic.mac1609_4 ReceivedBroadcasts 1987
+scalar RSUExampleScenario.rsu[0].nic.mac1609_4 SentPackets 1055
+scalar RSUExampleScenario.rsu[0].nic.mac1609_4 SentAcknowledgements 0
+scalar RSUExampleScenario.rsu[0].nic.mac1609_4 RetriesExceeded 0
+scalar RSUExampleScenario.rsu[0].nic.mac1609_4 SNIRLostPackets 782
+scalar RSUExampleScenario.rsu[0].nic.mac1609_4 RXTXLostPackets 147
+scalar RSUExampleScenario.rsu[0].nic.mac1609_4 TotalLostPackets 929
+scalar RSUExampleScenario.rsu[0].nic.mac1609_4 DroppedPacketsInMac 0
+scalar RSUExampleScenario.rsu[0].nic.mac1609_4 TooLittleTime 0
+scalar RSUExampleScenario.rsu[0].nic.mac1609_4 TimesIntoBackoff 1055
+scalar RSUExampleScenario.rsu[0].nic.mac1609_4 SlotsBackoff 3706
+scalar RSUExampleScenario.rsu[0].nic.mac1609_4 NumInternalContention 0
+scalar RSUExampleScenario.rsu[0].nic.mac1609_4 totalBusyTime 0.829527
+scalar RSUExampleScenario.rsu[0].nic.mac1609_4 retriesExceeded:count 0
+attr source org_car2x_veins_modules_mac_sigRetriesExceeded
+scalar RSUExampleScenario.rsu[0].nic.mac1609_4 sentAcks:count 0
+attr source org_car2x_veins_modules_mac_sigSentAck
+scalar RSUExampleScenario.rsu[0].nic.mac1609_4 sentPackets:count 1055
+attr source org_car2x_veins_modules_mac_sigSentPacket
+scalar RSUExampleScenario.rsu[0].nic.mac1609_4 collisions:count 0
+attr source org_car2x_veins_modules_mac_sigCollision
+scalar RSUExampleScenario.rsu[0].nic.mac1609_4 channelBusy:timeavg 0.00082952700000003
+attr source org_car2x_veins_modules_mac_sigChannelBusy
 

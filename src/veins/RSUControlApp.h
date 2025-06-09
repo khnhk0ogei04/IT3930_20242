@@ -11,6 +11,7 @@
 #include "GraphProcessor.h"
 #include "TaskGenerator.h"
 #include "SimulationLogger.h"
+#include "Vehicle.h"
 
 using namespace std;
 namespace veins {
@@ -25,19 +26,6 @@ protected:
     void handleSelfMsg(cMessage* msg) override;
 
 private:
-    struct VehicleData {
-        simtime_t lastMessageTime = 0;
-        Destination assignedDestination; // Store the assigned destination
-        vector<string> assignedPath; // Store the assigned path
-        vector<string> lastSentPath; // Store the last path sent to the vehicle
-        int simulationId = -1; // Store the actual simulation ID of the vehicle
-        double startTime = 0.0; // Thời gian xe bắt đầu
-        double estimatedTravelTime = 0.0; // Thời gian di chuyển ước tính
-        double earliestArrival = 0.0; // Thời gian đến sớm nhất (time window)
-        double latestArrival = 0.0; // Thời gian đến trễ nhất (time window)
-        double pathLength = 0.0; // Độ dài đường đi
-        double algorithmTime = 0.0; // Thời gian để tìm đường
-    };
     cMessage* statusCheckMsg;
     cMessage* rerouteMsg;
 
@@ -51,7 +39,7 @@ private:
     void handleVehicleMessage(const string& message, LAddress::L2Type vehicleId);
     void sendRoadListMessage(LAddress::L2Type vehicleId, const vector<string>& roadList);
     void sendRerouteMessage(LAddress::L2Type vehicleId, const vector<string>& edgePath);
-    map<LAddress::L2Type, VehicleData> vehicleDataMap;
+    map<LAddress::L2Type, Vehicle> vehicleDataMap;
 
     // Map between RSU internal IDs and simulation IDs
     map<int, LAddress::L2Type> simulationIdToAddressMap;
@@ -68,8 +56,8 @@ private:
     double getShortestPathLength(const std::string& sourceId, const std::string& targetId) const;
 
     void printNodeInfo() const;
-    void printVehicleRouteInfo(const std::vector<VehicleInfo>& vehicles);
-    void generateAndAssignDestinations(const std::vector<VehicleInfo>& vehicles);
+    void printVehicleRouteInfo(const std::vector<Vehicle>& vehicles);
+    void generateAndAssignDestinations(const std::vector<Vehicle>& vehicles);
     void findEdgePathAndPrint(std::string sourceEdgeId, std::string targetEdgeId) const;
     void testTaskGenerator();
     double getEdgeLength(const std::string& edgeId) const;

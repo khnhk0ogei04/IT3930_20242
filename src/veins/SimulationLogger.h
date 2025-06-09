@@ -9,6 +9,7 @@
 #include <ctime>
 #include <iomanip>
 #include <mutex>
+#include "Vehicle.h"
 
 namespace veins {
 
@@ -19,27 +20,6 @@ public:
         static SimulationLogger instance;
         return instance;
     }
-    struct VehicleStats {
-        int vehicleId;                  // ID of vehicle
-        std::string startingRoad;       // edgeId start
-        std::string targetRoad;         // edgeId target
-        double startTime;
-        double endTime;
-        double travelTime;
-        double earliestArrival;
-        double latestArrival;
-        double timeWindowDeviation;
-        bool arrivedOnTime;
-        std::vector<std::string> path;
-        double pathLength;
-        double algorithmTime;           // time for algorithm
-        double estimatedTravelTime;
-
-        VehicleStats() : 
-            vehicleId(-1), startTime(0), endTime(0), travelTime(0),
-            earliestArrival(0), latestArrival(0), timeWindowDeviation(0),
-            arrivedOnTime(true), pathLength(0), algorithmTime(0), estimatedTravelTime(0) {}
-    };
 
     struct SimulationSummary {
         std::string mapName;
@@ -80,7 +60,7 @@ private:
     std::string getCurrentTimeStamp() const;
     double calculateTimeWindowDeviation(double endTime, double earliestArrival, double latestArrival) const;
     
-    std::map<int, VehicleStats> vehicleStats;  // ThÃ´ng tin vá»� má»—i xe
+    std::map<int, Vehicle> vehicleStats;       // Thông tin về mỗi xe
     SimulationSummary summary;                 // ThÃ´ng tin tá»•ng há»£p
     std::mutex mutex;                          // Mutex Ä‘á»ƒ báº£o vá»‡ truy cáº­p Ä‘á»“ng thá»�i
     bool summaryCalculated;                    // Ä�Ã£ tÃ­nh tá»•ng há»£p chÆ°a

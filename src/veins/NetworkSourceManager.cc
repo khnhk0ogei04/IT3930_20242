@@ -15,7 +15,7 @@ bool NetworkSourceManager::loadNetwork(string filename) {
     if (success) {
         networkLoaded = true;
         cout << "Loaded network from " << filename << endl;
-        cout << "Network contains " << roadNetwork.getNodeCount() << " nodes and " 
+        cout << "Network contains " << roadNetwork.getNodeCount() << " nodes and "
                   << roadNetwork.getEdgeCount() << " edges" << endl;
     } else {
         cout << "Failed to load network from " << filename << endl;

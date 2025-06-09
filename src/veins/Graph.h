@@ -25,7 +25,6 @@ public:
     Edge getEdge(string edgeId) const;
     static vector<Edge> getRoadsFromXml(string filePath);
     static unordered_map<string, Node> getJunctionsFromXml(string filePath);
-    void printNeighbors() const;
 
 private:
     unordered_map<string, Node> nodes;

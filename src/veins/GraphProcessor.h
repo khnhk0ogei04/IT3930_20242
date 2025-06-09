@@ -29,12 +29,6 @@ public:
     vector<string> findEdgeShortestPath(string sourceEdgeId, string targetEdgeId) const;
     double getEdgeShortestPathLength(string sourceEdgeId, string targetEdgeId) const;
     double getEdgeLength(string sourceEdgeId, string targetEdgeId) const;
-//    struct LanePath {
-//        string edgeId;
-//        int laneIndex;
-//        double cost;
-//    };
-//    vector<LanePath> findLaneShortestPath(string sourceLaneId, string targetLaneId) const;
     vector<int> getOptimalVehicleAssignment(
         const vector<string>& sourceEdges,
         const vector<string>& destEdges) const;

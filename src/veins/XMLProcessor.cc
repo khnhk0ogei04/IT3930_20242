@@ -249,33 +249,32 @@ bool XMLProcessor::loadRouteFile(const string& filePath) {
          tripElem != nullptr;
          tripElem = tripElem->NextSiblingElement("trip")) {
 
-         VehicleInfo vehicle;
-         vehicle.id = tripElem->Attribute("id");
-         vehicle.index = index++; // Assign sequential index
+         Vehicle vehicle(index, tripElem->Attribute("id"), index); // vehicleId, sumoId, index
+         index++; // Assign sequential index
 
          const char* departAttr = tripElem->Attribute("depart");
+         double departTime = 0.0;
          if (departAttr) {
-            vehicle.depart = std::stod(departAttr);
-         } else {
-            vehicle.depart = 0.0;
+            departTime = std::stod(departAttr);
          }
 
-         vehicle.from = tripElem->Attribute("from");
-         vehicle.to = tripElem->Attribute("to");
-
+         string fromRoad = tripElem->Attribute("from");
+         string toRoad = tripElem->Attribute("to");
+         string viaRoad = "";
+         
          const char* viaAttr = tripElem->Attribute("via");
          if (viaAttr) {
-            vehicle.via = viaAttr;
-         } else {
-            vehicle.via = "";
+            viaRoad = viaAttr;
          }
+         
+         vehicle.setRouteInfo(fromRoad, toRoad, departTime, viaRoad);
          vehicleData.push_back(vehicle);
     }
     cout << "XMLProcessor: Loaded " << vehicleData.size() << " vehicles from " << filePath << endl;
     return true;
 }
 
-vector<VehicleInfo> XMLProcessor::getVehicles() const {
+vector<Vehicle> XMLProcessor::getVehicles() const {
     return vehicleData;
 }
 
