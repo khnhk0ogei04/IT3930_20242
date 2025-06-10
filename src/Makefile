@@ -28,7 +28,6 @@ OBJS = \
     $O/veins/Edge.o \
     $O/veins/Graph.o \
     $O/veins/GraphProcessor.o \
-    $O/veins/NetworkSourceManager.o \
     $O/veins/Node.o \
     $O/veins/RSUControlApp.o \
     $O/veins/SimulationLogger.o \

@@ -28,10 +28,18 @@ public:
     const Graph& getGraph() const { return roadNetwork; }
     vector<string> findEdgeShortestPath(string sourceEdgeId, string targetEdgeId) const;
     double getEdgeShortestPathLength(string sourceEdgeId, string targetEdgeId) const;
-    double getEdgeLength(string sourceEdgeId, string targetEdgeId) const;
     vector<int> getOptimalVehicleAssignment(
         const vector<string>& sourceEdges,
         const vector<string>& destEdges) const;
+    
+    // Network query methods (moved from NetworkSourceManager)
+    vector<string> getAllNodes() const;
+    vector<string> getAllEdges() const;
+    vector<string> getEdgesFromNode(const string& nodeId) const;
+    vector<string> getConnectedEdges(const string& edgeId) const;
+    string getEdgeSource(const string& edgeId) const;
+    string getEdgeTarget(const string& edgeId) const;
+    double getEdgeLength(const string& edgeId) const;
 
 private:
     const Graph& roadNetwork;
@@ -51,6 +59,7 @@ private:
     string extractEdgeIdFromLane(string laneId) const;
     int extractLaneIndexFromLane(string laneId) const;
     int findBestLaneForEdge(string edgeId) const;
+    const Edge* findEdge(const string& edgeId) const;
 };
 
 } // namespace veins

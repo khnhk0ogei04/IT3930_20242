@@ -29,36 +29,7 @@ double GraphProcessor::getShortestPathLength(string sourceId, string targetId) c
     return -1.0;
 }
 
-double GraphProcessor::getEdgeLength(string sourceEdgeId, string targetEdgeId) const {
-    if (sourceEdgeId == targetEdgeId) {
-        return 0.0;
-    }
 
-    for (const auto& nodePair : roadNetwork.getAdjList()) {
-        for (const auto& edge : nodePair.second) {
-            if (edge.getId() == sourceEdgeId) {
-                string sourceNodeTo = edge.getTo();
-                for (const auto& nextNodePair : roadNetwork.getAdjList()) {
-                    if (nextNodePair.first == sourceNodeTo) {
-                        for (const auto& nextEdge : nextNodePair.second) {
-                            if (nextEdge.getId() == targetEdgeId) {
-                                return edge.getLength();
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-    for (const auto& nodePair : roadNetwork.getAdjList()) {
-        for (const auto& edge : nodePair.second) {
-            if (edge.getId() == sourceEdgeId) {
-                return edge.getLength();
-            }
-        }
-    }
-    return 0.0;
-}
 
 bool GraphProcessor::existsValidAssignment(
     const vector<string>& sources,
@@ -571,6 +542,105 @@ vector<int> GraphProcessor::getOptimalVehicleAssignment(
             if (starred[i][j]) { result[i] = j; break; }
     }
     return result;
+}
+
+// Network query methods (moved from NetworkSourceManager)
+vector<string> GraphProcessor::getAllNodes() const {
+    vector<string> result;
+    const auto& nodes = roadNetwork.getNodes();
+    for (const auto& pair : nodes) {
+        result.push_back(pair.first);
+    }
+    return result;
+}
+
+vector<string> GraphProcessor::getAllEdges() const {
+    vector<string> result;
+    const auto& adjList = roadNetwork.getAdjList();
+    for (const auto& pair : adjList) {
+        const auto& edges = pair.second;
+        for (const auto& edge : edges) {
+            result.push_back(edge.getId());
+        }
+    }
+    
+    // Remove duplicates
+    sort(result.begin(), result.end());
+    auto last = unique(result.begin(), result.end());
+    result.erase(last, result.end());
+    
+    return result;
+}
+
+vector<string> GraphProcessor::getEdgesFromNode(const string& nodeId) const {
+    vector<string> result;
+    const auto& adjList = roadNetwork.getAdjList();
+    auto it = adjList.find(nodeId);
+    if (it != adjList.end()) {
+        const auto& edges = it->second;
+        for (const auto& edge : edges) {
+            result.push_back(edge.getId());
+        }
+    }
+    return result;
+}
+
+vector<string> GraphProcessor::getConnectedEdges(const string& edgeId) const {
+    vector<string> result;
+    const Edge* edge = findEdge(edgeId);
+    if (!edge) return result;
+    
+    const string& targetNode = edge->getTo();
+    
+    // Get all edges starting from the target node
+    const auto& adjList = roadNetwork.getAdjList();
+    auto it = adjList.find(targetNode);
+    if (it != adjList.end()) {
+        const auto& edges = it->second;
+        for (const auto& connEdge : edges) {
+            if (connEdge.getId() != edgeId) {
+                result.push_back(connEdge.getId());
+            }
+        }
+    }
+    return result;
+}
+
+string GraphProcessor::getEdgeSource(const string& edgeId) const {
+    const Edge* edge = findEdge(edgeId);
+    if (edge) {
+        return edge->getFrom();
+    }
+    return "";
+}
+
+string GraphProcessor::getEdgeTarget(const string& edgeId) const {
+    const Edge* edge = findEdge(edgeId);
+    if (edge) {
+        return edge->getTo();
+    }
+    return "";
+}
+
+double GraphProcessor::getEdgeLength(const string& edgeId) const {
+    const Edge* edge = findEdge(edgeId);
+    if (edge) {
+        return edge->getLength();
+    }
+    return 0.0;
+}
+
+const Edge* GraphProcessor::findEdge(const string& edgeId) const {
+    const auto& adjList = roadNetwork.getAdjList();
+    for (const auto& pair : adjList) {
+        const auto& edges = pair.second;
+        for (const auto& edge : edges) {
+            if (edge.getId() == edgeId) {
+                return &edge;
+            }
+        }
+    }
+    return nullptr;
 }
 
 
