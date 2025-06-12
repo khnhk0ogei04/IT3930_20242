@@ -1,0 +1,10 @@
+SIMULATION SUMMARY
+MapName,RoutingAlgorithm,Version,TotalVehicles,LateVehicles,TotalTravelTime,AvgTravelTime,TotalTimeWindowDeviation,AvgTimeWindowDeviation,TotalAlgorithmTime,AvgAlgorithmTime,ObjectiveFunctionValue,Timestamp
+erlangen,ShortestPath,2.0,4,1,531,132.75,68.0975,17.0244,0.0010011,0.000250275,599.097,2025-06-13 00:46:34
+
+VEHICLE STATISTICS
+VehicleID,StartRoad,TargetRoad,StartTime,EndTime,TravelTime,EarliestArrival,LatestArrival,TimeWindowDeviation,ArrivedOnTime,PathLength,AlgorithmTime
+16,873,-2316,1,317,316,190.337,248.903,68.0975,No,2033.68,0
+22,60,199,1,74,73,66.2738,86.6657,0,Yes,708.11,0.0010011
+28,-831,-612,1,24,23,20.8487,27.2636,0,Yes,222.76,0
+34,-592,E9,1,120,119,92.6528,121.161,0,Yes,989.96,0

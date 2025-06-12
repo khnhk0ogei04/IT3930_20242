@@ -322,40 +322,10 @@ void RSUControlApp::handleVehicleMessage(const string& message, LAddress::L2Type
             }
         }
     }
-    // Handle generate destinations request
-    else if (message.find("GENERATE_DESTINATIONS:") == 0 && taskGenerator) {
-        EV << "[RSU] DEBUG: Received GENERATE_DESTINATIONS request: " << message << std::endl;
-        
-        try {
-            int count = std::stoi(message.substr(22)); // Skip "GENERATE_DESTINATIONS:"
-            EV << "[RSU] Generating " << count << " random destinations" << std::endl;
-            
-            auto destinations = taskGenerator->generateDestinations(count);
-
-            // Convert destinations to a string format
-            std::vector<std::string> destStrings;
-            for (const auto& dest : destinations) {
-                std::string destStr = dest.nodeId + "," +
-                                     std::to_string(dest.timeWindow.earliness) + "," +
-                                     std::to_string(dest.timeWindow.tardiness);
-                destStrings.push_back(destStr);
-                EV << "[RSU] DEBUG: Generated destination: " << destStr << std::endl;
-            }
-            
-            EV << "[RSU] Sending " << destStrings.size() << " destinations to vehicle" << std::endl;
-            sendRoadListMessage(vehicleId, destStrings);
-        }
-        catch (const std::exception& e) {
-            EV << "[RSU] ERROR in GENERATE_DESTINATIONS: " << e.what() << std::endl;
-            std::vector<std::string> errorMsg = {"ERROR: Failed to generate destinations"};
-            sendRoadListMessage(vehicleId, errorMsg);
-        }
-    }
-    // Handle valid assignment check
     else if (message.find("EXISTS_VALID_ASSIGNMENT:") == 0 && taskGenerator) {
         EV << "[RSU] DEBUG: Received EXISTS_VALID_ASSIGNMENT request: " << message << std::endl;
         
-        string params = message.substr(24); // Skip "EXISTS_VALID_ASSIGNMENT:"
+        string params = message.substr(24);
         size_t separatorPos = params.find('|');
         
         if (separatorPos != std::string::npos) {
@@ -631,7 +601,7 @@ void RSUControlApp::sendRerouteMessage(LAddress::L2Type vehicleId, const std::ve
 
 void RSUControlApp::finish() {
     // Save all statistics to CSV files
-    SimulationLogger::getInstance().saveToCSV("simulation_results.csv");
+    SimulationLogger::getInstance().saveToCSV("simulation_results_4.csv");
     
     // Print summary
     SimulationLogger::getInstance().printSummary();
@@ -890,18 +860,12 @@ void RSUControlApp::generateAndAssignDestinations(const std::vector<Vehicle>& ve
     }
 
     EV << "\n=============== VEHICLE DESTINATION ASSIGNMENT ===============" << std::endl;
-    
-    // Store vehicles and their source roads
     std::vector<std::string> sourceRoads;
-    
     for (const auto& vehicle : vehicles) {
         sourceRoads.push_back(vehicle.startingRoad);
-        
-        // Record vehicle start using the vehicle's index
         double startTime = vehicle.departTime;
         try {
             recordVehicleStart(vehicle.index, vehicle.startingRoad, startTime);
-            
             EV << "[RSU] Vehicle " << vehicle.sumoId << " (index: " << vehicle.index 
                << ") starting at road " << vehicle.startingRoad << " at time " << startTime << std::endl;
         } catch (const std::exception& e) {

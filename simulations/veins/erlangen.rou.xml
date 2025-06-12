@@ -21,22 +21,6 @@
     <trip id="t_20" depart="0.00" from="583" to="2199" via="-1956 1960"/>
     <trip id="t_21" depart="0.00" from="-2182" to="-2192"/>
     <trip id="t_22" depart="0.00" departSpeed="3.50" from="64" to="64"/>
-    <trip id="t_23" depart="0.00" from="-219" to="184" via="-190"/>
-    <trip id="t_24" depart="0.00" from="-172" to="-1972" via="2020"/>
-    <trip id="t_25" depart="0.00" from="1992" to="1925"/>
-    <trip id="t_26" depart="0.00" from="144" to="152" via="131"/>
-    <trip id="t_27" depart="0.00" from="162" to="60" via="-75"/>
-    <trip id="t_28" depart="0.00" from="31" to="-15" via="23 11"/>
-    <trip id="t_29" depart="0.00" departSpeed="2.70" from="587" to="587"/>
-    <trip id="t_3" depart="0.00" from="-854" to="1737" via="852 879 1025 -1148 1150 1204 1474 1722"/>
-    <trip id="t_30" depart="0.00" from="45" to="-3" via="-55 -444 587"/>
-    <trip id="t_31" depart="0.00" from="-37" to="474" via="5 206"/>
-    <trip id="t_4" depart="0.00" from="879" to="-162"/>
-    <trip id="t_5" depart="0.00" from="865" to="-214"/>
-    <trip id="t_6" depart="0.00" from="1148" to="1747" via="1242"/>
-    <trip id="t_7" depart="0.00" from="1597" to="-1777"/>
-    <trip id="t_8" depart="0.00" from="-1595" to="1211"/>
-    <trip id="t_9" depart="0.00" from="-1154" to="-991"/>
     <person id="p_0" depart="0.00">
         <personTrip from="-1194" to="-865"/>
     </person>
