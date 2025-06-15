@@ -59,13 +59,11 @@ private:
     void printVehicleRouteInfo(const std::vector<Vehicle>& vehicles);
     void generateAndAssignDestinations(const std::vector<Vehicle>& vehicles);
     void findEdgePathAndPrint(std::string sourceEdgeId, std::string targetEdgeId) const;
-    void testTaskGenerator();
     double getEdgeLength(const std::string& edgeId) const;
     void recordVehicleStart(int vehicleId, const std::string& startRoad, double startTime);
     void recordVehicleDestination(int vehicleId, const std::string& targetRoad, 
                                   double earliestArrival, double latestArrival,
                                   const std::vector<std::string>& path, double pathLength);
-    void recordAlgorithmTime(int vehicleId, double algorithmTime);
     
     // Simulation info
     std::string mapName;

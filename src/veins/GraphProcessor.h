@@ -20,6 +20,15 @@ class GraphProcessor {
 public:
     GraphProcessor(const Graph& graph);
     virtual ~GraphProcessor();
+    
+    // Core Dijkstra algorithm and path reconstruction methods - now public
+    map<string, pair<double, string>> dijkstra(string sourceId) const;
+    vector<string> reconstructPath(
+        const map<string, pair<double, string>>& dijkstraResult,
+        string sourceId,
+        string targetId) const;
+        
+    // Original methods
     vector<string> findShortestPath(string sourceId, string targetId) const;
     double getShortestPathLength(string sourceId, string targetId) const;
     bool existsValidAssignment(
@@ -31,6 +40,10 @@ public:
     vector<int> getOptimalVehicleAssignment(
         const vector<string>& sourceEdges,
         const vector<string>& destEdges) const;
+    
+    // New function to accept custom cost matrix
+    vector<int> getOptimalAssignmentWithMatrix(
+        const vector<vector<double>>& costMatrix) const;
     
     // Network query methods (moved from NetworkSourceManager)
     vector<string> getAllNodes() const;
@@ -50,11 +63,6 @@ private:
             return distance > other.distance;
         }
     };
-    map<string, pair<double, string>> dijkstra(string sourceId) const;
-    vector<string> reconstructPath(
-        const map<string, pair<double, string>>& dijkstraResult,
-        string sourceId,
-        string targetId) const;
     bool hungarianAlgorithm(const vector<vector<double>>& costMatrix) const;
     string extractEdgeIdFromLane(string laneId) const;
     int extractLaneIndexFromLane(string laneId) const;

@@ -1,10 +1,10 @@
 SIMULATION SUMMARY
 MapName,RoutingAlgorithm,Version,TotalVehicles,LateVehicles,TotalTravelTime,AvgTravelTime,TotalTimeWindowDeviation,AvgTimeWindowDeviation,TotalAlgorithmTime,AvgAlgorithmTime,ObjectiveFunctionValue,Timestamp
-erlangen,ShortestPath,2.0,4,1,531,132.75,68.0975,17.0244,0.0010011,0.000250275,599.097,2025-06-13 00:46:34
+erlangen,ShortestPath,2.0,4,3,536,134,162.11,40.5275,0.003003,0.00075075,698.11,2025-06-15 08:04:46
 
 VEHICLE STATISTICS
-VehicleID,StartRoad,TargetRoad,StartTime,EndTime,TravelTime,EarliestArrival,LatestArrival,TimeWindowDeviation,ArrivedOnTime,PathLength,AlgorithmTime
-16,873,-2316,1,317,316,190.337,248.903,68.0975,No,2033.68,0
-22,60,199,1,74,73,66.2738,86.6657,0,Yes,708.11,0.0010011
-28,-831,-612,1,24,23,20.8487,27.2636,0,Yes,222.76,0
-34,-592,E9,1,120,119,92.6528,121.161,0,Yes,989.96,0
+VehicleID,StartRoad,TargetRoad,StartTime,EndTime,TravelTime,EarliestArrival,LatestArrival,TimeWindowDeviation,ArrivedOnTime,PathLength
+16,873,5,1,142,141,66.0799,99.1199,42.8801,No,874.02
+22,60,-583,1,93,92,53.4788,80.2182,12.7818,No,909.21
+28,-831,1774,1,108,107,78.0596,117.089,0,Yes,1127.41
+34,-592,1962,1,197,196,60.3679,90.5519,106.448,No,979.02

@@ -43,7 +43,8 @@ public:
                                  const std::vector<std::string>& path,
                                  double pathLength,
                                  double estimatedTravelTime = 0.0);
-    void recordAlgorithmTime(int vehicleId, double algorithmTime);
+    // Chỉ giữ lại phương thức ghi nhận tổng thời gian thuật toán
+    void recordTotalAlgorithmTime(double totalAlgorithmTime);
     void recordVehicleEnd(int vehicleId, double endTime);
     void setSimulationInfo(const std::string& mapName, const std::string& algorithm, 
                           const std::string& version);

@@ -90,8 +90,7 @@ private:
     void logDepartureIfNeeded();
     void checkVehicleStatus();
     void updateTimingFile(double endTime);
-    void checkAndAdjustSpeed();
-    double measureRoutingAlgorithmTime(const std::string& sourceId, const std::string& targetId);
+    // Đã loại bỏ phương thức measureRoutingAlgorithmTime không còn sử dụng
 };
 
 } // namespace veins

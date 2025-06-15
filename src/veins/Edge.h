@@ -1,7 +1,8 @@
 #ifndef EDGE_H
 #define EDGE_H
 
-#include<bits/stdc++.h>
+#include <string>
+#include <vector>
 using namespace std;
 
 struct Lane{

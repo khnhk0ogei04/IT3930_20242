@@ -544,6 +544,188 @@ vector<int> GraphProcessor::getOptimalVehicleAssignment(
     return result;
 }
 
+vector<int> GraphProcessor::getOptimalAssignmentWithMatrix(
+    const vector<vector<double>>& costMatrix) const {
+    
+    if (costMatrix.empty() || costMatrix[0].empty()) {
+        return vector<int>();
+    }
+    
+    int numRows = costMatrix.size();
+    int numCols = costMatrix[0].size();
+    int n = max(numRows, numCols);
+    
+    // Create square matrix for Hungarian algorithm
+    vector<vector<double>> C(n, vector<double>(n, 9999999.0));
+    
+    // Copy input matrix
+    for (int i = 0; i < numRows; ++i) {
+        for (int j = 0; j < numCols; ++j) {
+            C[i][j] = costMatrix[i][j];
+        }
+    }
+    
+    // Apply Hungarian algorithm steps
+    // Step 1: Row reduction
+    for (int i = 0; i < n; ++i) {
+        double rowMin = *min_element(C[i].begin(), C[i].end());
+        if (rowMin < 9999999.0 && rowMin > 0) {
+            for (int j = 0; j < n; ++j) {
+                if (C[i][j] < 9999999.0) {
+                    C[i][j] -= rowMin;
+                }
+            }
+        }
+    }
+    
+    // Step 2: Column reduction
+    for (int j = 0; j < n; ++j) {
+        double colMin = C[0][j];
+        for (int i = 1; i < n; ++i) {
+            colMin = min(colMin, C[i][j]);
+        }
+        if (colMin < 9999999.0 && colMin > 0) {
+            for (int i = 0; i < n; ++i) {
+                if (C[i][j] < 9999999.0) {
+                    C[i][j] -= colMin;
+                }
+            }
+        }
+    }
+    
+    // Initialize assignment arrays
+    vector<int> rowAssign(n, -1), colAssign(n, -1);
+    vector<vector<bool>> starred(n, vector<bool>(n, false));
+    
+    // Find initial starred zeros
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < n; ++j) {
+            if (C[i][j] == 0 && rowAssign[i] == -1 && colAssign[j] == -1) {
+                starred[i][j] = true;
+                rowAssign[i] = j;
+                colAssign[j] = i;
+            }
+        }
+    }
+    
+    // Main Hungarian loop
+    while (true) {
+        // Cover all columns with a starred zero
+        vector<bool> rowCover(n, false), colCover(n, false);
+        for (int j = 0; j < n; ++j) {
+            if (colAssign[j] != -1) colCover[j] = true;
+        }
+        
+        // If n columns are covered, optimal assignment found
+        int count = 0;
+        for (int j = 0; j < n; ++j) if (colCover[j]) ++count;
+        if (count == n) break;
+        
+        // Find a non-covered zero and prime it
+        vector<vector<bool>> prime(n, vector<bool>(n, false));
+        int zrow = -1, zcol = -1;
+        
+        while (true) {
+            bool found = false;
+            for (int i = 0; i < n && !found; ++i) {
+                if (rowCover[i]) continue;
+                for (int j = 0; j < n; ++j) {
+                    if (!colCover[j] && C[i][j] == 0) {
+                        zrow = i; zcol = j; found = true; break;
+                    }
+                }
+            }
+            
+            if (!found) break; // Go to step 4: adjust matrix
+            
+            prime[zrow][zcol] = true;
+            int starCol = -1;
+            for (int j = 0; j < n; ++j) {
+                if (starred[zrow][j]) { starCol = j; break; }
+            }
+            
+            if (starCol == -1) {
+                // Augment path starting from primed zero
+                vector<pair<int, int>> path;
+                path.emplace_back(zrow, zcol);
+                
+                while (true) {
+                    int rowStar = -1;
+                    for (int i = 0; i < n; ++i) {
+                        if (starred[i][path.back().second]) { rowStar = i; break; }
+                    }
+                    if (rowStar == -1) break;
+                    path.emplace_back(rowStar, path.back().second);
+                    
+                    int colPrime = -1;
+                    for (int j = 0; j < n; ++j) {
+                        if (prime[path.back().first][j]) { colPrime = j; break; }
+                    }
+                    path.emplace_back(path.back().first, colPrime);
+                }
+                
+                // Update starred zeros along path
+                for (size_t k = 0; k < path.size(); ++k) {
+                    int r = path[k].first, c = path[k].second;
+                    starred[r][c] = !starred[r][c];
+                }
+                
+                // Reset covers and primes
+                fill(rowCover.begin(), rowCover.end(), false);
+                fill(colCover.begin(), colCover.end(), false);
+                for (auto& v : prime) fill(v.begin(), v.end(), false);
+                fill(rowAssign.begin(), rowAssign.end(), -1);
+                fill(colAssign.begin(), colAssign.end(), -1);
+                
+                for (int i = 0; i < n; ++i) {
+                    for (int j = 0; j < n; ++j) {
+                        if (starred[i][j]) { 
+                            rowAssign[i] = j; 
+                            colAssign[j] = i; 
+                        }
+                    }
+                }
+                break;
+            } else {
+                rowCover[zrow] = true;
+                colCover[starCol] = false;
+            }
+        }
+        
+        // Step 4: Adjust matrix
+        double delta = 9999999.0;
+        for (int i = 0; i < n; ++i) {
+            if (!rowCover[i]) {
+                for (int j = 0; j < n; ++j) {
+                    if (!colCover[j]) {
+                        delta = min(delta, C[i][j]);
+                    }
+                }
+            }
+        }
+        
+        for (int i = 0; i < n; ++i) {
+            for (int j = 0; j < n; ++j) {
+                if (rowCover[i]) C[i][j] += delta;
+                if (!colCover[j]) C[i][j] -= delta;
+            }
+        }
+    }
+    
+    // Extract final assignment
+    vector<int> result(numRows, -1);
+    for (int i = 0; i < numRows; ++i) {
+        for (int j = 0; j < numCols; ++j) {
+            if (starred[i][j]) { 
+                result[i] = j; 
+                break; 
+            }
+        }
+    }
+    
+    return result;
+}
+
 // Network query methods (moved from NetworkSourceManager)
 vector<string> GraphProcessor::getAllNodes() const {
     vector<string> result;

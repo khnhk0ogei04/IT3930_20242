@@ -7,20 +7,6 @@
     <!-- Vehicles, persons and containers (sorted by depart) -->
     <trip id="t_0" depart="0.00" from="873" to="1777" via="1148 -1025 -991"/>
     <trip id="t_1" depart="0.00" from="60" to="-58" via="64 120 -109 31"/>
-    <trip id="t_10" depart="0.00" from="-831" to="-60"/>
-    <trip id="t_11" depart="0.00" from="-592" to="123"/>
-    <trip id="t_12" depart="0.00" from="-588" to="2230" via="206 474 2165"/>
-    <trip id="t_13" depart="0.00" from="-1755" to="-1766"/>
-    <trip id="t_14" depart="0.00" from="2151" to="-1775"/>
-    <trip id="t_15" depart="0.00" departSpeed="3.50" from="831" to="75" via="844 -79"/>
-    <trip id="t_16" depart="0.00" from="-5" to="-1775" via="206 474"/>
-    <trip id="t_17" depart="0.00" from="474" to="131" via="-206 -5 11 109"/>
-    <trip id="t_18" depart="0.00" from="109" to="587" via="123 -15 3"/>
-    <trip id="t_19" depart="0.00" from="58" to="172" via="123 -144 148"/>
-    <trip id="t_2" depart="0.00" from="-3" to="-120" via="15 -123"/>
-    <trip id="t_20" depart="0.00" from="583" to="2199" via="-1956 1960"/>
-    <trip id="t_21" depart="0.00" from="-2182" to="-2192"/>
-    <trip id="t_22" depart="0.00" departSpeed="3.50" from="64" to="64"/>
     <person id="p_0" depart="0.00">
         <personTrip from="-1194" to="-865"/>
     </person>

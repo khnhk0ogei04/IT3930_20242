@@ -1,5 +1,9 @@
 #include "TaskGenerator.h"
-#include<bits/stdc++.h>
+#include <random>
+#include <algorithm>
+#include <set>
+#include <limits>
+#include <iostream>
 
 namespace veins {
 
@@ -103,6 +107,44 @@ std::vector<std::string> TaskGenerator::getPotentialDestinationEdges(int n, cons
     }
     std::cout << "INFO: Selected " << potentialDestEdges.size() << " valid destinations" << std::endl;
     return potentialDestEdges;
+}
+
+std::vector<Destination> TaskGenerator::generateDestinationsWithTimeWindows(
+    int n, 
+    const std::vector<std::string>& currentSourceEdges, 
+    const Graph& graph,
+    unsigned seedValue) {
+    
+    std::vector<Destination> destinations;
+    
+    // Seed the random number generator if provided
+    if (seedValue > 0) {
+        rng.seed(seedValue);
+    }
+    
+    // Get potential destination edges first
+    auto destEdges = getPotentialDestinationEdges(n, currentSourceEdges, seedValue);
+    
+    // Create random distribution for earliness time: uniform distribution from 20 to 150 seconds
+    std::uniform_real_distribution<double> earlinessDistribution(20.0, 150.0);
+    
+    // Create Destination objects with random time windows
+    for (const auto& edgeId : destEdges) {
+        // Generate random earliness time in range [20, 150]
+        double earliness = earlinessDistribution(rng);
+        
+        // Calculate tardiness = 1.5 * earliness
+        double tardiness = 1.5 * earliness;
+        
+        // Create destination with time window
+        destinations.emplace_back(edgeId, TimeWindow(earliness, tardiness));
+        
+        std::cout << "[TaskGenerator] Created destination " << edgeId 
+                  << " with time window [" << earliness << ", " << tardiness 
+                  << "] (window size: " << (tardiness - earliness) << "s)" << std::endl;
+    }
+    
+    return destinations;
 }
 
 } // namespace veins
