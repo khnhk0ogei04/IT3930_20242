@@ -10,7 +10,6 @@ void VehicleControlApp::initialize(int stage) {
     TraCIDemo11p::initialize(stage);
     if (stage == 0) {
         statusUpdateMsg = new cMessage("statusUpdate");
-        requestRoadInfoMsg = new cMessage("requestRoadInfo");
         cleanupTimer = new cMessage("vehicleCleanup");
         mobility = TraCIMobilityAccess().get(getParentModule());
         traciVehicle = mobility->getVehicleCommandInterface();
@@ -30,9 +29,6 @@ void VehicleControlApp::initialize(int stage) {
         
         // initialize data structures
         allRoads.clear();
-        accessibleRoads.clear();
-        incomingRoads.clear();
-        currentRoadAttributes.clear();
         currentPath.clear();
         destinations.clear();
         earliestArrival = 0.0;
@@ -43,7 +39,6 @@ void VehicleControlApp::initialize(int stage) {
         requestAllRoads();
     } else if (stage == 1) {
         scheduleAt(simTime() + uniform(1.0, 2.0), statusUpdateMsg);
-        scheduleAt(simTime() + uniform(3.0, 5.0), requestRoadInfoMsg);
         scheduleAt(simTime() + 0.3, cleanupTimer);
         EV << "[VEHICLE] Vehicle " << myId << " initialized" << std::endl;
     }
@@ -71,24 +66,11 @@ void VehicleControlApp::onWSM(BaseFrame1609_4* wsm) {
     if (data.find("ALL_ROADS:") == 0) {
         processAllRoadsResponse(data.substr(10));  // Skip "ALL_ROADS:"
     }
-    else if (data.find("ACCESSIBLE_ROADS:") == 0) {
-        processAccessibleRoadsResponse(data.substr(17));  // Skip "ACCESSIBLE_ROADS:"
-    } 
-    else if (data.find("INCOMING_ROADS:") == 0) {
-        processIncomingRoadsResponse(data.substr(15));  // Skip "INCOMING_ROADS:"
-    } 
-    else if (data.find("ROAD_ATTRIBUTES:") == 0) {
-        processRoadAttributesResponse(data.substr(16));  // Skip "ROAD_ATTRIBUTES:"
-    } 
-    else if (data.find("SHORTEST_PATH:") == 0) {
-        processShortestPathResponse(data.substr(14));  // Skip "SHORTEST_PATH:"
-    } 
+ 
     else if (data.find("DESTINATIONS:") == 0) {
         processDestinationsResponse(data.substr(13));  // Skip "DESTINATIONS:"
     } 
-    else if (data.find("VALID_ASSIGNMENT:") == 0) {
-        processValidAssignmentResponse(data.substr(17));  // Skip "VALID_ASSIGNMENT:"
-    }
+
     else if (data.find("ERROR:") == 0) {
         EV << "[VEHICLE] Error from RSU: " << data.substr(6) << std::endl;  // Skip "ERROR:"
     } 
@@ -270,21 +252,7 @@ void VehicleControlApp::handleSelfMsg(cMessage* msg) {
         // Schedule next update
         scheduleAt(simTime() + 2.0, statusUpdateMsg);
     }
-    else if (msg == requestRoadInfoMsg) {
-        // Update current road
-        currentRoadId = traciVehicle->getRoadId();
 
-        // Only request road info if the vehicle is on a road
-        if (!currentRoadId.empty() && currentRoadId != "") {
-            // Request road information
-            requestAccessibleRoads(currentRoadId);
-            requestIncomingRoads(currentRoadId);
-            requestRoadAttributes(currentRoadId);
-        }
-
-        // Schedule next request
-        scheduleAt(simTime() + 5.0, requestRoadInfoMsg);
-    }
     else if (msg == cleanupTimer) {
         // Check if vehicle has reached destination
         checkVehicleStatus();
@@ -354,73 +322,13 @@ void VehicleControlApp::requestAllRoads() {
     EV << "[VEHICLE] Requested all roads" << std::endl;
 }
 
-void VehicleControlApp::requestAccessibleRoads(const std::string& roadId) {
-    // Create request message
-    std::string request = "GET_ACCESSIBLE_ROADS:" + roadId;
 
-    // Send message
-    auto* req = new TraCIDemo11pMessage();
-    req->setDemoData(request.c_str());
-    req->setSenderAddress(myId);
-    
-    auto* wsm = new BaseFrame1609_4();
-    wsm->encapsulate(req);
-    populateWSM(wsm);
-    sendDown(wsm);
-    
-    EV << "[VEHICLE] Vehicle " << myId << " requested accessible roads from " << roadId << std::endl;
-}
 
-void VehicleControlApp::requestIncomingRoads(const std::string& roadId) {
-    // Create request message
-    std::string request = "GET_INCOMING_ROADS:" + roadId;
-    
-    // Send message
-    auto* req = new TraCIDemo11pMessage();
-    req->setDemoData(request.c_str());
-    req->setSenderAddress(myId);
-    
-    auto* wsm = new BaseFrame1609_4();
-    wsm->encapsulate(req);
-    populateWSM(wsm);
-    sendDown(wsm);
-    
-    EV << "[VEHICLE] Vehicle " << myId << " requested incoming roads to " << roadId << std::endl;
-}
 
-void VehicleControlApp::requestRoadAttributes(const std::string& roadId) {
-    // Create request message
-    std::string request = "GET_ROAD_ATTRIBUTES:" + roadId;
 
-    // Send message
-    auto* req = new TraCIDemo11pMessage();
-    req->setDemoData(request.c_str());
-    req->setSenderAddress(myId);
-    
-    auto* wsm = new BaseFrame1609_4();
-    wsm->encapsulate(req);
-    populateWSM(wsm);
-    sendDown(wsm);
-    
-    EV << "[VEHICLE] Vehicle " << myId << " requested attributes for road " << roadId << std::endl;
-}
 
-void VehicleControlApp::requestShortestPath(const std::string& sourceId, const std::string& targetId) {
-    // Create request message
-    std::string request = "FIND_SHORTEST_PATH:" + sourceId + "," + targetId;
 
-    // Send message
-    auto* req = new TraCIDemo11pMessage();
-    req->setDemoData(request.c_str());
-    req->setSenderAddress(myId);
-    
-    auto* wsm = new BaseFrame1609_4();
-    wsm->encapsulate(req);
-    populateWSM(wsm);
-    sendDown(wsm);
-    
-    EV << "[VEHICLE] Requested shortest path from " << sourceId << " to " << targetId << std::endl;
-}
+
 
 void VehicleControlApp::requestDestinations(int count) {
     // Create request message
@@ -440,43 +348,7 @@ void VehicleControlApp::requestDestinations(int count) {
     EV << "[VEHICLE] Requested " << count << " random destinations - DEBUG: message=" << oss.str() << std::endl;
 }
 
-void VehicleControlApp::requestValidAssignment(const std::vector<std::string>& sources, const std::vector<std::string>& destinations) {
-    // Create request message
-    std::ostringstream oss;
-    oss << "EXISTS_VALID_ASSIGNMENT:";
 
-    // Add sources
-    for (size_t i = 0; i < sources.size(); ++i) {
-        oss << sources[i];
-        if (i < sources.size() - 1) {
-            oss << ",";
-        }
-    }
-
-    // Add separator between sources and destinations
-    oss << "|";
-
-    // Add destinations
-    for (size_t i = 0; i < destinations.size(); ++i) {
-        oss << destinations[i];
-        if (i < destinations.size() - 1) {
-            oss << ",";
-        }
-    }
-
-    // Send message
-    auto* req = new TraCIDemo11pMessage();
-    req->setDemoData(oss.str().c_str());
-    req->setSenderAddress(myId);
-    
-    auto* wsm = new BaseFrame1609_4();
-    wsm->encapsulate(req);
-    populateWSM(wsm);
-    sendDown(wsm);
-    
-    EV << "[VEHICLE] Requested valid assignment check for " << sources.size() 
-       << " sources and " << destinations.size() << " destinations" << std::endl;
-}
 
 void VehicleControlApp::processAllRoadsResponse(const std::string& data) {
     allRoads = parseRoadList(data);
@@ -496,8 +368,10 @@ void VehicleControlApp::processAllRoadsResponse(const std::string& data) {
         EV << "  ... and " << (allRoads.size() - maxRoadsToDisplay) << " more roads" << std::endl;
     }
 
-    // Build the local road network from the received data
-    buildLocalRoadNetwork();
+    // Initialize graph processor with road network
+    if (allRoads.size() > 0) {
+        graphProcessor.reset(new GraphProcessor(roadNetwork));
+    }
 
     // Immediately run path finding tests to print shortest paths
     EV << "\n=============== IMMEDIATE PATH FINDING TEST ===============" << std::endl;
@@ -507,8 +381,12 @@ void VehicleControlApp::processAllRoadsResponse(const std::string& data) {
         std::string source1 = allRoads.front();
         std::string target1 = allRoads.back();
         EV << "Test 1: Finding path from road " << source1 << " to road " << target1 << std::endl;
-        std::vector<std::string> path = findShortestPath(source1, target1);
-        double pathLength = getShortestPathLength(source1, target1);
+        std::vector<std::string> path;
+        double pathLength = 0.0;
+        if (graphProcessor) {
+            path = graphProcessor->findShortestPath(source1, target1);
+            pathLength = graphProcessor->getShortestPathLength(source1, target1);
+        }
 
         if (!path.empty() && pathLength > 0) {
             EV << "SUCCESS: Path found with length " << pathLength << std::endl;
@@ -529,8 +407,10 @@ void VehicleControlApp::processAllRoadsResponse(const std::string& data) {
         if (allRoads.size() >= 3) {
             std::string target2 = allRoads[allRoads.size() / 2];
             EV << "\nTest 2: Finding path from road " << source1 << " to road " << target2 << std::endl;
-            path = findShortestPath(source1, target2);
-            pathLength = getShortestPathLength(source1, target2);
+            if (graphProcessor) {
+                path = graphProcessor->findShortestPath(source1, target2);
+                pathLength = graphProcessor->getShortestPathLength(source1, target2);
+            }
 
             if (!path.empty() && pathLength > 0) {
                 EV << "SUCCESS: Path found with length " << pathLength << std::endl;
@@ -552,79 +432,13 @@ void VehicleControlApp::processAllRoadsResponse(const std::string& data) {
     }
 }
 
-void VehicleControlApp::processAccessibleRoadsResponse(const std::string& data) {
-    accessibleRoads = parseRoadList(data);
-    
-    EV << "[VEHICLE] Received list of accessible roads from " << currentRoadId 
-       << ": " << accessibleRoads.size() << " roads" << std::endl;
-}
 
-void VehicleControlApp::processIncomingRoadsResponse(const std::string& data) {
-    incomingRoads = parseRoadList(data);
-    
-    EV << "[VEHICLE] Received list of incoming roads to " << currentRoadId 
-       << ": " << incomingRoads.size() << " roads" << std::endl;
-}
 
-void VehicleControlApp::processRoadAttributesResponse(const std::string& data) {
-    size_t colonPos = data.find(':');
-    if (colonPos != std::string::npos) {
-        std::string roadId = data.substr(0, colonPos);
-        std::string attributesStr = data.substr(colonPos + 1);
-        
-        currentRoadAttributes = parseAttributes(attributesStr);
-        
-        EV << "[VEHICLE] Received attributes for road " << roadId 
-           << ": " << currentRoadAttributes.size() << " attributes" << std::endl;
 
-        // Also print in standard console for debugging
-        EV << "[VEHICLE] Received attributes for road " << roadId 
-                << ": " << currentRoadAttributes.size() << " attributes" << std::endl;
-                
-        // Check if lanes attribute exists
-        auto lanesIt = currentRoadAttributes.find("lanes");
-        if (lanesIt != currentRoadAttributes.end()) {
-            EV << "[VEHICLE] Lane information: " << lanesIt->second << std::endl;
-        } else {
-            EV << "[VEHICLE] No lane information in attributes" << std::endl;
-        }
-    }
-}
 
-void VehicleControlApp::processShortestPathResponse(const std::string& data) {
-    std::vector<std::string> responseElements = parseRoadList(data);
-    
-    // Check if path exists
-    if (responseElements.size() == 1 && responseElements[0] == "NO_PATH_EXISTS") {
-        EV << "[VEHICLE] No path exists between the requested source and target" << std::endl;
-        return;
-    }
-    
-    // Extract path length (first element) and road segments (remaining elements)
-    double pathLength = -1;
-    if (!responseElements.empty() && responseElements[0].find("LENGTH:") == 0) {
-        std::string lengthStr = responseElements[0].substr(7); // Skip "LENGTH:"
-        pathLength = std::stod(lengthStr);
-        responseElements.erase(responseElements.begin()); // Remove length element
-    }
-    
-    // Store the path
-    currentPath = responseElements;
 
-    // Display path information
-    EV << "[VEHICLE] Received shortest path with length " << pathLength
-       << " units and " << currentPath.size() << " segments:" << std::endl;
 
-    // Print đường đi trên một dòng với mũi tên phân tách
-    EV << "[VEHICLE] Path: ";
-    for (size_t i = 0; i < currentPath.size(); i++) {
-        EV << currentPath[i];
-        if (i < currentPath.size() - 1) {
-            EV << " -> ";
-        }
-    }
-    EV << std::endl;
-}
+
 
 void VehicleControlApp::processDestinationsResponse(const std::string& data) {
     EV << "[VEHICLE] DEBUG: Received destination response data: " << data << std::endl;
@@ -745,11 +559,7 @@ void VehicleControlApp::processDestinationsResponse(const std::string& data) {
     }
 }
 
-void VehicleControlApp::processValidAssignmentResponse(const std::string& data) {
-    bool result = (data == "TRUE");
-    
-    EV << "[VEHICLE] Valid assignment exists: " << (result ? "YES" : "NO") << std::endl;
-}
+
 
 std::vector<std::string> VehicleControlApp::parseRoadList(const std::string& data, char delimiter) {
     std::vector<std::string> result;
@@ -765,32 +575,9 @@ std::vector<std::string> VehicleControlApp::parseRoadList(const std::string& dat
     return result;
 }
 
-std::map<std::string, std::string> VehicleControlApp::parseAttributes(const std::string& data) {
-    std::map<std::string, std::string> result;
-    std::istringstream iss(data);
-    std::string attr;
-    
-    while (std::getline(iss, attr, ';')) {
-        if (!attr.empty()) {
-            size_t equalPos = attr.find('=');
-            if (equalPos != std::string::npos) {
-                std::string key = attr.substr(0, equalPos);
-                std::string value = attr.substr(equalPos + 1);
-                result[key] = value;
-            }
-        }
-    }
-    
-    return result;
-}
 
-void VehicleControlApp::printRoadInfo() {
-    // Compact version that only prints summary information
-    EV << "[VEHICLE] Current road: " << currentRoadId
-       << ", Accessible roads: " << accessibleRoads.size()
-       << ", Incoming roads: " << incomingRoads.size()
-       << ", Attributes: " << currentRoadAttributes.size() << std::endl;
-}
+
+
 
 void VehicleControlApp::onBSM(DemoSafetyMessage* /*bsm*/) {
     // Not used in this implementation
@@ -821,7 +608,7 @@ void VehicleControlApp::handlePositionUpdate(cObject* obj) {
             Coord pos = mobility->getPositionAt(simTime());
             if (pos.x == 0 && pos.y == 0) {
                 // This likely means the vehicle is being removed
-                handleEndOfVehicleLifecycle();
+                logDepartureIfNeeded();
             }
         }
         // If the vehicle is on its target road - it has reached the destination
@@ -848,10 +635,7 @@ void VehicleControlApp::cleanupMessages() {
         cancelAndDelete(statusUpdateMsg);
         statusUpdateMsg = nullptr;
     }
-    if (requestRoadInfoMsg) {
-        cancelAndDelete(requestRoadInfoMsg);
-        requestRoadInfoMsg = nullptr;
-    }
+
     if (cleanupTimer) {
         cancelAndDelete(cleanupTimer);
         cleanupTimer = nullptr;
@@ -879,23 +663,7 @@ void VehicleControlApp::logDepartureIfNeeded() {
     }
 }
 
-void VehicleControlApp::handleEndOfVehicleLifecycle() {
-    if (!hasLoggedDeparture) {
-        endTime = simTime().dbl();
-        
-        EV << "[VEHICLE] Vehicle " << mySimulationId << " is being removed from simulation at exact time " 
-           << std::fixed << std::setprecision(1) << endTime << std::endl;
-        // Log the departure with precision
-        std::cout << std::fixed << std::setprecision(1);
-        printf("VEHICLE_LIFECYCLE_END: ID=%d, TIME=%.1f, STATUS=REMOVED_FROM_SIMULATION\n",
-               mySimulationId, endTime);
-        std::cout.unsetf(std::ios_base::fixed);
-        fflush(stdout);
-        SimulationLogger::getInstance().recordVehicleEnd(mySimulationId, endTime);
 
-        hasLoggedDeparture = true;
-    }
-}
 
 void VehicleControlApp::checkVehicleStatus() {
     if (mobility && traciVehicle) {
@@ -908,99 +676,14 @@ void VehicleControlApp::checkVehicleStatus() {
         else if (roadId.empty() || roadId == "") {
             EV << "[VEHICLE] Vehicle " << mySimulationId << " is no longer on a road at time " 
                << simTime() << " (may be removed from simulation)" << std::endl;
-            handleEndOfVehicleLifecycle();
-        }
-    }
-}
-void VehicleControlApp::buildLocalRoadNetwork() {
-    roadNetwork = Graph();
-    for (const auto& road : allRoads) {
-        roadNetwork.addNode(road);
-    }
-    for (const auto& roadId : allRoads) {
-        requestRoadAttributes(roadId);
-        string fromNodeId = "";
-        string toNodeId = "";
-        double length = 100.0;
-        auto attrs = currentRoadAttributes.find(roadId);
-        if (attrs != currentRoadAttributes.end()) {
-            auto fromAttr = attrs->second.find("from=");
-            auto toAttr = attrs->second.find("to=");
-            auto lengthAttr = attrs->second.find("length=");
-            
-            if (fromAttr != string::npos) {
-                size_t startPos = fromAttr + 5; // Skip "from="
-                size_t endPos = attrs->second.find(";", startPos);
-                if (endPos != std::string::npos) {
-                    fromNodeId = attrs->second.substr(startPos, endPos - startPos);
-                }
-            }
-            if (toAttr != string::npos) {
-                size_t startPos = toAttr + 3; // Skip "to="
-                size_t endPos = attrs->second.find(";", startPos);
-                if (endPos != string::npos) {
-                    toNodeId = attrs->second.substr(startPos, endPos - startPos);
-                }
-            }
-            
-            if (lengthAttr != std::string::npos) {
-                size_t startPos = lengthAttr + 7; // Skip "length="
-                size_t endPos = attrs->second.find(";", startPos);
-                if (endPos != std::string::npos) {
-                    std::string lengthStr = attrs->second.substr(startPos, endPos - startPos);
-                    try {
-                        length = std::stod(lengthStr);
-                    } catch (...) {
-                        // Use default if parse fails
-                    }
-                }
-            }
-        }
-
-        // If we don't have connectivity info, try to infer it from the road ID
-        if (fromNodeId.empty() || toNodeId.empty()) {
-            // Some road IDs follow the pattern "edge_from_to"
-            size_t underscorePos1 = roadId.find('_');
-            if (underscorePos1 != std::string::npos) {
-                size_t underscorePos2 = roadId.find('_', underscorePos1 + 1);
-                if (underscorePos2 != std::string::npos) {
-                    fromNodeId = roadId.substr(underscorePos1 + 1, underscorePos2 - underscorePos1 - 1);
-                    toNodeId = roadId.substr(underscorePos2 + 1);
-                }
-            }
-        }
-        
-        // Parse out the from/to from the XML format if shown in the road ID
-        // <edge id="-1249" from="339" to="1177" priority="-1">
-        if (fromNodeId.empty() || toNodeId.empty()) {
-            // Extract from XML-like format if available
-            if (roadId.find("from=") != std::string::npos && roadId.find("to=") != std::string::npos) {
-                size_t fromPos = roadId.find("from=\"") + 6;
-                size_t fromEndPos = roadId.find("\"", fromPos);
-                size_t toPos = roadId.find("to=\"") + 4;
-                size_t toEndPos = roadId.find("\"", toPos);
-
-                if (fromPos != std::string::npos && fromEndPos != std::string::npos &&
-                    toPos != std::string::npos && toEndPos != std::string::npos) {
-                    fromNodeId = roadId.substr(fromPos, fromEndPos - fromPos);
-                    toNodeId = roadId.substr(toPos, toEndPos - toPos);
-                }
-            }
+            logDepartureIfNeeded();
         }
     }
 }
 
-vector<string> VehicleControlApp::findShortestPath(const string& sourceId, const string& targetId) {
-    vector<string> path = graphProcessor->findShortestPath(sourceId, targetId);
-    if (!path.empty()) {
-        currentPath = path;
-    }
-    return path;
-}
 
-double VehicleControlApp::getShortestPathLength(const string& sourceId, const string& targetId) {
-    double length = graphProcessor->getShortestPathLength(sourceId, targetId);
-    return length;
-}
+
+
+
 
 

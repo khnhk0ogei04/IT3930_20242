@@ -31,15 +31,13 @@ protected:
     virtual void handleSelfMsg(cMessage* msg) override;
     virtual void handlePositionUpdate(cObject* obj) override;
     virtual void handleLowerMsg(cMessage* msg) override;
-    virtual void handleEndOfVehicleLifecycle();
     
 private:
     cMessage* statusUpdateMsg;
-    cMessage* requestRoadInfoMsg;
     cMessage* cleanupTimer;
 
-    int myInternalId;       // the internal ID used by Veins/OMNeT++
-    int mySimulationId;     // the simulation ID visible in the TreeView
+    int myInternalId;
+    int mySimulationId;
     bool hasLoggedDeparture = false;
     double startTime;
     double endTime;
@@ -51,9 +49,6 @@ private:
     
     string currentRoadId;
     vector<string> allRoads;
-    vector<string> accessibleRoads;
-    vector<string> incomingRoads;
-    map<string, string> currentRoadAttributes;
     vector<string> currentPath;
     vector<Destination> destinations;
 
@@ -62,32 +57,16 @@ private:
 
     void sendStatusUpdate();
     void requestAllRoads();
-    void requestAccessibleRoads(const string& roadId);
-    void requestIncomingRoads(const string& roadId);
-    void requestRoadAttributes(const string& roadId);
-    void requestShortestPath(const string& sourceId, const string& targetId);
     void requestDestinations(int count);
-    void requestValidAssignment(const vector<string>& sources, const vector<string>& destinations);
 
     void processAllRoadsResponse(const string& data);
-    void processAccessibleRoadsResponse(const string& data);
-    void processIncomingRoadsResponse(const string& data);
-    void processRoadAttributesResponse(const string& data);
-    void processShortestPathResponse(const string& data);
     void processDestinationsResponse(const string& data);
-    void processValidAssignmentResponse(const string& data);
 
     // Helper methods
     vector<string> parseRoadList(const string& data, char delimiter = ',');
-    map<string, string> parseAttributes(const string& data);
-    void printRoadInfo();
-    void buildLocalRoadNetwork();   
-    vector<string> findShortestPath(const string& sourceId, const string& targetId);
-    double getShortestPathLength(const string& sourceId, const string& targetId);
     void cleanupMessages();
     void logDepartureIfNeeded();
     void checkVehicleStatus();
-    void updateTimingFile(double endTime);
 };
 
 } // namespace veins

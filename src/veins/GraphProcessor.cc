@@ -217,43 +217,9 @@ string GraphProcessor::extractEdgeIdFromLane(string laneId) const {
     return laneId;
 }
 
-int GraphProcessor::extractLaneIndexFromLane(string laneId) const {
-    int pos = laneId.find_last_of('_');
-    if (pos != string::npos && pos < laneId.length() - 1) {
-        try {
-            return stoi(laneId.substr(pos + 1));
-        } catch (const invalid_argument&) {
-            return 0;
-        }
-    }
-    return 0;
-}
 
-int GraphProcessor::findBestLaneForEdge(string edgeId) const {
-    for (const auto& nodePair : roadNetwork.getAdjList()) {
-        for (const auto& edge : nodePair.second) {
-            if (edge.getId() == edgeId) {
-                const auto& lanes = edge.getLanes();
 
-                if (lanes.empty()) {
-                    return 0;
-                }
 
-                int bestLaneIndex = 0;
-                double highestSpeed = 0.0;
-
-                for (const auto& lane : lanes) {
-                    if (lane.speed > highestSpeed) {
-                        highestSpeed = lane.speed;
-                        bestLaneIndex = lane.index;
-                    }
-                }
-                return bestLaneIndex;
-            }
-        }
-    }
-    return 0;
-}
 
 vector<string> GraphProcessor::findEdgeShortestPath(string sourceEdgeId, string targetEdgeId) const {
     vector<string> result;
@@ -694,88 +660,19 @@ vector<int> GraphProcessor::getOptimalAssignmentWithMatrix(
     return result;
 }
 
-vector<string> GraphProcessor::getAllNodes() const {
-    vector<string> result;
-    const auto& nodes = roadNetwork.getNodes();
-    for (const auto& pair : nodes) {
-        result.push_back(pair.first);
-    }
-    return result;
-}
 
-vector<string> GraphProcessor::getAllEdges() const {
-    vector<string> result;
-    const auto& adjList = roadNetwork.getAdjList();
-    for (const auto& pair : adjList) {
-        const auto& edges = pair.second;
-        for (const auto& edge : edges) {
-            result.push_back(edge.getId());
-        }
-    }
-    
-    sort(result.begin(), result.end());
-    auto last = unique(result.begin(), result.end());
-    result.erase(last, result.end());
-    
-    return result;
-}
 
-vector<string> GraphProcessor::getEdgesFromNode(const string& nodeId) const {
-    vector<string> result;
-    const auto& adjList = roadNetwork.getAdjList();
-    auto it = adjList.find(nodeId);
-    if (it != adjList.end()) {
-        const auto& edges = it->second;
-        for (const auto& edge : edges) {
-            result.push_back(edge.getId());
-        }
-    }
-    return result;
-}
 
-vector<string> GraphProcessor::getConnectedEdges(const string& edgeId) const {
-    vector<string> result;
-    const Edge* edge = findEdge(edgeId);
-    if (!edge) return result;
-    
-    const string& targetNode = edge->getTo();
-    
-    const auto& adjList = roadNetwork.getAdjList();
-    auto it = adjList.find(targetNode);
-    if (it != adjList.end()) {
-        const auto& edges = it->second;
-        for (const auto& connEdge : edges) {
-            if (connEdge.getId() != edgeId) {
-                result.push_back(connEdge.getId());
-            }
-        }
-    }
-    return result;
-}
 
-string GraphProcessor::getEdgeSource(const string& edgeId) const {
-    const Edge* edge = findEdge(edgeId);
-    if (edge) {
-        return edge->getFrom();
-    }
-    return "";
-}
 
-string GraphProcessor::getEdgeTarget(const string& edgeId) const {
-    const Edge* edge = findEdge(edgeId);
-    if (edge) {
-        return edge->getTo();
-    }
-    return "";
-}
 
-double GraphProcessor::getEdgeLength(const string& edgeId) const {
-    const Edge* edge = findEdge(edgeId);
-    if (edge) {
-        return edge->getLength();
-    }
-    return 0.0;
-}
+
+
+
+
+
+
+
 
 const Edge* GraphProcessor::findEdge(const string& edgeId) const {
     const auto& adjList = roadNetwork.getAdjList();
