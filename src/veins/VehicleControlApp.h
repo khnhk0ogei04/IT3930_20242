@@ -81,16 +81,13 @@ private:
     vector<string> parseRoadList(const string& data, char delimiter = ',');
     map<string, string> parseAttributes(const string& data);
     void printRoadInfo();
-    void buildLocalRoadNetwork();
-    
+    void buildLocalRoadNetwork();   
     vector<string> findShortestPath(const string& sourceId, const string& targetId);
     double getShortestPathLength(const string& sourceId, const string& targetId);
-
     void cleanupMessages();
     void logDepartureIfNeeded();
     void checkVehicleStatus();
     void updateTimingFile(double endTime);
-    // Đã loại bỏ phương thức measureRoutingAlgorithmTime không còn sử dụng
 };
 
 } // namespace veins
